@@ -69,7 +69,7 @@ class _AuthPageState extends State<AuthPage> {
     });
 
     // Fill in debug credentials
-    _emailController.text = 'test@example.com';
+    _emailController.text = 'debug@example.com';
     _passwordController.text = 'password123';
 
     final authProvider = context.read<AuthProvider>();
@@ -215,7 +215,6 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                         const SizedBox(height: 16),
 
-
                         // Error Message
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, child) {
@@ -298,7 +297,7 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ),
                         ),
-                        
+
                         // Debug Login Button (only in debug mode)
                         if (kDebugMode) ...[
                           const SizedBox(height: 16),
@@ -325,7 +324,8 @@ class _AuthPageState extends State<AuthPage> {
                             width: double.infinity,
                             height: 40,
                             child: OutlinedButton.icon(
-                              onPressed: _isLoading ? null : _debugCreateAccount,
+                              onPressed:
+                                  _isLoading ? null : _debugCreateAccount,
                               icon: const Icon(Icons.person_add, size: 16),
                               label: const Text('Debug Create Account'),
                               style: OutlinedButton.styleFrom(
@@ -339,7 +339,7 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Debug: test@example.com / password123 (Login)\nDebug: debug@example.com / password123 (Create)',
+                            'Debug: debug@example.com / password123 (Login)\nDebug: debug@example.com / password123 (Create)',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
