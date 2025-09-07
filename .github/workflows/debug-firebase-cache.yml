@@ -1,7 +1,9 @@
 name: Debug Firebase CLI Cache
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:  # Manual trigger also available
 
 jobs:
   debug-firebase-cache:
