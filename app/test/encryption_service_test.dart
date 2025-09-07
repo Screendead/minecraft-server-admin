@@ -88,7 +88,7 @@ void main() {
           'simple-key',
           'complex-key-with-special-chars!@#\$%^&*()',
           'key-with-unicode-🚀-emoji',
-          'very-long-key-' + 'x' * 1000,
+          'very-long-key-${'x' * 1000}',
         ];
         const password = 'test-password';
 
