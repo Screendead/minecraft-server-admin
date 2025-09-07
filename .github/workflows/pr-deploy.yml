@@ -8,6 +8,9 @@ jobs:
   build-and-deploy-preview:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
+    permissions:
+      pull-requests: write
+      contents: read
     
     steps:
     - name: Checkout code
@@ -129,9 +132,3 @@ jobs:
               body: commentBody
             });
           }
-          
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report-pr-${{ github.event.pull_request.number }}
-        path: app/coverage/
