@@ -45,16 +45,11 @@ jobs:
       run: |
         # Check if firebase-tools is already installed globally
         export PATH="$PATH:$(npm config get prefix)/bin"
-        echo "Checking for Firebase CLI..."
-        echo "PATH: $PATH"
-        echo "npm prefix: $(npm config get prefix)"
         
         # Check if firebase binary exists in common locations
         if [ -f "/usr/local/bin/firebase" ] || [ -f "$(npm config get prefix)/bin/firebase" ]; then
-          echo "Firebase CLI found in filesystem, checking version..."
           firebase --version
         elif command -v firebase &> /dev/null; then
-          echo "Firebase CLI found in PATH, checking version..."
           firebase --version
         else
           echo "Installing Firebase CLI..."
@@ -93,6 +88,97 @@ jobs:
         working-directory: app
         update-comment: true
         
+    - name: Deploy coverage report to Firebase
+      id: deploy-coverage
+      run: |
+        # Create a temporary directory for coverage deployment
+        mkdir -p coverage-deploy
+        
+        # Check what coverage files are available and copy them
+        echo "Available coverage files:"
+        ls -la app/coverage/
+        
+        # The zgosalvez/github-actions-report-lcov action generates HTML in a temp directory
+        # We need to copy from there instead of app/coverage
+        if [ -d "/tmp/__zgosalvez_github-actions-report-lcov/html" ]; then
+          echo "Copying HTML coverage report from LCOV action temp directory..."
+          cp -r /tmp/__zgosalvez_github-actions-report-lcov/html/* coverage-deploy/
+        elif [ -d "app/coverage/html" ]; then
+          echo "Copying HTML coverage report from html/ subdirectory..."
+          cp -r app/coverage/html/* coverage-deploy/
+        else
+          echo "Copying coverage files directly..."
+          cp -r app/coverage/* coverage-deploy/
+        fi
+        
+        # Create a temporary firebase.json for coverage deployment
+        cat > coverage-firebase.json << EOF
+        {
+          "hosting": {
+            "public": "coverage-deploy",
+            "ignore": [
+              "firebase.json",
+              "**/.*",
+              "**/node_modules/**"
+            ]
+          }
+        }
+        EOF
+        
+        # Set Firebase project directly (avoid interactive prompts)
+        firebase use minecraft-server-automation || {
+          echo "Error: Could not set Firebase project. This may be due to authentication issues."
+          echo "Please ensure FIREBASE_TOKEN secret is valid and has proper permissions."
+          exit 1
+        }
+        
+        # Deploy coverage report to a temporary Firebase hosting channel
+        # First, try to delete any existing channel (ignore errors if it doesn't exist)
+        firebase hosting:channel:delete pr-${{ github.event.number }}-coverage \
+          --project minecraft-server-automation \
+          --force 2>/dev/null || true
+        
+        # Then create the channel and capture the URL (capture both stdout and stderr)
+        CHANNEL_OUTPUT=$(firebase hosting:channel:create pr-${{ github.event.number }}-coverage \
+          --project minecraft-server-automation \
+          --expires 7d 2>&1)
+        
+        CHANNEL_EXIT_CODE=$?
+        
+        if [ $CHANNEL_EXIT_CODE -ne 0 ]; then
+          echo "Error: Failed to create Firebase hosting channel"
+          COVERAGE_URL=""
+        else
+          # Extract the URL from the channel creation output
+          COVERAGE_URL=$(echo "$CHANNEL_OUTPUT" | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
+          
+          if [ -n "$COVERAGE_URL" ]; then
+            echo "Coverage channel created at: $COVERAGE_URL"
+          else
+            echo "Warning: Could not extract URL from channel creation output"
+            COVERAGE_URL=""
+          fi
+          
+          # Then deploy to the channel using the temporary config
+          firebase hosting:channel:deploy pr-${{ github.event.number }}-coverage \
+            --project minecraft-server-automation \
+            --config coverage-firebase.json
+          
+          DEPLOY_EXIT_CODE=$?
+          
+          if [ $DEPLOY_EXIT_CODE -eq 0 ]; then
+            echo "Coverage report deployed successfully to: $COVERAGE_URL"
+          else
+            echo "Error: Failed to deploy coverage report to channel"
+            COVERAGE_URL=""
+          fi
+        fi
+        
+        # Set output for use in subsequent steps
+        echo "coverage-url=$COVERAGE_URL" >> $GITHUB_OUTPUT
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
     - name: Verify iOS build configuration
       run: |
         cd app
@@ -117,12 +203,21 @@ jobs:
             comment.body.includes('🚀 iOS Build completed')
           );
           
+          const coverageUrl = '${{ steps.deploy-coverage.outputs.coverage-url }}';
+          const coverageSection = coverageUrl && coverageUrl !== '' 
+            ? `**Coverage Report:** 
+          - 📊 [View Coverage Report](${coverageUrl})
+          - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            : `**Coverage Report:** 
+          - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - ⚠️ Firebase deployment failed - coverage report available as artifact only`;
+          
           const commentBody = `## 🚀 iOS Configuration verified!
           
           **Build Status:** ✅ Configuration verified
           **Platform:** iOS only
           **Bundle ID:** com.screendead.servers
-          **Coverage Report:** Available in artifacts
+          ${coverageSection}
           
           Note: iOS builds require macOS runners. This PR verifies the iOS configuration is correct.
           
