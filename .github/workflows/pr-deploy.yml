@@ -45,8 +45,7 @@ jobs:
         # Install lcov for coverage report generation
         sudo apt-get update
         sudo apt-get install -y lcov
-        # Generate HTML coverage report
-        lcov --capture --directory coverage --output-file coverage/lcov.info
+        # Generate HTML coverage report from existing lcov.info
         genhtml coverage/lcov.info --output-directory coverage/html
         
     - name: Build Flutter web app
@@ -97,8 +96,8 @@ jobs:
             comment.body.includes('🚀 Preview deployed')
           );
           
-          const previewUrl = '${{ steps.build-and-deploy-preview.outputs.PR_PREVIEW_URL }}';
-          const coverageUrl = '${{ steps.build-and-deploy-preview.outputs.COVERAGE_URL }}';
+          const previewUrl = process.env.PR_PREVIEW_URL;
+          const coverageUrl = process.env.COVERAGE_URL;
           
           const commentBody = `## 🚀 Preview deployed!
           
