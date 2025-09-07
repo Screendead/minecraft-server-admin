@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/droplets_provider.dart';
 import '../widgets/api_key_management_banner.dart';
+import '../widgets/droplets_list.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load droplets when the page is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DropletsProvider>().loadDroplets();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +29,12 @@ class HomePage extends StatelessWidget {
         title: const Text('Minecraft Server Admin'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              context.read<DropletsProvider>().refresh();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -26,37 +48,12 @@ class HomePage extends StatelessWidget {
           // API Key Management Banner (always visible)
           const ApiKeyManagementBanner(),
 
-          // Main content
+          // Main content - droplets list
           const Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.sports_esports,
-                    size: 64,
-                    color: Colors.green,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Minecraft Server Admin',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Welcome! Your server admin panel is ready.',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
+            child: DropletsList(),
           ),
         ],
       ),
     );
   }
-
 }
