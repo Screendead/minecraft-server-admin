@@ -55,6 +55,14 @@ jobs:
         cd app
         flutter test --coverage
         
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: app/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        
     - name: Cache Flutter build
       uses: actions/cache@v4
       with:
