@@ -367,65 +367,99 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
           bottom: BorderSide(color: Colors.blue.shade200),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.security,
-                size: 16,
-                color: Colors.blue.shade700,
+              Row(
+                children: [
+                  Icon(
+                    Icons.security,
+                    size: 16,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'API Key Management',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Text(
-                'API Key Management',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
-              ),
+              const SizedBox(height: 4),
+              _buildSubtitleContent(),
             ],
           ),
-          const SizedBox(height: 4),
-          _buildContent(),
+          const SizedBox(width: 16),
+          _buildButtons(),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildSubtitleContent() {
     if (_isLoading) {
-      return Row(
-        children: [
-          const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'Loading...',
-            style: TextStyle(fontSize: 12),
-          ),
-        ],
+      return const Text(
+        'Loading...',
+        style: TextStyle(fontSize: 12),
+      );
+    }
+
+    if (_error != null) {
+      return Text(
+        'Error: $_error',
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.red.shade700,
+        ),
+      );
+    }
+
+    // No API key found
+    if (!_hasBiometricKey && !_hasPasswordKey) {
+      return const Text(
+        'No API key found. Add one to get started.',
+        style: TextStyle(fontSize: 12),
+      );
+    }
+
+    // API key exists - show status
+    String statusText = 'API key available';
+    if (_hasBiometricKey) {
+      statusText = 'API key secured with Face ID/Touch ID';
+    } else if (_hasPasswordKey) {
+      statusText = 'API key encrypted with password';
+    }
+
+    // If decrypted, show different status
+    if (_showDecryptedKey && _decryptedApiKey != null) {
+      statusText = 'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
+    }
+
+    return Text(
+      statusText,
+      style: const TextStyle(fontSize: 12),
+    );
+  }
+
+  Widget _buildButtons() {
+    if (_isLoading) {
+      return const SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2),
       );
     }
 
     if (_error != null) {
       return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Text(
-              'Error: $_error',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.red.shade700,
-              ),
-            ),
-          ),
           TextButton(
             onPressed: _showDecryptDialog,
             style: TextButton.styleFrom(
@@ -451,51 +485,21 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     // No API key found
     if (!_hasBiometricKey && !_hasPasswordKey) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Expanded(
-            child: Text(
-              'No API key found. Add one to get started.',
-              style: TextStyle(fontSize: 12),
-            ),
-          ),
-          TextButton(
-            onPressed: () => _showApiKeyInputDialog(),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Add API Key', style: TextStyle(fontSize: 11)),
-          ),
-        ],
+      return TextButton(
+        onPressed: () => _showApiKeyInputDialog(),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: const Text('Add API Key', style: TextStyle(fontSize: 11)),
       );
     }
 
-    // API key exists - show management options
-    String statusText = 'API key available';
-    if (_hasBiometricKey) {
-      statusText = 'API key secured with Face ID/Touch ID';
-    } else if (_hasPasswordKey) {
-      statusText = 'API key encrypted with password';
-    }
-
-    // If decrypted, show different status
-    if (_showDecryptedKey && _decryptedApiKey != null) {
-      statusText =
-          'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
-    }
-
+    // API key exists - show management buttons
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: Text(
-            statusText,
-            style: const TextStyle(fontSize: 12),
-          ),
-        ),
         if (!_showDecryptedKey) ...[
           TextButton(
             onPressed: _showDecryptDialog,
@@ -567,4 +571,5 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       ],
     );
   }
+
 }
