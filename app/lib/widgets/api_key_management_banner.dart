@@ -201,8 +201,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     }
   }
 
-  Future<void> _storeApiKey(String apiKey) async {
-    if (!mounted) return;
+  Future<bool> _storeApiKey(String apiKey) async {
+    if (!mounted) return false;
 
     setState(() {
       _isLoading = true;
@@ -220,18 +220,25 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
       await apiKeyService.storeApiKey(apiKey);
       await _checkApiKeyStatus();
-    } catch (e) {
+
       if (mounted) {
         setState(() {
-          _error = 'Error storing API key: $e';
           _isLoading = false;
         });
       }
+      return true;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      rethrow; // Re-throw so the dialog can catch and display the error
     }
   }
 
-  Future<void> _updateApiKey(String newApiKey) async {
-    if (!mounted) return;
+  Future<bool> _updateApiKey(String newApiKey) async {
+    if (!mounted) return false;
 
     setState(() {
       _isLoading = true;
@@ -249,13 +256,20 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
       await apiKeyService.updateApiKey(newApiKey);
       await _checkApiKeyStatus();
-    } catch (e) {
+
       if (mounted) {
         setState(() {
-          _error = 'Error updating API key: $e';
           _isLoading = false;
         });
       }
+      return true;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      rethrow; // Re-throw so the dialog can catch and display the error
     }
   }
 
@@ -301,11 +315,11 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       context: context,
       builder: (context) => ApiKeyInputDialog(
         isUpdate: isUpdate,
-        onConfirm: (apiKey) {
+        onConfirm: (apiKey) async {
           if (isUpdate) {
-            _updateApiKey(apiKey);
+            return await _updateApiKey(apiKey);
           } else {
-            _storeApiKey(apiKey);
+            return await _storeApiKey(apiKey);
           }
         },
       ),
@@ -461,7 +475,12 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextButton(
-            onPressed: _showDecryptDialog,
+            onPressed: () {
+              setState(() {
+                _error = null;
+              });
+              _showDecryptDialog();
+            },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               minimumSize: Size.zero,
@@ -471,7 +490,13 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
           ),
           const SizedBox(width: 8),
           TextButton(
-            onPressed: _checkApiKeyStatus,
+            onPressed: () {
+              setState(() {
+                _error = null;
+                _isLoading = true;
+              });
+              _checkApiKeyStatus();
+            },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               minimumSize: Size.zero,
