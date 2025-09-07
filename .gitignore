@@ -1,0 +1,8 @@
+node_modules
+
+# Firebase emulator data (contains sensitive test data)
+emulator-data/
+
+# Firebase debug logs
+firebase-debug.log
+firestore-debug.log
