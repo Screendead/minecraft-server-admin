@@ -33,11 +33,19 @@ class AuthProvider extends ChangeNotifier {
 
   void _init() {
     // Listen to Firebase Auth state changes
-    _firebaseAuth.authStateChanges().listen((User? user) {
-      _user = user;
-      _isLoading = false;
-      notifyListeners();
-    });
+    _firebaseAuth.authStateChanges().listen(
+      (User? user) {
+        _user = user;
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (error) {
+        print('Firebase Auth error: $error');
+        _setError('Authentication error: $error');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
   Future<bool> signUp(String email, String password, String apiKey) async {

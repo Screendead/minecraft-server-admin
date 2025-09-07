@@ -15,16 +15,19 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Connect to Firebase emulators in debug mode
+  // Connect to Firebase emulators in debug mode only
   if (const bool.fromEnvironment('dart.vm.product') == false) {
     try {
       await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
       FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
       await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+      print('Connected to Firebase emulators');
     } catch (e) {
       // Emulators might not be running, that's okay for now
       print('Firebase emulators not available: $e');
     }
+  } else {
+    print('Running in production mode - using Firebase production services');
   }
 
   // Initialize shared preferences
