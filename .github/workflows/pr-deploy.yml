@@ -71,8 +71,6 @@ jobs:
         
     - name: Setup LCOV
       uses: hrishikesh-kadam/setup-lcov@v1
-      with:
-        version: '1.16'
       
     - name: Generate coverage report
       uses: zgosalvez/github-actions-report-lcov@v4
