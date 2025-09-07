@@ -7,24 +7,29 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:mockito/mockito.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/main.dart';
+import 'package:app/services/auth_service.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App shows authentication page when not signed in',
+      (WidgetTester tester) async {
+    // Create mock services
+    final mockAuthService = MockAuthService();
+    when(mockAuthService.isSignedIn()).thenAnswer((_) async => false);
+
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(authService: mockAuthService));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('Button clicks: 0'), findsOneWidget);
-    expect(find.text('Button clicks: 1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('Button clicks: 0'), findsNothing);
-    expect(find.text('Button clicks: 1'), findsOneWidget);
+    // Verify that authentication page is shown
+    expect(find.text('Sign In'), findsNWidgets(2)); // Title and button
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
   });
 }
+
+class MockAuthService extends Mock implements AuthService {}
