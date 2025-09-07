@@ -1,11 +1,8 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
 
 import 'ios_biometric_encryption_service_test.mocks.dart';
@@ -57,7 +54,8 @@ void main() {
     });
 
     group('encryptWithBiometrics', () {
-      test('should encrypt data successfully with biometric authentication', () async {
+      test('should encrypt data successfully with biometric authentication',
+          () async {
         // Arrange
         const testData = 'test-api-key';
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
@@ -83,10 +81,12 @@ void main() {
         verify(mockSecureStorage.write(
           key: anyNamed('key'),
           value: anyNamed('value'),
-        )).called(3); // Called three times: once for encryption key, once for encrypted data, once for metadata
+        )).called(
+            3); // Called three times: once for encryption key, once for encrypted data, once for metadata
       });
 
-      test('should throw exception when biometric authentication fails', () async {
+      test('should throw exception when biometric authentication fails',
+          () async {
         // Arrange
         const testData = 'test-api-key';
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
@@ -103,7 +103,9 @@ void main() {
         );
       });
 
-      test('should throw exception when biometric authentication is not available', () async {
+      test(
+          'should throw exception when biometric authentication is not available',
+          () async {
         // Arrange
         const testData = 'test-api-key';
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => false);
@@ -118,7 +120,8 @@ void main() {
     });
 
     group('decryptWithBiometrics', () {
-      test('should attempt to decrypt data with biometric authentication', () async {
+      test('should attempt to decrypt data with biometric authentication',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -162,7 +165,8 @@ void main() {
         );
       });
 
-      test('should throw exception when biometric authentication fails', () async {
+      test('should throw exception when biometric authentication fails',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -189,7 +193,8 @@ void main() {
         await service.clearEncryptedData();
 
         // Assert
-        verify(mockSecureStorage.delete(key: anyNamed('key'))).called(3); // Called three times: once for encryption key, once for encrypted data, once for metadata
+        verify(mockSecureStorage.delete(key: anyNamed('key'))).called(
+            3); // Called three times: once for encryption key, once for encrypted data, once for metadata
       });
     });
   });
