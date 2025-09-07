@@ -4,9 +4,10 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
-import 'dart:typed_data' as _i9;
+import 'dart:convert' as _i13;
+import 'dart:typed_data' as _i10;
 
-import 'package:app/services/ios_biometric_encryption_service.dart' as _i10;
+import 'package:app/services/ios_biometric_encryption_service.dart' as _i11;
 import 'package:cloud_firestore/cloud_firestore.dart' as _i4;
 import 'package:cloud_firestore_platform_interface/cloud_firestore_platform_interface.dart'
     as _i3;
@@ -14,9 +15,10 @@ import 'package:firebase_auth/firebase_auth.dart' as _i7;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart'
     as _i6;
 import 'package:firebase_core/firebase_core.dart' as _i2;
-import 'package:local_auth/local_auth.dart' as _i11;
+import 'package:http/http.dart' as _i8;
+import 'package:local_auth/local_auth.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:mockito/src/dummies.dart' as _i9;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -256,6 +258,27 @@ class _FakeUser_20 extends _i1.SmartFake implements _i7.User {
         );
 }
 
+class _FakeResponse_21 extends _i1.SmartFake implements _i8.Response {
+  _FakeResponse_21(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeStreamedResponse_22 extends _i1.SmartFake
+    implements _i8.StreamedResponse {
+  _FakeStreamedResponse_22(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [FirebaseFirestore].
 ///
 /// See the documentation for Mockito's code generation for more information.
@@ -276,7 +299,7 @@ class MockFirebaseFirestore extends _i1.Mock implements _i4.FirebaseFirestore {
   @override
   String get databaseId => (super.noSuchMethod(
         Invocation.getter(#databaseId),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#databaseId),
         ),
@@ -367,7 +390,7 @@ class MockFirebaseFirestore extends _i1.Mock implements _i4.FirebaseFirestore {
       ) as _i5.Future<void>);
 
   @override
-  _i4.LoadBundleTask loadBundle(_i9.Uint8List? bundle) => (super.noSuchMethod(
+  _i4.LoadBundleTask loadBundle(_i10.Uint8List? bundle) => (super.noSuchMethod(
         Invocation.method(
           #loadBundle,
           [bundle],
@@ -533,8 +556,8 @@ class MockFirebaseFirestore extends _i1.Mock implements _i4.FirebaseFirestore {
             #maxAttempts: maxAttempts,
           },
         ),
-        returnValue: _i8.ifNotNull(
-              _i8.dummyValueOrNull<T>(
+        returnValue: _i9.ifNotNull(
+              _i9.dummyValueOrNull<T>(
                 this,
                 Invocation.method(
                   #runTransaction,
@@ -605,7 +628,7 @@ class MockCollectionReference<T extends Object?> extends _i1.Mock
   @override
   String get id => (super.noSuchMethod(
         Invocation.getter(#id),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#id),
         ),
@@ -614,7 +637,7 @@ class MockCollectionReference<T extends Object?> extends _i1.Mock
   @override
   String get path => (super.noSuchMethod(
         Invocation.getter(#path),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#path),
         ),
@@ -1107,7 +1130,7 @@ class MockDocumentReference<T extends Object?> extends _i1.Mock
   @override
   String get id => (super.noSuchMethod(
         Invocation.getter(#id),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#id),
         ),
@@ -1125,7 +1148,7 @@ class MockDocumentReference<T extends Object?> extends _i1.Mock
   @override
   String get path => (super.noSuchMethod(
         Invocation.getter(#path),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#path),
         ),
@@ -1259,7 +1282,7 @@ class MockDocumentSnapshot<T extends Object?> extends _i1.Mock
   @override
   String get id => (super.noSuchMethod(
         Invocation.getter(#id),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#id),
         ),
@@ -1764,7 +1787,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i7.FirebaseAuth {
           #verifyPasswordResetCode,
           [code],
         ),
-        returnValue: _i5.Future<String>.value(_i8.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i9.dummyValue<String>(
           this,
           Invocation.method(
             #verifyPasswordResetCode,
@@ -1904,7 +1927,7 @@ class MockUser extends _i1.Mock implements _i7.User {
   @override
   String get uid => (super.noSuchMethod(
         Invocation.getter(#uid),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i9.dummyValue<String>(
           this,
           Invocation.getter(#uid),
         ),
@@ -2230,7 +2253,7 @@ class MockUser extends _i1.Mock implements _i7.User {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockIOSBiometricEncryptionService extends _i1.Mock
-    implements _i10.IOSBiometricEncryptionService {
+    implements _i11.IOSBiometricEncryptionService {
   MockIOSBiometricEncryptionService() {
     _i1.throwOnMissingStub(this);
   }
@@ -2245,15 +2268,15 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
       ) as _i5.Future<bool>);
 
   @override
-  _i5.Future<List<_i11.BiometricType>> getAvailableBiometrics() =>
+  _i5.Future<List<_i12.BiometricType>> getAvailableBiometrics() =>
       (super.noSuchMethod(
         Invocation.method(
           #getAvailableBiometrics,
           [],
         ),
         returnValue:
-            _i5.Future<List<_i11.BiometricType>>.value(<_i11.BiometricType>[]),
-      ) as _i5.Future<List<_i11.BiometricType>>);
+            _i5.Future<List<_i12.BiometricType>>.value(<_i12.BiometricType>[]),
+      ) as _i5.Future<List<_i12.BiometricType>>);
 
   @override
   _i5.Future<String> encryptWithBiometrics(String? data) => (super.noSuchMethod(
@@ -2261,7 +2284,7 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
           #encryptWithBiometrics,
           [data],
         ),
-        returnValue: _i5.Future<String>.value(_i8.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i9.dummyValue<String>(
           this,
           Invocation.method(
             #encryptWithBiometrics,
@@ -2276,7 +2299,7 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
           #decryptWithBiometrics,
           [],
         ),
-        returnValue: _i5.Future<String>.value(_i8.dummyValue<String>(
+        returnValue: _i5.Future<String>.value(_i9.dummyValue<String>(
           this,
           Invocation.method(
             #decryptWithBiometrics,
@@ -2312,4 +2335,240 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
+}
+
+/// A class which mocks [Client].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockClient extends _i1.Mock implements _i8.Client {
+  MockClient() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<_i8.Response> head(
+    Uri? url, {
+    Map<String, String>? headers,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #head,
+          [url],
+          {#headers: headers},
+        ),
+        returnValue: _i5.Future<_i8.Response>.value(_FakeResponse_21(
+          this,
+          Invocation.method(
+            #head,
+            [url],
+            {#headers: headers},
+          ),
+        )),
+      ) as _i5.Future<_i8.Response>);
+
+  @override
+  _i5.Future<_i8.Response> get(
+    Uri? url, {
+    Map<String, String>? headers,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #get,
+          [url],
+          {#headers: headers},
+        ),
+        returnValue: _i5.Future<_i8.Response>.value(_FakeResponse_21(
+          this,
+          Invocation.method(
+            #get,
+            [url],
+            {#headers: headers},
+          ),
+        )),
+      ) as _i5.Future<_i8.Response>);
+
+  @override
+  _i5.Future<_i8.Response> post(
+    Uri? url, {
+    Map<String, String>? headers,
+    Object? body,
+    _i13.Encoding? encoding,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #post,
+          [url],
+          {
+            #headers: headers,
+            #body: body,
+            #encoding: encoding,
+          },
+        ),
+        returnValue: _i5.Future<_i8.Response>.value(_FakeResponse_21(
+          this,
+          Invocation.method(
+            #post,
+            [url],
+            {
+              #headers: headers,
+              #body: body,
+              #encoding: encoding,
+            },
+          ),
+        )),
+      ) as _i5.Future<_i8.Response>);
+
+  @override
+  _i5.Future<_i8.Response> put(
+    Uri? url, {
+    Map<String, String>? headers,
+    Object? body,
+    _i13.Encoding? encoding,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #put,
+          [url],
+          {
+            #headers: headers,
+            #body: body,
+            #encoding: encoding,
+          },
+        ),
+        returnValue: _i5.Future<_i8.Response>.value(_FakeResponse_21(
+          this,
+          Invocation.method(
+            #put,
+            [url],
+            {
+              #headers: headers,
+              #body: body,
+              #encoding: encoding,
+            },
+          ),
+        )),
+      ) as _i5.Future<_i8.Response>);
+
+  @override
+  _i5.Future<_i8.Response> patch(
+    Uri? url, {
+    Map<String, String>? headers,
+    Object? body,
+    _i13.Encoding? encoding,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #patch,
+          [url],
+          {
+            #headers: headers,
+            #body: body,
+            #encoding: encoding,
+          },
+        ),
+        returnValue: _i5.Future<_i8.Response>.value(_FakeResponse_21(
+          this,
+          Invocation.method(
+            #patch,
+            [url],
+            {
+              #headers: headers,
+              #body: body,
+              #encoding: encoding,
+            },
+          ),
+        )),
+      ) as _i5.Future<_i8.Response>);
+
+  @override
+  _i5.Future<_i8.Response> delete(
+    Uri? url, {
+    Map<String, String>? headers,
+    Object? body,
+    _i13.Encoding? encoding,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #delete,
+          [url],
+          {
+            #headers: headers,
+            #body: body,
+            #encoding: encoding,
+          },
+        ),
+        returnValue: _i5.Future<_i8.Response>.value(_FakeResponse_21(
+          this,
+          Invocation.method(
+            #delete,
+            [url],
+            {
+              #headers: headers,
+              #body: body,
+              #encoding: encoding,
+            },
+          ),
+        )),
+      ) as _i5.Future<_i8.Response>);
+
+  @override
+  _i5.Future<String> read(
+    Uri? url, {
+    Map<String, String>? headers,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #read,
+          [url],
+          {#headers: headers},
+        ),
+        returnValue: _i5.Future<String>.value(_i9.dummyValue<String>(
+          this,
+          Invocation.method(
+            #read,
+            [url],
+            {#headers: headers},
+          ),
+        )),
+      ) as _i5.Future<String>);
+
+  @override
+  _i5.Future<_i10.Uint8List> readBytes(
+    Uri? url, {
+    Map<String, String>? headers,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #readBytes,
+          [url],
+          {#headers: headers},
+        ),
+        returnValue: _i5.Future<_i10.Uint8List>.value(_i10.Uint8List(0)),
+      ) as _i5.Future<_i10.Uint8List>);
+
+  @override
+  _i5.Future<_i8.StreamedResponse> send(_i8.BaseRequest? request) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #send,
+          [request],
+        ),
+        returnValue:
+            _i5.Future<_i8.StreamedResponse>.value(_FakeStreamedResponse_22(
+          this,
+          Invocation.method(
+            #send,
+            [request],
+          ),
+        )),
+      ) as _i5.Future<_i8.StreamedResponse>);
+
+  @override
+  void close() => super.noSuchMethod(
+        Invocation.method(
+          #close,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
 }

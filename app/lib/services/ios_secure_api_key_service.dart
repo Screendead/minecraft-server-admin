@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:local_auth/local_auth.dart';
 import 'ios_biometric_encryption_service.dart';
+import 'digitalocean_api_service.dart';
 
 /// iOS Secure API Key Service for storing encrypted API keys in Firestore
 class IOSSecureApiKeyService {
@@ -13,7 +14,7 @@ class IOSSecureApiKeyService {
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     required IOSBiometricEncryptionService biometricService,
-  }) : _firestore = firestore,
+  })  : _firestore = firestore,
         _auth = auth,
         _biometricService = biometricService;
 
@@ -25,29 +26,38 @@ class IOSSecureApiKeyService {
     }
 
     try {
+      // Validate the API key before storing
+      final isValid = await DigitalOceanApiService.validateApiKey(apiKey);
+      if (!isValid) {
+        throw Exception(
+            'Invalid DigitalOcean API key. Please check your key and try again.');
+      }
+
       // Encrypt the API key using biometric authentication
-      final encryptedApiKey = await _biometricService.encryptWithBiometrics(apiKey);
-      
+      final encryptedApiKey =
+          await _biometricService.encryptWithBiometrics(apiKey);
+
       // Get key metadata
       final metadata = await _biometricService.getKeyMetadata();
-      
+
       // Store in Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'email': user.email,
         'encryptedApiKey': encryptedApiKey,
-        'keyMetadata': metadata ?? {
-          'algorithm': 'AES-256-GCM',
-          'secureEnclaveBacked': true,
-          'faceIdRequired': true,
-          'touchIdRequired': true,
-          'createdAt': DateTime.now().toIso8601String(),
-          'lastUpdated': DateTime.now().toIso8601String(),
-        },
+        'keyMetadata': metadata ??
+            {
+              'algorithm': 'AES-256-GCM',
+              'secureEnclaveBacked': true,
+              'faceIdRequired': true,
+              'touchIdRequired': true,
+              'createdAt': DateTime.now().toIso8601String(),
+              'lastUpdated': DateTime.now().toIso8601String(),
+            },
         'createdAt': FieldValue.serverTimestamp(),
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
-      if (e is BiometricAuthenticationException || 
+      if (e is BiometricAuthenticationException ||
           e is BiometricNotAvailableException) {
         rethrow;
       }
@@ -64,14 +74,14 @@ class IOSSecureApiKeyService {
 
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      
+
       if (!doc.exists || doc.data() == null) {
         return null;
       }
 
       final data = doc.data()!;
       final encryptedApiKey = data['encryptedApiKey'] as String?;
-      
+
       if (encryptedApiKey == null) {
         return null;
       }
@@ -79,7 +89,7 @@ class IOSSecureApiKeyService {
       // Decrypt using biometric authentication
       return await _biometricService.decryptWithBiometrics();
     } catch (e) {
-      if (e is BiometricAuthenticationException || 
+      if (e is BiometricAuthenticationException ||
           e is BiometricNotAvailableException ||
           e is NoEncryptedDataException) {
         rethrow;
@@ -96,26 +106,35 @@ class IOSSecureApiKeyService {
     }
 
     try {
+      // Validate the new API key before updating
+      final isValid = await DigitalOceanApiService.validateApiKey(newApiKey);
+      if (!isValid) {
+        throw Exception(
+            'Invalid DigitalOcean API key. Please check your key and try again.');
+      }
+
       // Encrypt the new API key using biometric authentication
-      final encryptedApiKey = await _biometricService.encryptWithBiometrics(newApiKey);
-      
+      final encryptedApiKey =
+          await _biometricService.encryptWithBiometrics(newApiKey);
+
       // Get updated key metadata
       final metadata = await _biometricService.getKeyMetadata();
-      
+
       // Update in Firestore
       await _firestore.collection('users').doc(user.uid).update({
         'encryptedApiKey': encryptedApiKey,
-        'keyMetadata': metadata ?? {
-          'algorithm': 'AES-256-GCM',
-          'secureEnclaveBacked': true,
-          'faceIdRequired': true,
-          'touchIdRequired': true,
-          'lastUpdated': DateTime.now().toIso8601String(),
-        },
+        'keyMetadata': metadata ??
+            {
+              'algorithm': 'AES-256-GCM',
+              'secureEnclaveBacked': true,
+              'faceIdRequired': true,
+              'touchIdRequired': true,
+              'lastUpdated': DateTime.now().toIso8601String(),
+            },
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      if (e is BiometricAuthenticationException || 
+      if (e is BiometricAuthenticationException ||
           e is BiometricNotAvailableException) {
         rethrow;
       }
@@ -132,7 +151,7 @@ class IOSSecureApiKeyService {
 
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      
+
       if (!doc.exists || doc.data() == null) {
         return false;
       }
@@ -157,7 +176,7 @@ class IOSSecureApiKeyService {
         'encryptedApiKey': FieldValue.delete(),
         'keyMetadata': FieldValue.delete(),
       });
-      
+
       // Clear from local secure storage
       await _biometricService.clearEncryptedData();
     } catch (e) {
@@ -174,7 +193,7 @@ class IOSSecureApiKeyService {
 
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      
+
       if (!doc.exists || doc.data() == null) {
         return null;
       }

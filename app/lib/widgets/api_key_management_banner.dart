@@ -302,13 +302,94 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(isUpdate ? 'Update API Key' : 'Add API Key'),
-        content: TextField(
-          controller: apiKeyController,
-          decoration: const InputDecoration(
-            labelText: 'DigitalOcean API Key',
-            border: OutlineInputBorder(),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: apiKeyController,
+                decoration: const InputDecoration(
+                  labelText: 'DigitalOcean API Key',
+                  border: OutlineInputBorder(),
+                ),
+                autofocus: true,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Required Scopes:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Your API key must have the following scopes:',
+                style: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              Builder(
+                builder: (context) {
+                  const requiredScopes = [
+                    'droplet:create',
+                    'droplet:read',
+                    'droplet:update',
+                    'droplet:delete',
+                    'block_storage:create',
+                    'block_storage:read',
+                    'block_storage_action:create',
+                    'snapshot:read',
+                    'monitoring:read',
+                    'monitoring:create',
+                    'monitoring:update',
+                    'monitoring:delete',
+                    'project:create',
+                    'project:read',
+                    'project:update',
+                    'tag:create',
+                    'tag:read',
+                    'tag:delete',
+                  ];
+
+                  return Wrap(
+                    spacing: 2.0,
+                    runSpacing: 2.0,
+                    children: requiredScopes
+                        .map(
+                          (scope) => Chip(
+                            label: Text(scope),
+                            backgroundColor: Colors.grey.shade800,
+                            labelStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 0,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'The API key will be validated before being stored.',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           ),
-          autofocus: true,
         ),
         actions: [
           TextButton(
