@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import '../providers/auth_provider.dart';
 import '../widgets/debug_api_key_banner.dart';
-import '../widgets/ios_api_key_management_widget.dart';
+import '../widgets/material_api_key_management_widget.dart';
 import '../services/ios_biometric_encryption_service.dart';
 import '../services/ios_secure_api_key_service.dart';
-import '../services/api_key_migration_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -81,18 +80,12 @@ class HomePage extends StatelessWidget {
       auth: authProvider.firebaseAuth,
       biometricService: biometricService,
     );
-    final migrationService = ApiKeyMigrationService(
-      sharedPreferences: authProvider.sharedPreferences,
-      encryptionService: authProvider.encryptionService,
-      iosSecureApiKeyService: apiKeyService,
-      biometricService: biometricService,
-    );
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => IOSApiKeyManagementWidget(
+        builder: (context) => MaterialApiKeyManagementWidget(
           apiKeyService: apiKeyService,
-          migrationService: migrationService,
+          biometricService: biometricService,
         ),
       ),
     );
