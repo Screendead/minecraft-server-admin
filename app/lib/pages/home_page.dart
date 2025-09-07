@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/debug_api_key_banner.dart';
+import '../widgets/api_key_management_banner.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -23,8 +23,8 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Debug API Key Banner (only in debug mode)
-          const DebugApiKeyBanner(),
+          // API Key Management Banner (always visible)
+          const ApiKeyManagementBanner(),
 
           // Main content
           const Expanded(
@@ -58,4 +58,5 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
 }

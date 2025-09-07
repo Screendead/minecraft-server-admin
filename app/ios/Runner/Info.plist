@@ -47,5 +47,13 @@
 	<true/>
 	<key>MinimumOSVersion</key>
 	<string>15.0</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app uses Face ID to securely encrypt and decrypt your DigitalOcean API key, providing maximum security for your server management.</string>
+	<key>NSBiometricUsageDescription</key>
+	<string>This app uses biometric authentication to securely encrypt and decrypt your DigitalOcean API key, providing maximum security for your server management.</string>
+	<key>NSKeychainAccessGroups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
+	</array>
 </dict>
 </plist>

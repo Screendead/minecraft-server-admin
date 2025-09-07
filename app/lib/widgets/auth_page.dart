@@ -14,7 +14,6 @@ class _AuthPageState extends State<AuthPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _apiKeyController = TextEditingController();
 
   bool _isSignUp = false;
   bool _isLoading = false;
@@ -23,14 +22,12 @@ class _AuthPageState extends State<AuthPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _apiKeyController.dispose();
     super.dispose();
   }
 
   void _toggleAuthMode() {
     setState(() {
       _isSignUp = !_isSignUp;
-      _apiKeyController.clear();
     });
     context.read<AuthProvider>().clearError();
   }
@@ -50,7 +47,6 @@ class _AuthPageState extends State<AuthPage> {
       await authProvider.signUp(
         _emailController.text.trim(),
         _passwordController.text,
-        _apiKeyController.text.trim(),
       );
     } else {
       await authProvider.signIn(
@@ -73,13 +69,38 @@ class _AuthPageState extends State<AuthPage> {
     });
 
     // Fill in debug credentials
-    _emailController.text = 'test@example.com';
+    _emailController.text = 'debug@example.com';
     _passwordController.text = 'password123';
 
     final authProvider = context.read<AuthProvider>();
     authProvider.clearError();
 
     await authProvider.signIn(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _debugCreateAccount() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _isSignUp = true; // Ensure we're in signup mode
+    });
+
+    // Fill in debug credentials
+    _emailController.text = 'debug@example.com';
+    _passwordController.text = 'password123';
+
+    final authProvider = context.read<AuthProvider>();
+    authProvider.clearError();
+
+    await authProvider.signUp(
       _emailController.text.trim(),
       _passwordController.text,
     );
@@ -194,26 +215,6 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        // API Key Field (only for sign up)
-                        if (_isSignUp) ...[
-                          TextFormField(
-                            controller: _apiKeyController,
-                            decoration: const InputDecoration(
-                              labelText: 'API Key',
-                              prefixIcon: Icon(Icons.key),
-                              border: OutlineInputBorder(),
-                              helperText: 'Your Minecraft server API key',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your API key';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-
                         // Error Message
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, child) {
@@ -296,7 +297,7 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ),
                         ),
-                        
+
                         // Debug Login Button (only in debug mode)
                         if (kDebugMode) ...[
                           const SizedBox(height: 16),
@@ -319,8 +320,26 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ),
                           const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: OutlinedButton.icon(
+                              onPressed:
+                                  _isLoading ? null : _debugCreateAccount,
+                              icon: const Icon(Icons.person_add, size: 16),
+                              label: const Text('Debug Create Account'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.blue,
+                                side: const BorderSide(color: Colors.blue),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           const Text(
-                            'Debug: test@example.com / password123',
+                            'Debug: debug@example.com / password123 (Login)\nDebug: debug@example.com / password123 (Create)',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
