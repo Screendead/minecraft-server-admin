@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
         children: [
           // Debug API Key Banner (only in debug mode)
           const DebugApiKeyBanner(),
-          
+
           // Main content
           const Expanded(
             child: Center(
