@@ -27,7 +27,10 @@ jobs:
     - name: Cache Firebase CLI
       uses: actions/cache@v4
       with:
-        path: ~/.npm
+        path: |
+          ~/.npm
+          /usr/local/lib/node_modules/firebase-tools
+          /usr/local/bin/firebase
         key: ${{ runner.os }}-firebase-cli-v13
         restore-keys: |
           ${{ runner.os }}-firebase-cli-
