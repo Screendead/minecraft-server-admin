@@ -98,8 +98,12 @@ jobs:
         echo "Available coverage files:"
         ls -la app/coverage/
         
-        # Copy coverage files - handle both HTML directory and direct files
-        if [ -d "app/coverage/html" ]; then
+        # The zgosalvez/github-actions-report-lcov action generates HTML in a temp directory
+        # We need to copy from there instead of app/coverage
+        if [ -d "/tmp/__zgosalvez_github-actions-report-lcov/html" ]; then
+          echo "Copying HTML coverage report from LCOV action temp directory..."
+          cp -r /tmp/__zgosalvez_github-actions-report-lcov/html/* coverage-deploy/
+        elif [ -d "app/coverage/html" ]; then
           echo "Copying HTML coverage report from html/ subdirectory..."
           cp -r app/coverage/html/* coverage-deploy/
         else
