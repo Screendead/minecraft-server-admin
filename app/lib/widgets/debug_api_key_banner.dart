@@ -14,16 +14,77 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
   String? _decryptedApiKey;
   bool _isLoading = false;
   String? _error;
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     if (kDebugMode) {
-      _loadApiKey();
+      _showPasswordDialog();
     }
   }
 
-  Future<void> _loadApiKey() async {
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showPasswordDialog() async {
+    if (!mounted) return;
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Debug: Enter Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter the password to decrypt the API key:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          if (kDebugMode) ...[
+            TextButton(
+              onPressed: () {
+                _passwordController.text = 'password123';
+              },
+              child: const Text('Debug Fill'),
+            ),
+          ],
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(_passwordController.text);
+            },
+            child: const Text('Decrypt'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await _loadApiKey(result);
+    }
+  }
+
+  Future<void> _loadApiKey(String password) async {
     if (!mounted) return;
     
     setState(() {
@@ -33,10 +94,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      // For debug purposes, we'll use a default password
-      // In a real app, you might want to prompt for the password
-      const debugPassword = 'password123';
-      final apiKey = await authProvider.getDecryptedApiKey(debugPassword);
+      final apiKey = await authProvider.getDecryptedApiKey(password);
       
       if (mounted) {
         setState(() {
@@ -86,7 +144,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
               size: 16,
               color: Colors.orange.shade700,
             ),
-            onPressed: _loadApiKey,
+            onPressed: _showPasswordDialog,
             tooltip: 'Refresh API Key',
           ),
         ],
@@ -97,7 +155,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
   Widget _buildContent() {
     if (_isLoading) {
       return const Text(
-        'Loading API key...',
+        'Decrypting API key...',
         style: TextStyle(fontSize: 12),
       );
     }
@@ -114,7 +172,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
 
     if (_decryptedApiKey == null) {
       return const Text(
-        'No API key found',
+        'Tap refresh to enter password and decrypt API key',
         style: TextStyle(fontSize: 12),
       );
     }
