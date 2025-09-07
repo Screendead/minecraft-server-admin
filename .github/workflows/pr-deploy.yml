@@ -93,8 +93,19 @@ jobs:
       run: |
         # Create a temporary directory for coverage deployment
         mkdir -p coverage-deploy
-        # Copy the HTML coverage report to the root of deployment directory
-        cp -r app/coverage/html/* coverage-deploy/
+        
+        # Check what coverage files are available and copy them
+        echo "Available coverage files:"
+        ls -la app/coverage/
+        
+        # Copy coverage files - handle both HTML directory and direct files
+        if [ -d "app/coverage/html" ]; then
+          echo "Copying HTML coverage report from html/ subdirectory..."
+          cp -r app/coverage/html/* coverage-deploy/
+        else
+          echo "Copying coverage files directly..."
+          cp -r app/coverage/* coverage-deploy/
+        fi
         
         # Create a temporary firebase.json for coverage deployment
         cat > coverage-firebase.json << EOF
