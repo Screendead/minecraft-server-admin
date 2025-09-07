@@ -23,8 +23,8 @@ jobs:
       with:
         path: |
           ~/.npm
-          /usr/local/lib/node_modules/firebase-tools
-          /usr/local/bin/firebase
+          /opt/hostedtoolcache/node/18.20.8/x64/lib/node_modules/firebase-tools
+          /opt/hostedtoolcache/node/18.20.8/x64/bin/firebase
         key: ${{ runner.os }}-firebase-cli-v13-debug
         restore-keys: |
           ${{ runner.os }}-firebase-cli-v13-debug
