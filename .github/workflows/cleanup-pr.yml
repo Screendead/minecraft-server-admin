@@ -17,15 +17,11 @@ jobs:
     - name: Install Firebase CLI
       run: npm install -g firebase-tools
       
-    - name: Cleanup PR Firebase projects
+    - name: Cleanup PR Firebase hosting channel
       run: |
-        # Delete the PR preview project
-        PR_SITE_NAME="minecraft-server-admin-pr-${{ github.event.pull_request.number }}"
-        firebase projects:delete $PR_SITE_NAME --force --token ${{ secrets.FIREBASE_TOKEN }} || echo "PR project $PR_SITE_NAME not found or already deleted"
-        
-        # Delete the coverage project
-        COVERAGE_SITE_NAME="minecraft-server-admin-coverage-pr-${{ github.event.pull_request.number }}"
-        firebase projects:delete $COVERAGE_SITE_NAME --force --token ${{ secrets.FIREBASE_TOKEN }} || echo "Coverage project $COVERAGE_SITE_NAME not found or already deleted"
+        # Delete the PR hosting channel
+        CHANNEL_NAME="pr-${{ github.event.pull_request.number }}"
+        firebase hosting:channel:delete $CHANNEL_NAME --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} || echo "Channel $CHANNEL_NAME not found or already deleted"
         
         echo "Cleanup completed for PR #${{ github.event.pull_request.number }}"
       env:
@@ -41,10 +37,9 @@ jobs:
             issue_number: context.issue.number,
             body: `## 🧹 Cleanup completed
             
-            The temporary Firebase projects for this PR have been cleaned up.
+            The Firebase hosting channel for this PR has been cleaned up.
             
-            - PR Preview project: \`minecraft-server-admin-pr-${{ github.event.pull_request.number }}\`
-            - Coverage project: \`minecraft-server-admin-coverage-pr-${{ github.event.pull_request.number }}\`
+            - Channel: \`pr-${{ github.event.pull_request.number }}\`
             
             ---
             *This PR has been closed and resources cleaned up.*`

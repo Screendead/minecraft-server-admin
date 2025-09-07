@@ -3,8 +3,6 @@ name: Deploy PR Preview
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  pull_request_target:
-    types: [opened, synchronize, reopened]
 
 jobs:
   build-and-deploy-preview:
@@ -56,45 +54,31 @@ jobs:
         cd app
         flutter build web --release
         
-    - name: Deploy PR preview to Firebase Hosting
+    - name: Deploy PR preview to Firebase Hosting channel
       run: |
         cd app
-        # Create a unique site name for this PR
-        PR_SITE_NAME="minecraft-server-admin-pr-${{ github.event.pull_request.number }}"
-        
-        # Create a temporary Firebase project for this PR
-        firebase projects:create $PR_SITE_NAME --display-name "Minecraft Server Admin PR #${{ github.event.pull_request.number }}" --token ${{ secrets.FIREBASE_TOKEN }}
-        
-        # Initialize hosting for the temporary project
-        firebase init hosting --project $PR_SITE_NAME --public build/web --yes --token ${{ secrets.FIREBASE_TOKEN }}
-        
-        # Deploy to the temporary site
-        firebase deploy --only hosting --project $PR_SITE_NAME --token ${{ secrets.FIREBASE_TOKEN }}
+        # Deploy to a Firebase hosting channel for this PR
+        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
         
         # Output the preview URL
-        echo "PR_PREVIEW_URL=https://$PR_SITE_NAME.web.app" >> $GITHUB_ENV
-        echo "PR_PREVIEW_URL=https://$PR_SITE_NAME.web.app" >> $GITHUB_OUTPUT
+        echo "PR_PREVIEW_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app" >> $GITHUB_ENV
+        echo "PR_PREVIEW_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app" >> $GITHUB_OUTPUT
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         
-    - name: Deploy coverage report
+    - name: Deploy coverage report to subdirectory
       run: |
         cd app
-        # Create a unique site name for coverage report
-        COVERAGE_SITE_NAME="minecraft-server-admin-coverage-pr-${{ github.event.pull_request.number }}"
+        # Create a subdirectory for coverage in the build output
+        mkdir -p build/web/coverage
+        cp -r coverage/html/* build/web/coverage/
         
-        # Create a temporary Firebase project for coverage
-        firebase projects:create $COVERAGE_SITE_NAME --display-name "Minecraft Server Admin Coverage PR #${{ github.event.pull_request.number }}" --token ${{ secrets.FIREBASE_TOKEN }}
-        
-        # Initialize hosting for coverage
-        firebase init hosting --project $COVERAGE_SITE_NAME --public coverage/html --yes --token ${{ secrets.FIREBASE_TOKEN }}
-        
-        # Deploy coverage report
-        firebase deploy --only hosting --project $COVERAGE_SITE_NAME --token ${{ secrets.FIREBASE_TOKEN }}
+        # Deploy to the same channel with coverage in subdirectory
+        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
         
         # Output the coverage URL
-        echo "COVERAGE_URL=https://$COVERAGE_SITE_NAME.web.app" >> $GITHUB_ENV
-        echo "COVERAGE_URL=https://$COVERAGE_SITE_NAME.web.app" >> $GITHUB_OUTPUT
+        echo "COVERAGE_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app/coverage/" >> $GITHUB_ENV
+        echo "COVERAGE_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app/coverage/" >> $GITHUB_OUTPUT
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         

@@ -17,17 +17,15 @@ This project uses GitHub Actions for automated builds, testing, and deployments.
 - **Actions**:
   - Runs Flutter tests with coverage
   - Builds the web app
-  - Creates temporary Firebase project for PR preview
-  - Deploys app to temporary URL
-  - Creates separate temporary Firebase project for coverage report
-  - Deploys coverage report to temporary URL
+  - Deploys to Firebase Hosting channel for PR preview
+  - Deploys coverage report to subdirectory of same channel
   - Comments on PR with preview links
   - Updates comment when PR is updated
 
 ### PR Cleanup
 - **Trigger**: Pull Request closed
 - **Actions**:
-  - Deletes temporary Firebase projects
+  - Deletes Firebase Hosting channel
   - Comments on PR confirming cleanup
 
 ## 🔧 Required Secrets
@@ -51,8 +49,8 @@ Add these secrets to your GitHub repository settings:
 - **Custom Domain**: (if configured in Firebase)
 
 ### PR Previews
-- **App Preview**: `https://minecraft-server-admin-pr-{PR_NUMBER}.web.app`
-- **Coverage Report**: `https://minecraft-server-admin-coverage-pr-{PR_NUMBER}.web.app`
+- **App Preview**: `https://minecraft-server-automation--pr-{PR_NUMBER}.web.app`
+- **Coverage Report**: `https://minecraft-server-automation--pr-{PR_NUMBER}.web.app/coverage/`
 
 ## 🛠️ Local Development
 
