@@ -93,6 +93,39 @@ jobs:
         working-directory: app
         update-comment: true
         
+    - name: Upload coverage reports as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-pr-${{ github.event.number }}
+        path: app/coverage/
+        
+    - name: Deploy coverage report to Firebase
+      id: deploy-coverage
+      run: |
+        # Create a temporary directory for coverage deployment
+        mkdir -p coverage-deploy
+        cp -r app/coverage/* coverage-deploy/
+        
+        # Initialize Firebase project (if not already done)
+        firebase use --add minecraft-server-automation || true
+        
+        # Deploy coverage report to a temporary Firebase hosting channel
+        # Capture the output to get the actual URL
+        DEPLOY_OUTPUT=$(firebase hosting:channel:deploy pr-${{ github.event.number }}-coverage \
+          --project minecraft-server-automation \
+          --public coverage-deploy \
+          --expires 7d \
+          --json)
+        
+        # Extract the URL from the JSON output
+        COVERAGE_URL=$(echo "$DEPLOY_OUTPUT" | jq -r '.result.url // empty')
+        
+        # Set output for use in subsequent steps
+        echo "coverage-url=$COVERAGE_URL" >> $GITHUB_OUTPUT
+        echo "Coverage report deployed to: $COVERAGE_URL"
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
     - name: Verify iOS build configuration
       run: |
         cd app
@@ -122,7 +155,9 @@ jobs:
           **Build Status:** ✅ Configuration verified
           **Platform:** iOS only
           **Bundle ID:** com.screendead.servers
-          **Coverage Report:** Available in artifacts
+          **Coverage Report:** 
+          - 📊 [View Coverage Report](${{ steps.deploy-coverage.outputs.coverage-url }})
+          - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           
           Note: iOS builds require macOS runners. This PR verifies the iOS configuration is correct.
           
