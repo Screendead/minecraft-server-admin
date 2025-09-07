@@ -366,29 +366,26 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
           bottom: BorderSide(color: Colors.blue.shade200),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.security,
-                size: 16,
-                color: Colors.blue.shade700,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'API Key Management',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
-              ),
-            ],
+          Icon(
+            Icons.security,
+            size: 16,
+            color: Colors.blue.shade700,
           ),
-          const SizedBox(height: 8),
-          _buildContent(),
+          const SizedBox(width: 8),
+          const Text(
+            'API Key Management',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _buildContent(),
+          ),
         ],
       ),
     );
@@ -413,39 +410,35 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     }
 
     if (_error != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      return Row(
         children: [
-          Text(
-            'Error: $_error',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.red.shade700,
+          Expanded(
+            child: Text(
+              'Error: $_error',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.red.shade700,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              TextButton(
-                onPressed: _showDecryptDialog,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text('Retry', style: TextStyle(fontSize: 11)),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: _checkApiKeyStatus,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text('Refresh', style: TextStyle(fontSize: 11)),
-              ),
-            ],
+          TextButton(
+            onPressed: _showDecryptDialog,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Retry', style: TextStyle(fontSize: 11)),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: _checkApiKeyStatus,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Refresh', style: TextStyle(fontSize: 11)),
           ),
         ],
       );
@@ -453,27 +446,22 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     // No API key found
     if (!_hasBiometricKey && !_hasPasswordKey) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      return Row(
         children: [
-          const Text(
-            'No API key found. Add one to get started.',
-            style: TextStyle(fontSize: 12),
+          const Expanded(
+            child: Text(
+              'No API key found. Add one to get started.',
+              style: TextStyle(fontSize: 12),
+            ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: () => _showApiKeyInputDialog(),
-                icon: const Icon(Icons.add, size: 14),
-                label: const Text('Add API Key', style: TextStyle(fontSize: 11)),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            ],
+          TextButton(
+            onPressed: () => _showApiKeyInputDialog(),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Add API Key', style: TextStyle(fontSize: 11)),
           ),
         ],
       );
@@ -487,108 +475,87 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       statusText = 'API key encrypted with password';
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    // If decrypted, show different status
+    if (_showDecryptedKey && _decryptedApiKey != null) {
+      statusText = 'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
+    }
+
+    return Row(
       children: [
-        Text(
-          statusText,
-          style: const TextStyle(fontSize: 12),
+        Expanded(
+          child: Text(
+            statusText,
+            style: const TextStyle(fontSize: 12),
+          ),
         ),
-        const SizedBox(height: 8),
-        
-        // Show decrypted key if available
-        if (_showDecryptedKey && _decryptedApiKey != null) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Colors.grey.shade300),
+        if (!_showDecryptedKey) ...[
+          TextButton(
+            onPressed: _showDecryptDialog,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'API Key:',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  _decryptedApiKey!,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
+            child: Text(
+              _hasBiometricKey ? 'Decrypt (Face ID)' : 'Decrypt',
+              style: const TextStyle(fontSize: 11),
             ),
           ),
-          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () => _showApiKeyInputDialog(isUpdate: true),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Edit', style: TextStyle(fontSize: 11)),
+          ),
         ],
-        
-        // Management buttons
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            if (!_showDecryptedKey)
-              ElevatedButton.icon(
-                onPressed: _showDecryptDialog,
-                icon: Icon(
-                  _hasBiometricKey ? Icons.fingerprint : Icons.lock,
-                  size: 14,
-                ),
-                label: Text(
-                  _hasBiometricKey ? 'Decrypt (Face ID)' : 'Decrypt',
-                  style: const TextStyle(fontSize: 11),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            if (_showDecryptedKey) ...[
-              ElevatedButton.icon(
-                onPressed: () => _showApiKeyInputDialog(isUpdate: true),
-                icon: const Icon(Icons.edit, size: 14),
-                label: const Text('Update', style: TextStyle(fontSize: 11)),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: _showClearConfirmationDialog,
-                icon: const Icon(Icons.delete, size: 14),
-                label: const Text('Clear', style: TextStyle(fontSize: 11)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            ],
-            if (!_hasBiometricKey && _hasPasswordKey)
-              ElevatedButton.icon(
-                onPressed: () => _showApiKeyInputDialog(),
-                icon: const Icon(Icons.add, size: 14),
-                label: const Text('Add Biometric', style: TextStyle(fontSize: 11)),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-          ],
-        ),
+        if (_showDecryptedKey) ...[
+          TextButton(
+            onPressed: () => _showApiKeyInputDialog(isUpdate: true),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Update', style: TextStyle(fontSize: 11)),
+          ),
+          TextButton(
+            onPressed: _showClearConfirmationDialog,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Clear', style: TextStyle(fontSize: 11)),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _showDecryptedKey = false;
+                _decryptedApiKey = null;
+              });
+            },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Hide', style: TextStyle(fontSize: 11)),
+          ),
+        ],
+        if (!_hasBiometricKey && _hasPasswordKey)
+          TextButton(
+            onPressed: () => _showApiKeyInputDialog(),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Add Biometric', style: TextStyle(fontSize: 11)),
+          ),
       ],
     );
   }
