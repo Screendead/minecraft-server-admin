@@ -78,17 +78,14 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: true
         
-    - name: Build Flutter web app
+    - name: Verify iOS build configuration
       run: |
         cd app
-        flutter build web --release
-        
-    - name: Deploy to Firebase Hosting
-      run: |
-        cd app
-        firebase deploy --only hosting --project minecraft-server-automation
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        echo "Verifying iOS build configuration..."
+        flutter doctor
+        echo "iOS build would require macOS runner - skipping actual build"
+        echo "Bundle ID: com.screendead.servers"
+        echo "Platform: iOS only"
         
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4

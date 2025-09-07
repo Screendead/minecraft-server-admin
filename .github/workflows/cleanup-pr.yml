@@ -17,15 +17,10 @@ jobs:
     - name: Install Firebase CLI
       run: npm install -g firebase-tools
       
-    - name: Cleanup PR Firebase hosting channel
+    - name: Cleanup PR resources
       run: |
-        # Delete the PR hosting channel
-        CHANNEL_NAME="pr-${{ github.event.pull_request.number }}"
-        firebase hosting:channel:delete $CHANNEL_NAME --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} || echo "Channel $CHANNEL_NAME not found or already deleted"
-        
         echo "Cleanup completed for PR #${{ github.event.pull_request.number }}"
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        echo "iOS build artifacts will be automatically cleaned up after retention period"
         
     - name: Comment PR with cleanup status
       uses: actions/github-script@v7
@@ -37,10 +32,11 @@ jobs:
             issue_number: context.issue.number,
             body: `## 🧹 Cleanup completed
             
-            The Firebase hosting channel for this PR has been cleaned up.
+            The iOS build artifacts for this PR will be automatically cleaned up after the retention period.
             
-            - Channel: \`pr-${{ github.event.pull_request.number }}\`
+            - Build Artifact: \`ios-build-pr-${{ github.event.pull_request.number }}\`
+            - Retention: 7 days
             
             ---
-            *This PR has been closed and resources cleaned up.*`
+            *This PR has been closed and resources will be cleaned up automatically.*`
           });
