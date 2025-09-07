@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart' as auth_provider;
+import 'providers/droplets_provider.dart';
 import 'widgets/auth_wrapper.dart';
 
 void main() async {
@@ -55,6 +56,9 @@ class MyApp extends StatelessWidget {
             firestore: FirebaseFirestore.instance,
             sharedPreferences: sharedPreferences,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => DropletsProvider(),
         ),
       ],
       child: MaterialApp(
