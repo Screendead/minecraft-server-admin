@@ -278,7 +278,10 @@ void main() {
         await service.clearApiKey();
 
         // Assert
-        verify(mockDocument.update(any)).called(1);
+        verify(mockDocument.update(argThat(equals({
+          'encryptedApiKey': FieldValue.delete(),
+          'keyMetadata': FieldValue.delete(),
+        })))).called(1);
         verify(mockBiometricService.clearEncryptedData()).called(1);
       });
 

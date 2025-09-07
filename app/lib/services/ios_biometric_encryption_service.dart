@@ -9,7 +9,7 @@ import 'package:encrypt/encrypt.dart';
 class BiometricAuthenticationException implements Exception {
   final String message;
   BiometricAuthenticationException(this.message);
-  
+
   @override
   String toString() => 'BiometricAuthenticationException: $message';
 }
@@ -17,7 +17,7 @@ class BiometricAuthenticationException implements Exception {
 class BiometricNotAvailableException implements Exception {
   final String message;
   BiometricNotAvailableException(this.message);
-  
+
   @override
   String toString() => 'BiometricNotAvailableException: $message';
 }
@@ -25,7 +25,7 @@ class BiometricNotAvailableException implements Exception {
 class NoEncryptedDataException implements Exception {
   final String message;
   NoEncryptedDataException(this.message);
-  
+
   @override
   String toString() => 'NoEncryptedDataException: $message';
 }
@@ -34,22 +34,23 @@ class NoEncryptedDataException implements Exception {
 class IOSBiometricEncryptionService {
   static const String _encryptedDataKey = 'ios_encrypted_api_key';
   static const String _keyMetadataKey = 'ios_key_metadata';
-  
+
   final LocalAuthentication _localAuth;
   final FlutterSecureStorage _secureStorage;
 
   IOSBiometricEncryptionService({
     LocalAuthentication? localAuth,
     FlutterSecureStorage? secureStorage,
-  }) : _localAuth = localAuth ?? LocalAuthentication(),
-        _secureStorage = secureStorage ?? const FlutterSecureStorage(
-          aOptions: AndroidOptions(
-            encryptedSharedPreferences: true,
-          ),
-          iOptions: IOSOptions(
-            accessibility: KeychainAccessibility.first_unlock_this_device,
-          ),
-        );
+  })  : _localAuth = localAuth ?? LocalAuthentication(),
+        _secureStorage = secureStorage ??
+            const FlutterSecureStorage(
+              aOptions: AndroidOptions(
+                encryptedSharedPreferences: true,
+              ),
+              iOptions: IOSOptions(
+                accessibility: KeychainAccessibility.first_unlock_this_device,
+              ),
+            );
 
   /// Checks if biometric authentication is available on the device
   Future<bool> isBiometricAvailable() async {
@@ -79,7 +80,8 @@ class IOSBiometricEncryptionService {
 
     // Check if biometrics are available
     if (!await isBiometricAvailable()) {
-      throw BiometricNotAvailableException('Biometric authentication is not available on this device');
+      throw BiometricNotAvailableException(
+          'Biometric authentication is not available on this device');
     }
 
     try {
@@ -93,26 +95,53 @@ class IOSBiometricEncryptionService {
       );
 
       if (!authenticated) {
-        throw BiometricAuthenticationException('Biometric authentication failed');
+        throw BiometricAuthenticationException(
+            'Biometric authentication failed');
       }
 
       // Get or generate a persistent encryption key
       final key = await _getOrCreateEncryptionKey();
-      
+
+      // Validate key strength (AES-256 requires 32 bytes)
+      if (key.bytes.length != 32) {
+        throw BiometricAuthenticationException(
+            'Encryption key is not 256 bits (32 bytes)');
+      }
+
+      // Generate IV and validate
+      IV iv;
+      try {
+        iv = IV.fromSecureRandom(16);
+        if (iv.bytes.length != 16) {
+          throw BiometricAuthenticationException(
+              'IV is not 128 bits (16 bytes)');
+        }
+        // Basic IV randomness check: not all zeros
+        if (iv.bytes.every((b) => b == 0)) {
+          throw BiometricAuthenticationException('IV is not random');
+        }
+      } catch (e) {
+        throw BiometricAuthenticationException('Failed to generate IV: $e');
+      }
+
       // Encrypt the data using AES-256-GCM
       final encrypter = Encrypter(AES(key));
-      final iv = IV.fromSecureRandom(16);
-      final encrypted = encrypter.encrypt(data, iv: iv);
-      
+      Encrypted encrypted;
+      try {
+        encrypted = encrypter.encrypt(data, iv: iv);
+      } catch (e) {
+        throw BiometricAuthenticationException('Encryption failed: $e');
+      }
+
       // Combine IV and encrypted data
       final combined = base64.encode(iv.bytes + encrypted.bytes);
-      
+
       // Store encrypted data in secure storage
       await _secureStorage.write(
         key: _encryptedDataKey,
         value: combined,
       );
-      
+
       // Store key metadata
       final metadata = {
         'algorithm': 'AES-256-GCM',
@@ -120,7 +149,7 @@ class IOSBiometricEncryptionService {
         'createdAt': DateTime.now().toIso8601String(),
         'biometricRequired': true,
       };
-      
+
       await _secureStorage.write(
         key: _keyMetadataKey,
         value: jsonEncode(metadata),
@@ -128,7 +157,8 @@ class IOSBiometricEncryptionService {
 
       return combined;
     } catch (e) {
-      if (e is BiometricAuthenticationException || e is BiometricNotAvailableException) {
+      if (e is BiometricAuthenticationException ||
+          e is BiometricNotAvailableException) {
         rethrow;
       }
       throw BiometricAuthenticationException('Failed to encrypt data: $e');
@@ -139,7 +169,8 @@ class IOSBiometricEncryptionService {
   Future<String> decryptWithBiometrics() async {
     // Check if biometrics are available
     if (!await isBiometricAvailable()) {
-      throw BiometricNotAvailableException('Biometric authentication is not available on this device');
+      throw BiometricNotAvailableException(
+          'Biometric authentication is not available on this device');
     }
 
     try {
@@ -159,22 +190,23 @@ class IOSBiometricEncryptionService {
       );
 
       if (!authenticated) {
-        throw BiometricAuthenticationException('Biometric authentication failed');
+        throw BiometricAuthenticationException(
+            'Biometric authentication failed');
       }
 
       // Get the same key used for encryption
       final key = await _getOrCreateEncryptionKey();
-      
+
       // Decode and decrypt the data
       final combined = base64.decode(encryptedData);
       final iv = IV(combined.sublist(0, 16));
       final encrypted = Encrypted(combined.sublist(16));
-      
+
       final encrypter = Encrypter(AES(key));
       return encrypter.decrypt(encrypted, iv: iv);
     } catch (e) {
-      if (e is BiometricAuthenticationException || 
-          e is BiometricNotAvailableException || 
+      if (e is BiometricAuthenticationException ||
+          e is BiometricNotAvailableException ||
           e is NoEncryptedDataException) {
         rethrow;
       }
@@ -210,7 +242,7 @@ class IOSBiometricEncryptionService {
   /// The key is stored securely and reused for encryption/decryption
   Future<Key> _getOrCreateEncryptionKey() async {
     const keyStorageKey = 'ios_encryption_key';
-    
+
     try {
       // Try to get existing key
       final existingKey = await _secureStorage.read(key: keyStorageKey);
@@ -221,17 +253,17 @@ class IOSBiometricEncryptionService {
     } catch (e) {
       // If there's an error reading the key, generate a new one
     }
-    
+
     // Generate a new key if none exists
     final key = _generateSecureKey();
     final keyBytes = base64.encode(key.bytes);
-    
+
     // Store the key securely
     await _secureStorage.write(
       key: keyStorageKey,
       value: keyBytes,
     );
-    
+
     return key;
   }
 

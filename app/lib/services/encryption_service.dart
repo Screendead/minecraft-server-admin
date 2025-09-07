@@ -46,10 +46,41 @@ class EncryptionService {
 
       // Create encryptor and decrypt
       final encrypter = Encrypter(AES(key));
-      return encrypter.decrypt(encrypted, iv: iv);
+      final decrypted = encrypter.decrypt(encrypted, iv: iv);
+
+      // Validate that the decrypted data is not garbage
+      // Check if the result contains only printable ASCII characters
+      // This helps detect when wrong password produces garbage data
+      if (!_isValidDecryptedData(decrypted)) {
+        return '';
+      }
+
+      return decrypted;
     } catch (e) {
       return '';
     }
+  }
+
+  /// Validates that decrypted data is not garbage
+  /// Checks if the data contains mostly valid text characters
+  bool _isValidDecryptedData(String data) {
+    if (data.isEmpty) return true;
+
+    // Count valid characters (printable ASCII, common whitespace, and basic Unicode)
+    int validCharCount = 0;
+    int totalCharCount = data.length;
+
+    for (int i = 0; i < data.length; i++) {
+      final codeUnit = data.codeUnitAt(i);
+      // Allow printable ASCII (32-126), common whitespace (9, 10, 13), and basic Unicode (128+)
+      if (codeUnit >= 9 && (codeUnit <= 13 || codeUnit >= 32)) {
+        validCharCount++;
+      }
+    }
+
+    // If more than 80% of characters are valid, consider it valid text
+    // This allows for some Unicode characters while rejecting garbage data
+    return (validCharCount / totalCharCount) > 0.8;
   }
 
   /// Derives a key from password using SHA256 hash
