@@ -32,11 +32,12 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      
+
       // Check for password-based key
-      final passwordKey = authProvider.sharedPreferences.getString('encrypted_api_key');
+      final passwordKey =
+          authProvider.sharedPreferences.getString('encrypted_api_key');
       _hasPasswordKey = passwordKey != null && passwordKey.isNotEmpty;
-      
+
       // Check for biometric key (iOS only)
       if (Platform.isIOS) {
         final biometricService = IOSBiometricEncryptionService();
@@ -47,7 +48,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         );
         _hasBiometricKey = await apiKeyService.hasApiKey();
       }
-      
+
       if (mounted) {
         setState(() {});
       }
@@ -176,7 +177,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         auth: authProvider.firebaseAuth,
         biometricService: biometricService,
       );
-      
+
       final apiKey = await apiKeyService.getApiKey();
 
       if (mounted) {
@@ -212,7 +213,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         auth: authProvider.firebaseAuth,
         biometricService: biometricService,
       );
-      
+
       await apiKeyService.storeApiKey(apiKey);
       await _checkApiKeyStatus();
     } catch (e) {
@@ -241,7 +242,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         auth: authProvider.firebaseAuth,
         biometricService: biometricService,
       );
-      
+
       await apiKeyService.updateApiKey(newApiKey);
       await _checkApiKeyStatus();
     } catch (e) {
@@ -270,10 +271,10 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         auth: authProvider.firebaseAuth,
         biometricService: biometricService,
       );
-      
+
       await apiKeyService.clearApiKey();
       await _checkApiKeyStatus();
-      
+
       if (mounted) {
         setState(() {
           _showDecryptedKey = false;
@@ -293,7 +294,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
   void _showApiKeyInputDialog({bool isUpdate = false}) {
     final apiKeyController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -332,7 +333,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear API Key'),
-        content: const Text('Are you sure you want to clear your API key? This action cannot be undone.'),
+        content: const Text(
+            'Are you sure you want to clear your API key? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -353,7 +355,6 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -414,6 +415,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     if (_error != null) {
       return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: Text(
@@ -450,6 +452,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     // No API key found
     if (!_hasBiometricKey && !_hasPasswordKey) {
       return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Expanded(
             child: Text(
@@ -480,10 +483,12 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     // If decrypted, show different status
     if (_showDecryptedKey && _decryptedApiKey != null) {
-      statusText = 'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
+      statusText =
+          'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
     }
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Text(
