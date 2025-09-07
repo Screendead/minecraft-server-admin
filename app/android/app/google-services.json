@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "526285433869",
+    "project_id": "minecraft-server-automation",
+    "storage_bucket": "minecraft-server-automation.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526285433869:android:69b9a5621335c3ce513944",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoOiE5InESALt-DA9n-KeodPBAttWND1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
