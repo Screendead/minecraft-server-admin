@@ -1,2 +1,2 @@
-Use a TDD - Red, Green, Refactor - approach.
+Ensure code you write has tests covering all branches.
 Create a branch for new functionality if you're currently on `master`.

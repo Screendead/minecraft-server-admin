@@ -34,7 +34,7 @@ dependencies:
   # iOS-specific dependencies
   cupertino_icons: ^1.0.8
   local_auth: ^2.1.7          # Face ID/Touch ID authentication
-  flutter_secure_storage: ^9.2.2  # iOS Keychain integration
+  flutter_secure_storage: ^9.0.0  # iOS Keychain integration
   
   # Firebase dependencies
   firebase_core: ^4.1.0

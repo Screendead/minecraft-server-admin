@@ -5,6 +5,14 @@ service cloud.firestore {
     // Allow users to read and write their own user document
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Additional validation for encrypted API key structure
+      allow create, update: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasAll(['email', 'encryptedApiKey', 'keyMetadata'])
+        && request.resource.data.encryptedApiKey is string
+        && request.resource.data.keyMetadata is map
+        && request.resource.data.keyMetadata.keys().hasAll(['algorithm', 'secureEnclaveBacked', 'faceIdRequired', 'touchIdRequired']);
     }
     
     // Deny all other access by default
