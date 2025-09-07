@@ -22,7 +22,7 @@
     "singleProjectMode": true
   },
   "hosting": {
-    "public": "build/web",
+    "public": "app/build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -41,7 +41,7 @@
         "default": {
           "projectId": "minecraft-server-automation",
           "appId": "1:526285433869:android:69b9a5621335c3ce513944",
-          "fileOutput": "android/app/google-services.json"
+          "fileOutput": "app/android/app/google-services.json"
         }
       },
       "ios": {
@@ -49,7 +49,7 @@
           "projectId": "minecraft-server-automation",
           "appId": "1:526285433869:ios:e9118f2900663962513944",
           "uploadDebugSymbols": false,
-          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+          "fileOutput": "app/ios/Runner/GoogleService-Info.plist"
         }
       },
       "macos": {
@@ -57,11 +57,11 @@
           "projectId": "minecraft-server-automation",
           "appId": "1:526285433869:ios:e9118f2900663962513944",
           "uploadDebugSymbols": false,
-          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+          "fileOutput": "app/macos/Runner/GoogleService-Info.plist"
         }
       },
       "dart": {
-        "lib/firebase_options.dart": {
+        "app/lib/firebase_options.dart": {
           "projectId": "minecraft-server-automation",
           "configurations": {
             "android": "1:526285433869:android:69b9a5621335c3ce513944",
