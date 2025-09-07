@@ -1,5 +1,3 @@
-node_modules
-
 # Firebase emulator data (contains sensitive test data)
 emulator-data/
 
