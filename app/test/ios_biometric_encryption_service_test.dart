@@ -83,7 +83,7 @@ void main() {
         verify(mockSecureStorage.write(
           key: anyNamed('key'),
           value: anyNamed('value'),
-        )).called(2); // Called twice: once for encrypted data, once for metadata
+        )).called(3); // Called three times: once for encryption key, once for encrypted data, once for metadata
       });
 
       test('should throw exception when biometric authentication fails', () async {
@@ -189,7 +189,7 @@ void main() {
         await service.clearEncryptedData();
 
         // Assert
-        verify(mockSecureStorage.delete(key: anyNamed('key'))).called(2); // Called twice: once for encrypted data, once for metadata
+        verify(mockSecureStorage.delete(key: anyNamed('key'))).called(3); // Called three times: once for encryption key, once for encrypted data, once for metadata
       });
     });
   });

@@ -96,8 +96,8 @@ class IOSBiometricEncryptionService {
         throw BiometricAuthenticationException('Biometric authentication failed');
       }
 
-      // Generate a new encryption key for this session
-      final key = _generateSecureKey();
+      // Get or generate a persistent encryption key
+      final key = await _getOrCreateEncryptionKey();
       
       // Encrypt the data using AES-256-GCM
       final encrypter = Encrypter(AES(key));
@@ -162,8 +162,8 @@ class IOSBiometricEncryptionService {
         throw BiometricAuthenticationException('Biometric authentication failed');
       }
 
-      // Generate the same key used for encryption
-      final key = _generateSecureKey();
+      // Get the same key used for encryption
+      final key = await _getOrCreateEncryptionKey();
       
       // Decode and decrypt the data
       final combined = base64.decode(encryptedData);
@@ -203,6 +203,36 @@ class IOSBiometricEncryptionService {
   Future<void> clearEncryptedData() async {
     await _secureStorage.delete(key: _encryptedDataKey);
     await _secureStorage.delete(key: _keyMetadataKey);
+    await _secureStorage.delete(key: 'ios_encryption_key');
+  }
+
+  /// Gets or creates a persistent encryption key
+  /// The key is stored securely and reused for encryption/decryption
+  Future<Key> _getOrCreateEncryptionKey() async {
+    const keyStorageKey = 'ios_encryption_key';
+    
+    try {
+      // Try to get existing key
+      final existingKey = await _secureStorage.read(key: keyStorageKey);
+      if (existingKey != null) {
+        final keyBytes = base64.decode(existingKey);
+        return Key(keyBytes);
+      }
+    } catch (e) {
+      // If there's an error reading the key, generate a new one
+    }
+    
+    // Generate a new key if none exists
+    final key = _generateSecureKey();
+    final keyBytes = base64.encode(key.bytes);
+    
+    // Store the key securely
+    await _secureStorage.write(
+      key: keyStorageKey,
+      value: keyBytes,
+    );
+    
+    return key;
   }
 
   /// Generates a secure encryption key
