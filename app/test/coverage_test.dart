@@ -8,8 +8,8 @@ void main() {
       // Build our app and trigger a frame.
       await tester.pumpWidget(const app.MyApp());
 
-      // Verify that the app title is displayed
-      expect(find.text('Minecraft Server Admin'), findsOneWidget);
+      // Verify that the app title is displayed (in the main text, not the app bar)
+      expect(find.text('Minecraft Server Admin'), findsWidgets);
       
       // Verify that the gaming icon is displayed
       expect(find.byIcon(Icons.sports_esports), findsOneWidget);
