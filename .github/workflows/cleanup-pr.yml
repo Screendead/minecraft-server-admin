@@ -1,0 +1,46 @@
+name: Cleanup PR Resources
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+      
+    - name: Cleanup PR Firebase hosting channel
+      run: |
+        # Delete the PR hosting channel
+        CHANNEL_NAME="pr-${{ github.event.pull_request.number }}"
+        firebase hosting:channel:delete $CHANNEL_NAME --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} || echo "Channel $CHANNEL_NAME not found or already deleted"
+        
+        echo "Cleanup completed for PR #${{ github.event.pull_request.number }}"
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Comment PR with cleanup status
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `## 🧹 Cleanup completed
+            
+            The Firebase hosting channel for this PR has been cleaned up.
+            
+            - Channel: \`pr-${{ github.event.pull_request.number }}\`
+            
+            ---
+            *This PR has been closed and resources cleaned up.*`
+          });

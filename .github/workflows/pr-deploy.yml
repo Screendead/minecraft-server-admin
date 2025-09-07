@@ -1,0 +1,167 @@
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-and-deploy-preview:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      pull-requests: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.27.0'
+        channel: 'stable'
+        cache: true
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Cache Firebase CLI
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-firebase-cli-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-firebase-cli-
+        
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+      
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          app/.dart_tool
+        key: ${{ runner.os }}-flutter-${{ hashFiles('app/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+        
+    - name: Install Flutter dependencies
+      run: |
+        cd app
+        flutter pub get
+        
+    - name: Run Flutter tests with coverage
+      run: |
+        cd app
+        flutter test --coverage
+        
+    - name: Setup LCOV
+      uses: hrishikesh-kadam/setup-lcov@v1
+      
+    - name: Generate coverage report
+      uses: zgosalvez/github-actions-report-lcov@v4
+      with:
+        coverage-files: app/coverage/lcov.info
+        artifact-name: code-coverage-report
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: app
+        update-comment: true
+        
+    - name: Cache Flutter build
+      uses: actions/cache@v4
+      with:
+        path: app/build
+        key: ${{ runner.os }}-flutter-build-${{ hashFiles('app/pubspec.lock', 'app/lib/**/*.dart') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-build-
+        
+    - name: Build Flutter web app
+      run: |
+        cd app
+        flutter build web --release
+        
+    - name: Deploy PR preview to Firebase Hosting channel
+      run: |
+        cd app
+        # Deploy to a Firebase hosting channel for this PR
+        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
+        
+        # Get the actual channel URL
+        CHANNEL_URL=$(firebase hosting:channel:open pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
+        
+        # Output the preview URL
+        echo "PR_PREVIEW_URL=$CHANNEL_URL" >> $GITHUB_ENV
+        echo "PR_PREVIEW_URL=$CHANNEL_URL" >> $GITHUB_OUTPUT
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Download coverage report artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: code-coverage-report
+        path: app/build/web/coverage/
+        
+    - name: Deploy coverage report to subdirectory
+      run: |
+        cd app
+        # Deploy to the same channel with coverage in subdirectory
+        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
+        
+        # Get the actual channel URL
+        CHANNEL_URL=$(firebase hosting:channel:open pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
+        
+        # Output the coverage URL
+        echo "COVERAGE_URL=$CHANNEL_URL/coverage/" >> $GITHUB_ENV
+        echo "COVERAGE_URL=$CHANNEL_URL/coverage/" >> $GITHUB_OUTPUT
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Comment PR with preview links
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('🚀 Preview deployed')
+          );
+          
+          const previewUrl = process.env.PR_PREVIEW_URL;
+          const coverageUrl = process.env.COVERAGE_URL;
+          
+          const commentBody = `## 🚀 Preview deployed!
+          
+          **App Preview:** ${previewUrl}
+          **Coverage Report:** ${coverageUrl}
+          
+          This preview will be automatically updated when you push new commits to this PR.
+          
+          ---
+          *This comment will be updated automatically.*`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: commentBody
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+          }
