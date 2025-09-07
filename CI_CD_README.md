@@ -74,10 +74,8 @@ cd app
 
 ## 📁 Workflow Files
 
-- `.github/workflows/deploy-master.yml` - Master branch deployment
-- `.github/workflows/pr-deploy.yml` - PR preview deployment
-- `.github/workflows/cleanup-pr.yml` - PR cleanup
-- `.github/workflows/test.yml` - Test runner
+- `.github/workflows/deploy-master.yml` - Master branch deployment (production)
+- `.github/workflows/pr-deploy.yml` - PR preview deployment and cleanup
 
 ## 🔍 Monitoring
 

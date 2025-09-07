@@ -3,7 +3,6 @@ name: Deploy to Firebase Hosting (Master)
 on:
   push:
     branches: [master]
-  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -16,7 +15,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.27.0'
         channel: 'stable'
         
     - name: Setup Node.js
