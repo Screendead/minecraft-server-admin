@@ -93,46 +93,19 @@ jobs:
         working-directory: app
         update-comment: true
         
-    - name: Build Flutter web app
+    - name: Build Flutter iOS app
       run: |
         cd app
-        flutter build web --release
+        flutter build ios --no-codesign
         
-    - name: Deploy PR preview to Firebase Hosting channel
-      run: |
-        # Deploy to a Firebase hosting channel for this PR (from root directory)
-        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
-        
-        # Get the actual channel URL
-        CHANNEL_URL=$(firebase hosting:channel:open pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
-        
-        # Output the preview URL
-        echo "PR_PREVIEW_URL=$CHANNEL_URL" >> $GITHUB_ENV
-        echo "PR_PREVIEW_URL=$CHANNEL_URL" >> $GITHUB_OUTPUT
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        
-    - name: Download coverage report artifact
-      uses: actions/download-artifact@v4
+    - name: Upload iOS build artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: code-coverage-report
-        path: app/build/web/coverage/
+        name: ios-build-pr-${{ github.event.pull_request.number }}
+        path: app/build/ios/
+        retention-days: 7
         
-    - name: Deploy coverage report to subdirectory
-      run: |
-        # Deploy to the same channel with coverage in subdirectory (from root directory)
-        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
-        
-        # Get the actual channel URL
-        CHANNEL_URL=$(firebase hosting:channel:open pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
-        
-        # Output the coverage URL
-        echo "COVERAGE_URL=$CHANNEL_URL/coverage/" >> $GITHUB_ENV
-        echo "COVERAGE_URL=$CHANNEL_URL/coverage/" >> $GITHUB_OUTPUT
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        
-    - name: Comment PR with preview links
+    - name: Comment PR with build status
       uses: actions/github-script@v7
       with:
         script: |
@@ -144,18 +117,17 @@ jobs:
           
           const botComment = comments.find(comment => 
             comment.user.type === 'Bot' && 
-            comment.body.includes('🚀 Preview deployed')
+            comment.body.includes('🚀 iOS Build completed')
           );
           
-          const previewUrl = process.env.PR_PREVIEW_URL;
-          const coverageUrl = process.env.COVERAGE_URL;
+          const commentBody = `## 🚀 iOS Build completed!
           
-          const commentBody = `## 🚀 Preview deployed!
+          **Build Status:** ✅ Success
+          **Platform:** iOS only
+          **Bundle ID:** com.screendead.servers
+          **Coverage Report:** Available in artifacts
           
-          **App Preview:** ${previewUrl}
-          **Coverage Report:** ${coverageUrl}
-          
-          This preview will be automatically updated when you push new commits to this PR.
+          The iOS build artifact has been uploaded and will be available for 7 days.
           
           ---
           *This comment will be updated automatically.*`;

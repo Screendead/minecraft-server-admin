@@ -78,17 +78,17 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: true
         
-    - name: Build Flutter web app
+    - name: Build Flutter iOS app
       run: |
         cd app
-        flutter build web --release
+        flutter build ios --no-codesign
         
-    - name: Deploy to Firebase Hosting
-      run: |
-        cd app
-        firebase deploy --only hosting --project minecraft-server-automation
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+    - name: Upload iOS build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-build-master
+        path: app/build/ios/
+        retention-days: 30
         
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
