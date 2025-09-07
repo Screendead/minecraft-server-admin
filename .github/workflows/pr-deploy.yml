@@ -107,7 +107,12 @@ jobs:
         cp -r app/coverage/* coverage-deploy/
         
         # Initialize Firebase project (if not already done)
-        firebase use --add minecraft-server-automation || true
+        if ! firebase use | grep -q "minecraft-server-automation"; then
+          echo "Firebase project 'minecraft-server-automation' not configured. Attempting to add..."
+          firebase use --add minecraft-server-automation
+        else
+          echo "Firebase project 'minecraft-server-automation' already configured."
+        fi
         
         # Deploy coverage report to a temporary Firebase hosting channel
         # Capture the output to get the actual URL
@@ -117,12 +122,23 @@ jobs:
           --expires 7d \
           --json)
         
-        # Extract the URL from the JSON output
-        COVERAGE_URL=$(echo "$DEPLOY_OUTPUT" | jq -r '.result.url // empty')
+        # Validate JSON and extract the URL from the JSON output
+        if echo "$DEPLOY_OUTPUT" | jq empty > /dev/null 2>&1; then
+          COVERAGE_URL=$(echo "$DEPLOY_OUTPUT" | jq -r '.result.url // empty')
+          if [ -n "$COVERAGE_URL" ] && [ "$COVERAGE_URL" != "null" ]; then
+            echo "Coverage report deployed to: $COVERAGE_URL"
+          else
+            echo "Warning: No URL found in Firebase deployment output"
+            COVERAGE_URL=""
+          fi
+        else
+          echo "Error: DEPLOY_OUTPUT is not valid JSON. Firebase deploy may have failed."
+          echo "Raw output: $DEPLOY_OUTPUT"
+          COVERAGE_URL=""
+        fi
         
         # Set output for use in subsequent steps
         echo "coverage-url=$COVERAGE_URL" >> $GITHUB_OUTPUT
-        echo "Coverage report deployed to: $COVERAGE_URL"
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         
@@ -150,14 +166,21 @@ jobs:
             comment.body.includes('🚀 iOS Build completed')
           );
           
+          const coverageUrl = '${{ steps.deploy-coverage.outputs.coverage-url }}';
+          const coverageSection = coverageUrl && coverageUrl !== '' 
+            ? `**Coverage Report:** 
+          - 📊 [View Coverage Report](${coverageUrl})
+          - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            : `**Coverage Report:** 
+          - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - ⚠️ Firebase deployment failed - coverage report available as artifact only`;
+          
           const commentBody = `## 🚀 iOS Configuration verified!
           
           **Build Status:** ✅ Configuration verified
           **Platform:** iOS only
           **Bundle ID:** com.screendead.servers
-          **Coverage Report:** 
-          - 📊 [View Coverage Report](${{ steps.deploy-coverage.outputs.coverage-url }})
-          - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          ${coverageSection}
           
           Note: iOS builds require macOS runners. This PR verifies the iOS configuration is correct.
           
