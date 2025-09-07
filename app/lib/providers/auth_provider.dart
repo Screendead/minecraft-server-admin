@@ -30,6 +30,12 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isSignedIn => _user != null;
   String? get errorMessage => _errorMessage;
+  
+  // Expose services for other providers
+  FirebaseAuth get firebaseAuth => _firebaseAuth;
+  FirebaseFirestore get firestore => _firestore;
+  SharedPreferences get sharedPreferences => _sharedPreferences;
+  EncryptionService get encryptionService => _encryptionService;
 
   void _init() {
     // Listen to Firebase Auth state changes

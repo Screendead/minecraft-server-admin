@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 import '../providers/auth_provider.dart';
 import '../widgets/debug_api_key_banner.dart';
+import '../widgets/ios_api_key_management_widget.dart';
+import '../services/ios_biometric_encryption_service.dart';
+import '../services/ios_secure_api_key_service.dart';
+import '../services/api_key_migration_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -13,6 +18,12 @@ class HomePage extends StatelessWidget {
         title: const Text('Minecraft Server Admin'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          // Show API Key Management button on iOS
+          if (Platform.isIOS)
+            IconButton(
+              icon: const Icon(Icons.security),
+              onPressed: () => _showApiKeyManagement(context),
+            ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -55,6 +66,34 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showApiKeyManagement(BuildContext context) {
+    // Get services from the main app
+    final authProvider = context.read<AuthProvider>();
+    
+    // Create service instances (these should be the same instances from main.dart)
+    final biometricService = IOSBiometricEncryptionService();
+    final apiKeyService = IOSSecureApiKeyService(
+      firestore: authProvider.firestore,
+      auth: authProvider.firebaseAuth,
+      biometricService: biometricService,
+    );
+    final migrationService = ApiKeyMigrationService(
+      sharedPreferences: authProvider.sharedPreferences,
+      encryptionService: authProvider.encryptionService,
+      iosSecureApiKeyService: apiKeyService,
+      biometricService: biometricService,
+    );
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => IOSApiKeyManagementWidget(
+          apiKeyService: apiKeyService,
+          migrationService: migrationService,
+        ),
       ),
     );
   }
