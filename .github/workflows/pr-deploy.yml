@@ -100,8 +100,7 @@ jobs:
         
     - name: Deploy PR preview to Firebase Hosting channel
       run: |
-        cd app
-        # Deploy to a Firebase hosting channel for this PR
+        # Deploy to a Firebase hosting channel for this PR (from root directory)
         firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
         
         # Get the actual channel URL
@@ -121,8 +120,7 @@ jobs:
         
     - name: Deploy coverage report to subdirectory
       run: |
-        cd app
-        # Deploy to the same channel with coverage in subdirectory
+        # Deploy to the same channel with coverage in subdirectory (from root directory)
         firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
         
         # Get the actual channel URL
