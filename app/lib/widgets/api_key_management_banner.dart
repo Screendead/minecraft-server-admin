@@ -366,26 +366,29 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
           bottom: BorderSide(color: Colors.blue.shade200),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.security,
-            size: 16,
-            color: Colors.blue.shade700,
+          Row(
+            children: [
+              Icon(
+                Icons.security,
+                size: 16,
+                color: Colors.blue.shade700,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'API Key Management',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'API Key Management',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildContent(),
-          ),
+          const SizedBox(height: 4),
+          _buildContent(),
         ],
       ),
     );
@@ -393,15 +396,15 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Row(
+      return Row(
         children: [
-          SizedBox(
+          const SizedBox(
             width: 16,
             height: 16,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
-          SizedBox(width: 8),
-          Text(
+          const SizedBox(width: 8),
+          const Text(
             'Loading...',
             style: TextStyle(fontSize: 12),
           ),
