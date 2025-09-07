@@ -6,19 +6,20 @@ import '../providers/auth_provider.dart';
 import '../services/ios_biometric_encryption_service.dart';
 import '../services/ios_secure_api_key_service.dart';
 
-class DebugApiKeyBanner extends StatefulWidget {
-  const DebugApiKeyBanner({super.key});
+class ApiKeyManagementBanner extends StatefulWidget {
+  const ApiKeyManagementBanner({super.key});
 
   @override
-  State<DebugApiKeyBanner> createState() => _DebugApiKeyBannerState();
+  State<ApiKeyManagementBanner> createState() => _ApiKeyManagementBannerState();
 }
 
-class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
+class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
   String? _decryptedApiKey;
   bool _isLoading = false;
   String? _error;
   bool _hasBiometricKey = false;
   bool _hasPasswordKey = false;
+  bool _showDecryptedKey = false;
 
   @override
   void initState() {
@@ -145,6 +146,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
       if (mounted) {
         setState(() {
           _decryptedApiKey = apiKey;
+          _showDecryptedKey = true;
           _isLoading = false;
         });
       }
@@ -180,6 +182,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
       if (mounted) {
         setState(() {
           _decryptedApiKey = apiKey;
+          _showDecryptedKey = true;
           _isLoading = false;
         });
       }
@@ -193,32 +196,199 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
     }
   }
 
+  Future<void> _storeApiKey(String apiKey) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final biometricService = IOSBiometricEncryptionService();
+      final apiKeyService = IOSSecureApiKeyService(
+        firestore: authProvider.firestore,
+        auth: authProvider.firebaseAuth,
+        biometricService: biometricService,
+      );
+      
+      await apiKeyService.storeApiKey(apiKey);
+      await _checkApiKeyStatus();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error storing API key: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _updateApiKey(String newApiKey) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final biometricService = IOSBiometricEncryptionService();
+      final apiKeyService = IOSSecureApiKeyService(
+        firestore: authProvider.firestore,
+        auth: authProvider.firebaseAuth,
+        biometricService: biometricService,
+      );
+      
+      await apiKeyService.updateApiKey(newApiKey);
+      await _checkApiKeyStatus();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error updating API key: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _clearApiKey() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final biometricService = IOSBiometricEncryptionService();
+      final apiKeyService = IOSSecureApiKeyService(
+        firestore: authProvider.firestore,
+        auth: authProvider.firebaseAuth,
+        biometricService: biometricService,
+      );
+      
+      await apiKeyService.clearApiKey();
+      await _checkApiKeyStatus();
+      
+      if (mounted) {
+        setState(() {
+          _showDecryptedKey = false;
+          _decryptedApiKey = null;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error clearing API key: $e';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showApiKeyInputDialog({bool isUpdate = false}) {
+    final apiKeyController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isUpdate ? 'Update API Key' : 'Add API Key'),
+        content: TextField(
+          controller: apiKeyController,
+          decoration: const InputDecoration(
+            labelText: 'DigitalOcean API Key',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (isUpdate) {
+                _updateApiKey(apiKeyController.text);
+              } else {
+                _storeApiKey(apiKeyController.text);
+              }
+            },
+            child: Text(isUpdate ? 'Update' : 'Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear API Key'),
+        content: const Text('Are you sure you want to clear your API key? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _clearApiKey();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    if (!kDebugMode) {
-      return const SizedBox.shrink();
-    }
-
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: Colors.blue.shade50,
         border: Border(
-          bottom: BorderSide(color: Colors.orange.shade200),
+          bottom: BorderSide(color: Colors.blue.shade200),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.bug_report,
-            size: 16,
-            color: Colors.orange.shade700,
+          Row(
+            children: [
+              Icon(
+                Icons.security,
+                size: 16,
+                color: Colors.blue.shade700,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'API Key Management',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildContent(),
-          ),
+          const SizedBox(height: 8),
+          _buildContent(),
         ],
       ),
     );
@@ -226,90 +396,198 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Text(
-        'Decrypting API key...',
-        style: TextStyle(fontSize: 12),
+      return const Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Loading...',
+            style: TextStyle(fontSize: 12),
+          ),
+        ],
       );
     }
 
     if (_error != null) {
-      return Row(
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              'Error: $_error',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.red.shade700,
-              ),
+          Text(
+            'Error: $_error',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.red.shade700,
             ),
           ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: _showDecryptDialog,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Retry', style: TextStyle(fontSize: 11)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              TextButton(
+                onPressed: _showDecryptDialog,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Retry', style: TextStyle(fontSize: 11)),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: _checkApiKeyStatus,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Refresh', style: TextStyle(fontSize: 11)),
+              ),
+            ],
           ),
         ],
       );
     }
 
-    if (_decryptedApiKey == null) {
-      String statusText = 'No API key found';
-      if (_hasBiometricKey) {
-        statusText = 'API key secured with Face ID/Touch ID';
-      } else if (_hasPasswordKey) {
-        statusText = 'API key encrypted with password';
-      }
-
-      return Row(
+    // No API key found
+    if (!_hasBiometricKey && !_hasPasswordKey) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              statusText,
-              style: const TextStyle(fontSize: 12),
-            ),
+          const Text(
+            'No API key found. Add one to get started.',
+            style: TextStyle(fontSize: 12),
           ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: _showDecryptDialog,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              _hasBiometricKey ? 'Decrypt (Face ID)' : 'Decrypt',
-              style: const TextStyle(fontSize: 11),
-            ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: () => _showApiKeyInputDialog(),
+                icon: const Icon(Icons.add, size: 14),
+                label: const Text('Add API Key', style: TextStyle(fontSize: 11)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
           ),
         ],
       );
+    }
+
+    // API key exists - show management options
+    String statusText = 'API key available';
+    if (_hasBiometricKey) {
+      statusText = 'API key secured with Face ID/Touch ID';
+    } else if (_hasPasswordKey) {
+      statusText = 'API key encrypted with password';
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Debug API Key:',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
+        Text(
+          statusText,
+          style: const TextStyle(fontSize: 12),
         ),
-        const SizedBox(height: 2),
-        SelectableText(
-          _decryptedApiKey!,
-          style: TextStyle(
-            fontSize: 11,
-            fontFamily: 'monospace',
-            color: Colors.orange.shade800,
+        const SizedBox(height: 8),
+        
+        // Show decrypted key if available
+        if (_showDecryptedKey && _decryptedApiKey != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'API Key:',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(
+                  _decryptedApiKey!,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: 8),
+        ],
+        
+        // Management buttons
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            if (!_showDecryptedKey)
+              ElevatedButton.icon(
+                onPressed: _showDecryptDialog,
+                icon: Icon(
+                  _hasBiometricKey ? Icons.fingerprint : Icons.lock,
+                  size: 14,
+                ),
+                label: Text(
+                  _hasBiometricKey ? 'Decrypt (Face ID)' : 'Decrypt',
+                  style: const TextStyle(fontSize: 11),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            if (_showDecryptedKey) ...[
+              ElevatedButton.icon(
+                onPressed: () => _showApiKeyInputDialog(isUpdate: true),
+                icon: const Icon(Icons.edit, size: 14),
+                label: const Text('Update', style: TextStyle(fontSize: 11)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _showClearConfirmationDialog,
+                icon: const Icon(Icons.delete, size: 14),
+                label: const Text('Clear', style: TextStyle(fontSize: 11)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+            if (!_hasBiometricKey && _hasPasswordKey)
+              ElevatedButton.icon(
+                onPressed: () => _showApiKeyInputDialog(),
+                icon: const Icon(Icons.add, size: 14),
+                label: const Text('Add Biometric', style: TextStyle(fontSize: 11)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+          ],
         ),
       ],
     );
