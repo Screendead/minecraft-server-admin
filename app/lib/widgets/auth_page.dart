@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -57,6 +58,31 @@ class _AuthPageState extends State<AuthPage> {
         _passwordController.text,
       );
     }
+
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _debugLogin() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _isSignUp = false; // Ensure we're in login mode
+    });
+
+    // Fill in debug credentials
+    _emailController.text = 'test@example.com';
+    _passwordController.text = 'password123';
+
+    final authProvider = context.read<AuthProvider>();
+    authProvider.clearError();
+
+    await authProvider.signIn(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
     if (!mounted) return;
     setState(() {
@@ -270,6 +296,39 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ),
                         ),
+                        
+                        // Debug Login Button (only in debug mode)
+                        if (kDebugMode) ...[
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: OutlinedButton.icon(
+                              onPressed: _isLoading ? null : _debugLogin,
+                              icon: const Icon(Icons.bug_report, size: 16),
+                              label: const Text('Debug Login'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.orange,
+                                side: const BorderSide(color: Colors.orange),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Debug: test@example.com / password123',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontStyle: FontStyle.italic,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ],
                     ),
                   ),
