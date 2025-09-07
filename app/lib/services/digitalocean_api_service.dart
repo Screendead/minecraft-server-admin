@@ -52,4 +52,24 @@ class DigitalOceanApiService {
     final data = json.decode(response.body);
     return data['account'] as Map<String, dynamic>;
   }
+
+  /// Gets all droplets for the authenticated user
+  /// Throws an exception if the API key is invalid or request fails
+  static Future<List<Map<String, dynamic>>> getDroplets(String apiKey) async {
+    final response = await _httpClient.get(
+      Uri.parse('$_baseUrl/droplets'),
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch droplets: ${response.statusCode}');
+    }
+
+    final data = json.decode(response.body);
+    final droplets = data['droplets'] as List<dynamic>;
+    return droplets.cast<Map<String, dynamic>>();
+  }
 }
