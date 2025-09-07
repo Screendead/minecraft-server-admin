@@ -135,15 +135,6 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
           Expanded(
             child: _buildContent(),
           ),
-          IconButton(
-            icon: Icon(
-              Icons.refresh,
-              size: 16,
-              color: Colors.orange.shade700,
-            ),
-            onPressed: _showPasswordDialog,
-            tooltip: 'Refresh API Key',
-          ),
         ],
       ),
     );
