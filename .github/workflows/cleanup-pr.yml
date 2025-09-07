@@ -1,0 +1,51 @@
+name: Cleanup PR Resources
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+      
+    - name: Cleanup PR Firebase projects
+      run: |
+        # Delete the PR preview project
+        PR_SITE_NAME="minecraft-server-admin-pr-${{ github.event.pull_request.number }}"
+        firebase projects:delete $PR_SITE_NAME --force --token ${{ secrets.FIREBASE_TOKEN }} || echo "PR project $PR_SITE_NAME not found or already deleted"
+        
+        # Delete the coverage project
+        COVERAGE_SITE_NAME="minecraft-server-admin-coverage-pr-${{ github.event.pull_request.number }}"
+        firebase projects:delete $COVERAGE_SITE_NAME --force --token ${{ secrets.FIREBASE_TOKEN }} || echo "Coverage project $COVERAGE_SITE_NAME not found or already deleted"
+        
+        echo "Cleanup completed for PR #${{ github.event.pull_request.number }}"
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        
+    - name: Comment PR with cleanup status
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `## 🧹 Cleanup completed
+            
+            The temporary Firebase projects for this PR have been cleaned up.
+            
+            - PR Preview project: \`minecraft-server-admin-pr-${{ github.event.pull_request.number }}\`
+            - Coverage project: \`minecraft-server-admin-coverage-pr-${{ github.event.pull_request.number }}\`
+            
+            ---
+            *This PR has been closed and resources cleaned up.*`
+          });

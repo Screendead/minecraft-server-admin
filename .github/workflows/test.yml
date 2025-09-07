@@ -1,0 +1,75 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [master, feature/build-automation]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        
+    - name: Install Flutter dependencies
+      run: |
+        cd app
+        flutter pub get
+        
+    - name: Run Flutter tests
+      run: |
+        cd app
+        flutter test --coverage
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: app/coverage/
+        
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            // Read coverage summary if available
+            const coveragePath = path.join('app', 'coverage', 'lcov.info');
+            if (fs.existsSync(coveragePath)) {
+              const coverage = fs.readFileSync(coveragePath, 'utf8');
+              const lines = coverage.split('\n');
+              const summaryLine = lines.find(line => line.startsWith('SF:'));
+              
+              if (summaryLine) {
+                const commentBody = `## 📊 Test Coverage
+                
+                Tests have been run and coverage data has been generated.
+                
+                Coverage report will be available in the PR preview deployment.
+                
+                ---
+                *Coverage data: \`${coveragePath}\`*`;
+                
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: commentBody
+                });
+              }
+            }
+          } catch (error) {
+            console.log('Could not read coverage file:', error.message);
+          }
