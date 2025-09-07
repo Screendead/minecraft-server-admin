@@ -89,12 +89,12 @@ jobs:
     - name: Deploy PR preview to Firebase Hosting channel
       run: |
         cd app
-        # Deploy to a Firebase hosting channel for this PR
-        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
+        # Deploy to a Firebase hosting channel for this PR and capture the URL
+        CHANNEL_URL=$(firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
         
         # Output the preview URL
-        echo "PR_PREVIEW_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app" >> $GITHUB_ENV
-        echo "PR_PREVIEW_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app" >> $GITHUB_OUTPUT
+        echo "PR_PREVIEW_URL=$CHANNEL_URL" >> $GITHUB_ENV
+        echo "PR_PREVIEW_URL=$CHANNEL_URL" >> $GITHUB_OUTPUT
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         
@@ -107,12 +107,12 @@ jobs:
     - name: Deploy coverage report to subdirectory
       run: |
         cd app
-        # Deploy to the same channel with coverage in subdirectory
-        firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
+        # Deploy to the same channel with coverage in subdirectory and capture the URL
+        CHANNEL_URL=$(firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }} | grep -o 'https://[^[:space:]]*\.web\.app' | head -1)
         
         # Output the coverage URL
-        echo "COVERAGE_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app/coverage/" >> $GITHUB_ENV
-        echo "COVERAGE_URL=https://minecraft-server-automation--pr-${{ github.event.pull_request.number }}.web.app/coverage/" >> $GITHUB_OUTPUT
+        echo "COVERAGE_URL=$CHANNEL_URL/coverage/" >> $GITHUB_ENV
+        echo "COVERAGE_URL=$CHANNEL_URL/coverage/" >> $GITHUB_OUTPUT
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         
