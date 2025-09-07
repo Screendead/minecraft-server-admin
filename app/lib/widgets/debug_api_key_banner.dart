@@ -19,9 +19,6 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
   @override
   void initState() {
     super.initState();
-    if (kDebugMode) {
-      _showPasswordDialog();
-    }
   }
 
   @override
@@ -86,7 +83,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
 
   Future<void> _loadApiKey(String password) async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -95,7 +92,7 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
     try {
       final authProvider = context.read<AuthProvider>();
       final apiKey = await authProvider.getDecryptedApiKey(password);
-      
+
       if (mounted) {
         setState(() {
           _decryptedApiKey = apiKey;
@@ -161,19 +158,51 @@ class _DebugApiKeyBannerState extends State<DebugApiKeyBanner> {
     }
 
     if (_error != null) {
-      return Text(
-        'Error: $_error',
-        style: TextStyle(
-          fontSize: 12,
-          color: Colors.red.shade700,
-        ),
+      return Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Error: $_error',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.red.shade700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: _showPasswordDialog,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Retry', style: TextStyle(fontSize: 11)),
+          ),
+        ],
       );
     }
 
     if (_decryptedApiKey == null) {
-      return const Text(
-        'Tap refresh to enter password and decrypt API key',
-        style: TextStyle(fontSize: 12),
+      return Row(
+        children: [
+          const Expanded(
+            child: Text(
+              'API key encrypted. Enter password to decrypt.',
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: _showPasswordDialog,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Decrypt', style: TextStyle(fontSize: 11)),
+          ),
+        ],
       );
     }
 
