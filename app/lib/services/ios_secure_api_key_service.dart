@@ -152,8 +152,11 @@ class IOSSecureApiKeyService {
     }
 
     try {
-      // Clear from Firestore
-      await _firestore.collection('users').doc(user.uid).delete();
+      // Clear only the API key fields from Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'encryptedApiKey': FieldValue.delete(),
+        'keyMetadata': FieldValue.delete(),
+      });
       
       // Clear from local secure storage
       await _biometricService.clearEncryptedData();

@@ -50,12 +50,15 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       }
 
       if (mounted) {
-        setState(() {});
+        setState(() {
+          _isLoading = false;
+        });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _error = 'Error checking API key status: $e';
+          _isLoading = false;
         });
       }
     }
@@ -368,6 +371,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
@@ -438,7 +442,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     // If decrypted, show different status
     if (_showDecryptedKey && _decryptedApiKey != null) {
-      statusText = 'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
+      statusText =
+          'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
     }
 
     return Text(
@@ -571,5 +576,4 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       ],
     );
   }
-
 }
