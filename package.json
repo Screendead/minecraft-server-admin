@@ -1,0 +1,12 @@
+{
+  "name": "minecraft-server-admin",
+  "version": "1.0.0",
+  "description": "Minecraft Server Admin CI/CD dependencies",
+  "private": true,
+  "devDependencies": {
+    "firebase-tools": "^13.0.0"
+  },
+  "scripts": {
+    "install-firebase": "npm install -g firebase-tools@latest --no-audit --no-fund"
+  }
+}

@@ -24,16 +24,27 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Cache Firebase CLI
+    - name: Cache Node modules
       uses: actions/cache@v4
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-firebase-cli-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-firebase-cli-
+          ${{ runner.os }}-node-
+        
+    - name: Install dependencies
+      run: npm ci --no-audit --no-fund
         
     - name: Install Firebase CLI
-      run: npm install -g firebase-tools
+      run: |
+        # Check if firebase-tools is already installed globally
+        if ! command -v firebase &> /dev/null; then
+          echo "Installing Firebase CLI..."
+          npm run install-firebase
+        else
+          echo "Firebase CLI already installed, checking version..."
+          firebase --version
+        fi
       
     - name: Cache Flutter dependencies
       uses: actions/cache@v4
