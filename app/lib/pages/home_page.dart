@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/droplets_provider.dart';
 import '../widgets/api_key_management_banner.dart';
 import '../widgets/droplets_list.dart';
+import 'add_droplet_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -53,6 +54,17 @@ class _HomePageState extends State<HomePage> {
             child: DropletsList(),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const AddDropletPage(),
+            ),
+          );
+        },
+        tooltip: 'Add New Droplet',
+        child: const Icon(Icons.add),
       ),
     );
   }
