@@ -120,13 +120,13 @@ jobs:
         }
         EOF
         
-        # Initialize Firebase project (if not already done)
-        if ! firebase use | grep -q "minecraft-server-automation"; then
-          echo "Firebase project 'minecraft-server-automation' not configured. Attempting to add..."
-          firebase use --add minecraft-server-automation
-        else
-          echo "Firebase project 'minecraft-server-automation' already configured."
-        fi
+        # Set Firebase project directly (avoid interactive prompts)
+        echo "Setting Firebase project to minecraft-server-automation..."
+        firebase use minecraft-server-automation || {
+          echo "Error: Could not set Firebase project. This may be due to authentication issues."
+          echo "Please ensure FIREBASE_TOKEN secret is valid and has proper permissions."
+          exit 1
+        }
         
         # Deploy coverage report to a temporary Firebase hosting channel
         # First, create the channel and capture the URL (capture both stdout and stderr)
