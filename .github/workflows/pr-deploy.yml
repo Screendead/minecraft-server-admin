@@ -45,16 +45,11 @@ jobs:
       run: |
         # Check if firebase-tools is already installed globally
         export PATH="$PATH:$(npm config get prefix)/bin"
-        echo "Checking for Firebase CLI..."
-        echo "PATH: $PATH"
-        echo "npm prefix: $(npm config get prefix)"
         
         # Check if firebase binary exists in common locations
         if [ -f "/usr/local/bin/firebase" ] || [ -f "$(npm config get prefix)/bin/firebase" ]; then
-          echo "Firebase CLI found in filesystem, checking version..."
           firebase --version
         elif command -v firebase &> /dev/null; then
-          echo "Firebase CLI found in PATH, checking version..."
           firebase --version
         else
           echo "Installing Firebase CLI..."
@@ -121,7 +116,6 @@ jobs:
         EOF
         
         # Set Firebase project directly (avoid interactive prompts)
-        echo "Setting Firebase project to minecraft-server-automation..."
         firebase use minecraft-server-automation || {
           echo "Error: Could not set Firebase project. This may be due to authentication issues."
           echo "Please ensure FIREBASE_TOKEN secret is valid and has proper permissions."
@@ -129,24 +123,17 @@ jobs:
         }
         
         # Deploy coverage report to a temporary Firebase hosting channel
-        echo "Creating Firebase hosting channel..."
-        
         # First, try to delete any existing channel (ignore errors if it doesn't exist)
-        echo "Cleaning up any existing channel..."
         firebase hosting:channel:delete pr-${{ github.event.number }}-coverage \
           --project minecraft-server-automation \
-          --force 2>/dev/null || echo "No existing channel to delete"
+          --force 2>/dev/null || true
         
         # Then create the channel and capture the URL (capture both stdout and stderr)
-        echo "Running: firebase hosting:channel:create pr-${{ github.event.number }}-coverage --project minecraft-server-automation --expires 7d"
         CHANNEL_OUTPUT=$(firebase hosting:channel:create pr-${{ github.event.number }}-coverage \
           --project minecraft-server-automation \
           --expires 7d 2>&1)
         
         CHANNEL_EXIT_CODE=$?
-        echo "Channel creation exit code: $CHANNEL_EXIT_CODE"
-        echo "Channel creation output:"
-        echo "$CHANNEL_OUTPUT"
         
         if [ $CHANNEL_EXIT_CODE -ne 0 ]; then
           echo "Error: Failed to create Firebase hosting channel"
@@ -159,18 +146,15 @@ jobs:
             echo "Coverage channel created at: $COVERAGE_URL"
           else
             echo "Warning: Could not extract URL from channel creation output"
-            echo "Channel output: $CHANNEL_OUTPUT"
             COVERAGE_URL=""
           fi
           
           # Then deploy to the channel using the temporary config
-          echo "Deploying coverage report to channel..."
           firebase hosting:channel:deploy pr-${{ github.event.number }}-coverage \
             --project minecraft-server-automation \
             --config coverage-firebase.json
           
           DEPLOY_EXIT_CODE=$?
-          echo "Deploy exit code: $DEPLOY_EXIT_CODE"
           
           if [ $DEPLOY_EXIT_CODE -eq 0 ]; then
             echo "Coverage report deployed successfully to: $COVERAGE_URL"
