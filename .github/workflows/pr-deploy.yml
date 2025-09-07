@@ -42,11 +42,45 @@ jobs:
     - name: Generate coverage report
       run: |
         cd app
-        # Install lcov for coverage report generation
-        sudo apt-get update
-        sudo apt-get install -y lcov
-        # Generate HTML coverage report from existing lcov.info
-        genhtml coverage/lcov.info --output-directory coverage/html
+        # Create a simple coverage report without heavy dependencies
+        mkdir -p coverage/html
+        
+        # Extract coverage percentage from lcov.info
+        if [ -f coverage/lcov.info ]; then
+          TOTAL_LINES=$(grep -c "^DA:" coverage/lcov.info || echo "0")
+          HIT_LINES=$(grep "^DA:" coverage/lcov.info | grep -c ",1$" || echo "0")
+          if [ "$TOTAL_LINES" -gt 0 ]; then
+            COVERAGE_PERCENT=$((HIT_LINES * 100 / TOTAL_LINES))
+          else
+            COVERAGE_PERCENT=0
+          fi
+        else
+          COVERAGE_PERCENT=0
+        fi
+        
+        # Create simple HTML report
+        cat > coverage/html/index.html << EOF
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Coverage Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .coverage { font-size: 2em; font-weight: bold; color: #4CAF50; }
+            .details { margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <h1>Test Coverage Report</h1>
+          <div class="coverage">${COVERAGE_PERCENT}%</div>
+          <div class="details">
+            <p>Lines covered: ${HIT_LINES} / ${TOTAL_LINES}</p>
+            <p>Raw coverage data: <a href="../lcov.info">lcov.info</a></p>
+            <p>Generated: $(date)</p>
+          </div>
+        </body>
+        </html>
+        EOF
         
     - name: Build Flutter web app
       run: |
