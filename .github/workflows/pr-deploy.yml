@@ -130,14 +130,23 @@ jobs:
         
         # Deploy coverage report to a temporary Firebase hosting channel
         echo "Creating Firebase hosting channel..."
-        # First, create the channel and capture the URL (capture both stdout and stderr)
+        
+        # First, try to delete any existing channel (ignore errors if it doesn't exist)
+        echo "Cleaning up any existing channel..."
+        firebase hosting:channel:delete pr-${{ github.event.number }}-coverage \
+          --project minecraft-server-automation \
+          --force 2>/dev/null || echo "No existing channel to delete"
+        
+        # Then create the channel and capture the URL (capture both stdout and stderr)
+        echo "Running: firebase hosting:channel:create pr-${{ github.event.number }}-coverage --project minecraft-server-automation --expires 7d"
         CHANNEL_OUTPUT=$(firebase hosting:channel:create pr-${{ github.event.number }}-coverage \
           --project minecraft-server-automation \
           --expires 7d 2>&1)
         
         CHANNEL_EXIT_CODE=$?
         echo "Channel creation exit code: $CHANNEL_EXIT_CODE"
-        echo "Channel creation output: $CHANNEL_OUTPUT"
+        echo "Channel creation output:"
+        echo "$CHANNEL_OUTPUT"
         
         if [ $CHANNEL_EXIT_CODE -ne 0 ]; then
           echo "Error: Failed to create Firebase hosting channel"
