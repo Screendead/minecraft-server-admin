@@ -39,48 +39,17 @@ jobs:
         cd app
         flutter test --coverage
         
+    - name: Setup LCOV
+      uses: hrishikesh-kadam/setup-lcov@v1
+      
     - name: Generate coverage report
-      run: |
-        cd app
-        # Create a simple coverage report without heavy dependencies
-        mkdir -p coverage/html
-        
-        # Extract coverage percentage from lcov.info
-        if [ -f coverage/lcov.info ]; then
-          TOTAL_LINES=$(grep -c "^DA:" coverage/lcov.info || echo "0")
-          HIT_LINES=$(grep "^DA:" coverage/lcov.info | grep -c ",1$" || echo "0")
-          if [ "$TOTAL_LINES" -gt 0 ]; then
-            COVERAGE_PERCENT=$((HIT_LINES * 100 / TOTAL_LINES))
-          else
-            COVERAGE_PERCENT=0
-          fi
-        else
-          COVERAGE_PERCENT=0
-        fi
-        
-        # Create simple HTML report
-        cat > coverage/html/index.html << EOF
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Coverage Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .coverage { font-size: 2em; font-weight: bold; color: #4CAF50; }
-            .details { margin-top: 20px; }
-          </style>
-        </head>
-        <body>
-          <h1>Test Coverage Report</h1>
-          <div class="coverage">${COVERAGE_PERCENT}%</div>
-          <div class="details">
-            <p>Lines covered: ${HIT_LINES} / ${TOTAL_LINES}</p>
-            <p>Raw coverage data: <a href="../lcov.info">lcov.info</a></p>
-            <p>Generated: $(date)</p>
-          </div>
-        </body>
-        </html>
-        EOF
+      uses: zgosalvez/github-actions-report-lcov@v4
+      with:
+        coverage-files: app/coverage/lcov.info
+        artifact-name: code-coverage-report
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: app
+        update-comment: true
         
     - name: Build Flutter web app
       run: |
@@ -99,13 +68,15 @@ jobs:
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         
+    - name: Download coverage report artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: code-coverage-report
+        path: app/build/web/coverage/
+        
     - name: Deploy coverage report to subdirectory
       run: |
         cd app
-        # Create a subdirectory for coverage in the build output
-        mkdir -p build/web/coverage
-        cp -r coverage/html/* build/web/coverage/
-        
         # Deploy to the same channel with coverage in subdirectory
         firebase hosting:channel:deploy pr-${{ github.event.pull_request.number }} --project minecraft-server-automation --token ${{ secrets.FIREBASE_TOKEN }}
         
