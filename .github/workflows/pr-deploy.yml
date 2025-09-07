@@ -83,14 +83,6 @@ jobs:
         working-directory: app
         update-comment: true
         
-    - name: Cache Flutter build
-      uses: actions/cache@v4
-      with:
-        path: app/build
-        key: ${{ runner.os }}-flutter-build-${{ hashFiles('app/pubspec.lock', 'app/lib/**/*.dart') }}
-        restore-keys: |
-          ${{ runner.os }}-flutter-build-
-        
     - name: Build Flutter web app
       run: |
         cd app
