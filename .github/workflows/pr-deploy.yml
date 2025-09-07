@@ -23,15 +23,35 @@ jobs:
       with:
         flutter-version: '3.27.0'
         channel: 'stable'
+        cache: true
         
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        cache: 'npm'
+        
+    - name: Cache Firebase CLI
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-firebase-cli-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-firebase-cli-
         
     - name: Install Firebase CLI
       run: npm install -g firebase-tools
       
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          app/.dart_tool
+        key: ${{ runner.os }}-flutter-${{ hashFiles('app/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+        
     - name: Install Flutter dependencies
       run: |
         cd app
@@ -53,6 +73,14 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         working-directory: app
         update-comment: true
+        
+    - name: Cache Flutter build
+      uses: actions/cache@v4
+      with:
+        path: app/build
+        key: ${{ runner.os }}-flutter-build-${{ hashFiles('app/pubspec.lock', 'app/lib/**/*.dart') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-build-
         
     - name: Build Flutter web app
       run: |
