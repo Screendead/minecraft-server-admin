@@ -93,7 +93,8 @@ jobs:
       run: |
         # Create a temporary directory for coverage deployment
         mkdir -p coverage-deploy
-        cp -r app/coverage/* coverage-deploy/
+        # Copy the HTML coverage report to the root of deployment directory
+        cp -r app/coverage/html/* coverage-deploy/
         
         # Create a temporary firebase.json for coverage deployment
         cat > coverage-firebase.json << EOF
@@ -104,12 +105,6 @@ jobs:
               "firebase.json",
               "**/.*",
               "**/node_modules/**"
-            ],
-            "rewrites": [
-              {
-                "source": "**",
-                "destination": "/index.html"
-              }
             ]
           }
         }
