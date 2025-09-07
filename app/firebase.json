@@ -1,0 +1,56 @@
+{
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "minecraft-server-automation",
+          "appId": "1:526285433869:android:69b9a5621335c3ce513944",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "minecraft-server-automation",
+          "appId": "1:526285433869:ios:e9118f2900663962513944",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "minecraft-server-automation",
+          "appId": "1:526285433869:ios:e9118f2900663962513944",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "minecraft-server-automation",
+          "configurations": {
+            "android": "1:526285433869:android:69b9a5621335c3ce513944",
+            "ios": "1:526285433869:ios:e9118f2900663962513944",
+            "macos": "1:526285433869:ios:e9118f2900663962513944",
+            "web": "1:526285433869:web:a34b3f0d55c55314513944",
+            "windows": "1:526285433869:web:46ccdb68f69189e2513944"
+          }
+        }
+      }
+    }
+  }
+}
