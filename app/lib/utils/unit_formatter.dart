@@ -21,9 +21,13 @@ class UnitFormatter {
   }
 
   /// Formats transfer/bandwidth from GB to appropriate unit (GB or TB)
-  static String formatTransfer(int transferInGB) {
-    if (transferInGB < 1024) {
-      return '${transferInGB}GB';
+  static String formatTransfer(double transferInGB) {
+    if (transferInGB < 1) {
+      // For values less than 1GB, show in MB
+      final transferMB = (transferInGB * 1024).round();
+      return '${transferMB}MB';
+    } else if (transferInGB < 1024) {
+      return '${transferInGB.toStringAsFixed(transferInGB % 1 == 0 ? 0 : 1)}GB';
     } else {
       final transferTB = transferInGB / 1024.0;
       return '${transferTB.toStringAsFixed(transferTB % 1 == 0 ? 0 : 1)}TB';

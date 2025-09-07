@@ -121,7 +121,7 @@ class DropletSize {
   final int memory;
   final int vcpus;
   final int disk;
-  final int transfer;
+  final double transfer;
   final double priceMonthly;
   final double priceHourly;
   final List<String> regions;
@@ -147,7 +147,7 @@ class DropletSize {
       memory: (json['memory'] ?? 0).toInt(),
       vcpus: (json['vcpus'] ?? 0).toInt(),
       disk: (json['disk'] ?? 0).toInt(),
-      transfer: (json['transfer'] ?? 0).toInt(),
+      transfer: (json['transfer'] ?? 0).toDouble(),
       priceMonthly: (json['price_monthly'] ?? 0).toDouble(),
       priceHourly: (json['price_hourly'] ?? 0).toDouble(),
       regions: (json['regions'] as List<dynamic>?)?.cast<String>() ?? [],
