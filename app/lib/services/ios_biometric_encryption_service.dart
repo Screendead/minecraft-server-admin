@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
 
 /// Custom exceptions for biometric encryption service
@@ -33,7 +32,6 @@ class NoEncryptedDataException implements Exception {
 
 /// iOS Biometric Encryption Service using Secure Enclave and Face ID/Touch ID
 class IOSBiometricEncryptionService {
-  static const String _secureEnclaveKeyAlias = 'ios_secure_enclave_key';
   static const String _encryptedDataKey = 'ios_encrypted_api_key';
   static const String _keyMetadataKey = 'ios_key_metadata';
   

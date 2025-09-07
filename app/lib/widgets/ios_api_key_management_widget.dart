@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:local_auth/local_auth.dart';
 import '../services/ios_secure_api_key_service.dart';
 import '../services/api_key_migration_service.dart';
 
@@ -150,19 +149,6 @@ class _IOSApiKeyManagementWidgetState extends State<IOSApiKeyManagementWidget> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('API Key Management'),
-      ),
-      child: SafeArea(
-        child: _isLoading
-            ? const Center(child: CupertinoActivityIndicator())
-            : _buildContent(),
-      ),
-    );
-  }
 
   Widget _buildContent() {
     if (!_isBiometricAvailable) {
@@ -346,7 +332,8 @@ class _IOSApiKeyManagementWidgetState extends State<IOSApiKeyManagementWidget> {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: CupertinoButton.destructive(
+                child: CupertinoButton(
+                  color: CupertinoColors.systemRed,
                   onPressed: () => _showClearConfirmationDialog(),
                   child: const Text('Clear'),
                 ),
