@@ -355,30 +355,36 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.security,
-                    size: 16,
-                    color: Colors.blue.shade700,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'API Key Management',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.security,
+                      size: 16,
+                      color: Colors.blue.shade700,
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              _buildSubtitleContent(),
-            ],
+                    const SizedBox(width: 8),
+                    const Flexible(
+                      child: Text(
+                        'API Key Management',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                _buildSubtitleContent(),
+              ],
+            ),
           ),
           const SizedBox(width: 16),
           _buildButtons(),
@@ -392,6 +398,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       return const Text(
         'Loading...',
         style: TextStyle(fontSize: 12),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     }
 
@@ -402,6 +410,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
           fontSize: 12,
           color: Colors.red.shade700,
         ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
       );
     }
 
@@ -410,6 +420,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       return const Text(
         'No API key found. Add one to get started.',
         style: TextStyle(fontSize: 12),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       );
     }
 
@@ -430,6 +442,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     return Text(
       statusText,
       style: const TextStyle(fontSize: 12),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
     );
   }
 
