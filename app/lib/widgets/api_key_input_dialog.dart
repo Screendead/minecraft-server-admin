@@ -19,6 +19,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
   final TextEditingController _apiKeyController = TextEditingController();
   final List<String> _selectedScopes = [];
   bool _isButtonEnabled = false;
+  bool _showPermissions = false;
 
   static const List<String> _requiredScopes = [
     'account:read',
@@ -84,6 +85,12 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
     });
   }
 
+  void _togglePermissions() {
+    setState(() {
+      _showPermissions = !_showPermissions;
+    });
+  }
+
   void _onScopeSelectionChanged(List<String> selectedScopes) {
     // Use WidgetsBinding to defer the setState until after the current build phase
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -122,24 +129,45 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
               obscureText: true,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Required Scopes:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Required Scopes:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _togglePermissions,
+                  style: TextButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    _showPermissions ? 'Hide' : 'View Scopes',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+            if (_showPermissions) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'Your API key must have the following scopes:',
+                style: TextStyle(fontSize: 12),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Your API key must have the following scopes:',
-              style: TextStyle(fontSize: 12),
-            ),
-            const SizedBox(height: 8),
-            PermissionChipsWidget(
-              requiredScopes: _requiredScopes,
-              onSelectionChanged: _onScopeSelectionChanged,
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
+              PermissionChipsWidget(
+                requiredScopes: _requiredScopes,
+                onSelectionChanged: _onScopeSelectionChanged,
+              ),
+              const SizedBox(height: 8),
+            ],
             const Text(
               'The API key will be validated before being stored.',
               style: TextStyle(
