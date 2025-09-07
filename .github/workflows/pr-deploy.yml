@@ -93,12 +93,6 @@ jobs:
         working-directory: app
         update-comment: true
         
-    - name: Upload coverage reports as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report-pr-${{ github.event.number }}
-        path: app/coverage/
-        
     - name: Deploy coverage report to Firebase
       id: deploy-coverage
       run: |
