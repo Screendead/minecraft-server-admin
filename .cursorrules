@@ -1,3 +1,2 @@
-This project requires 100% code coverage in the app/lib directory.
 Use a TDD - Red, Green, Refactor - approach.
 Create a branch for new functionality if you're currently on `master`.

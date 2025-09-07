@@ -29,7 +29,7 @@ A Flutter web application for managing Minecraft servers with Firebase integrati
 
 - **Flutter Version:** 3.27.0
 - **Firebase Project:** minecraft-server-automation
-- **Coverage Requirement:** 100% (enforced in CI)
+- **Coverage:** Tracked via Codecov (no minimum requirement)
 
 ## 📁 Project Structure
 
@@ -46,7 +46,7 @@ A Flutter web application for managing Minecraft servers with Firebase integrati
 
 - **Master Branch:** Deploys to production Firebase Hosting
 - **Pull Requests:** Creates preview deployments with coverage reports
-- **Coverage:** 100% test coverage required for merging
+- **Coverage:** Tracked and reported (no minimum requirement)
 
 ## 📚 Documentation
 

@@ -17,7 +17,7 @@ This project uses GitHub Actions for automated builds, testing, and deployments.
 - **Trigger**: Pull Request opened, updated, or reopened
 - **Actions**:
   - Runs Flutter tests with coverage
-  - **Enforces 100% test coverage requirement** (build fails if not met)
+  - Generates coverage reports for review
   - Builds the web app
   - Deploys to Firebase Hosting channel for PR preview
   - Deploys coverage report to subdirectory of same channel
@@ -40,12 +40,12 @@ Add these secrets to your GitHub repository settings:
 
 ## 📊 Code Coverage
 
-- **100% test coverage required** for all PR merges
+- **Coverage tracking** for all PR merges
 - Coverage reports are generated for every test run
 - **Codecov integration** for master branch coverage tracking
 - **Dynamic coverage badge** in README shows current coverage
 - PR previews include a separate coverage report URL
-- Build fails if coverage is below 100%
+- Coverage reports help identify untested code areas
 
 ## 🌐 Deployment URLs
 
@@ -101,7 +101,7 @@ cd app
 2. **Build Failures**
    - Check Flutter version compatibility
    - Verify all dependencies are properly configured
-   - **Coverage failures**: Ensure 100% test coverage before merging
+   - **Coverage failures**: Review coverage reports to identify untested areas
 
 3. **Deployment Failures**
    - Ensure Firebase project exists and is accessible

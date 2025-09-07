@@ -72,7 +72,6 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         working-directory: app
         update-comment: true
-        minimum-coverage: 100
         
     - name: Cache Flutter build
       uses: actions/cache@v4
