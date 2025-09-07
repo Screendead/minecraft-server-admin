@@ -225,6 +225,14 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         setState(() {
           _isLoading = false;
         });
+        // Show success feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('API key linked successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
       return true;
     } catch (e) {
@@ -261,6 +269,14 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
         setState(() {
           _isLoading = false;
         });
+        // Show success feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('API key updated successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
       return true;
     } catch (e) {
@@ -299,6 +315,14 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
           _decryptedApiKey = null;
           _isLoading = false;
         });
+        // Show success feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('API key cleared successfully!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
