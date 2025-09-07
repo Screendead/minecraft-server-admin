@@ -5,6 +5,7 @@ import 'dart:io';
 import '../providers/auth_provider.dart';
 import '../services/ios_biometric_encryption_service.dart';
 import '../services/ios_secure_api_key_service.dart';
+import 'api_key_input_dialog.dart';
 
 class ApiKeyManagementBanner extends StatefulWidget {
   const ApiKeyManagementBanner({super.key});
@@ -296,139 +297,17 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
   }
 
   void _showApiKeyInputDialog({bool isUpdate = false}) {
-    final apiKeyController = TextEditingController();
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isUpdate ? 'Update API Key' : 'Add API Key'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: apiKeyController,
-                decoration: const InputDecoration(
-                  labelText: 'DigitalOcean API Key',
-                  border: OutlineInputBorder(),
-                ),
-                autofocus: true,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Required Scopes:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Your API key must have the following scopes:',
-                style: TextStyle(fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              Builder(
-                builder: (context) {
-                  const requiredScopes = [
-                    'account:read',
-                    'droplet:create',
-                    'block_storage:create',
-                    'block_storage:delete',
-                    'block_storage:read',
-                    'block_storage:update',
-                    'block_storage_action:create',
-                    'block_storage_action:read',
-                    'block_storage_snapshot:create',
-                    'block_storage_snapshot:delete',
-                    'block_storage_snapshot:read',
-                    'droplet:admin',
-                    'droplet:create',
-                    'droplet:delete',
-                    'droplet:read',
-                    'droplet:update',
-                    'monitoring:create',
-                    'monitoring:delete',
-                    'monitoring:read',
-                    'monitoring:update',
-                    'project:create',
-                    'project:delete',
-                    'project:read',
-                    'project:update',
-                    'regions:read',
-                    'sizes:read',
-                    'snapshot:read',
-                    'snapshot:delete',
-                    'ssh_key:create',
-                    'ssh_key:delete',
-                    'ssh_key:read',
-                    'ssh_key:update',
-                    'tag:create',
-                    'tag:delete',
-                    'tag:read',
-                    'uptime:create',
-                    'uptime:delete',
-                    'uptime:read',
-                    'uptime:update',
-                  ];
-
-                  return Wrap(
-                    spacing: 2.0,
-                    runSpacing: 2.0,
-                    children: requiredScopes
-                        .map(
-                          (scope) => Chip(
-                            label: Text(scope),
-                            backgroundColor: Colors.grey.shade800,
-                            labelStyle: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 2,
-                              vertical: 0,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'The API key will be validated before being stored.',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              if (isUpdate) {
-                _updateApiKey(apiKeyController.text);
-              } else {
-                _storeApiKey(apiKeyController.text);
-              }
-            },
-            child: Text(isUpdate ? 'Update' : 'Add'),
-          ),
-        ],
+      builder: (context) => ApiKeyInputDialog(
+        isUpdate: isUpdate,
+        onConfirm: (apiKey) {
+          if (isUpdate) {
+            _updateApiKey(apiKey);
+          } else {
+            _storeApiKey(apiKey);
+          }
+        },
       ),
     );
   }

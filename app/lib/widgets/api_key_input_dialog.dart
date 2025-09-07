@@ -119,6 +119,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
                 border: OutlineInputBorder(),
               ),
               autofocus: true,
+              obscureText: true,
             ),
             const SizedBox(height: 16),
             const Text(
