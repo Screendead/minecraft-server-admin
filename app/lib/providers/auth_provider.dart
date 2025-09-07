@@ -54,7 +54,7 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
-  Future<bool> signUp(String email, String password, String apiKey) async {
+  Future<bool> signUp(String email, String password) async {
     try {
       _setError(null);
 
@@ -67,16 +67,11 @@ class AuthProvider extends ChangeNotifier {
       final user = userCredential.user;
       if (user == null) return false;
 
-      // Encrypt and store API key
-      final encryptedApiKey = _encryptionService.encrypt(apiKey, password);
-      await _sharedPreferences.setString('encrypted_api_key', encryptedApiKey);
-
       // Create user document in Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'email': email,
         'createdAt': FieldValue.serverTimestamp(),
         'lastLoginAt': FieldValue.serverTimestamp(),
-        'apiKeyEncrypted': true,
       });
 
       return true;

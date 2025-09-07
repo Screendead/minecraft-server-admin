@@ -20,7 +20,7 @@ class AuthService {
         _encryptionService = encryptionService ?? EncryptionService();
 
   /// Signs up a new user with email and password
-  Future<bool> signUp(String email, String password, String apiKey) async {
+  Future<bool> signUp(String email, String password) async {
     try {
       // Create user account
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -31,16 +31,11 @@ class AuthService {
       final user = userCredential.user;
       if (user == null) return false;
 
-      // Encrypt and store API key
-      final encryptedApiKey = _encryptionService.encrypt(apiKey, password);
-      await _sharedPreferences.setString('encrypted_api_key', encryptedApiKey);
-
       // Create user document in Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'email': email,
         'createdAt': FieldValue.serverTimestamp(),
         'lastLoginAt': FieldValue.serverTimestamp(),
-        'apiKeyEncrypted': true, // Flag to indicate API key is encrypted
       });
 
       return true;
