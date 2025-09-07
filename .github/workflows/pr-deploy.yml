@@ -106,6 +106,26 @@ jobs:
         mkdir -p coverage-deploy
         cp -r app/coverage/* coverage-deploy/
         
+        # Create a temporary firebase.json for coverage deployment
+        cat > coverage-firebase.json << EOF
+        {
+          "hosting": {
+            "public": "coverage-deploy",
+            "ignore": [
+              "firebase.json",
+              "**/.*",
+              "**/node_modules/**"
+            ],
+            "rewrites": [
+              {
+                "source": "**",
+                "destination": "/index.html"
+              }
+            ]
+          }
+        }
+        EOF
+        
         # Initialize Firebase project (if not already done)
         if ! firebase use | grep -q "minecraft-server-automation"; then
           echo "Firebase project 'minecraft-server-automation' not configured. Attempting to add..."
@@ -115,11 +135,16 @@ jobs:
         fi
         
         # Deploy coverage report to a temporary Firebase hosting channel
+        # First, create the channel
+        firebase hosting:channel:create pr-${{ github.event.number }}-coverage \
+          --project minecraft-server-automation \
+          --expires 7d
+        
+        # Then deploy to the channel using the temporary config
         # Capture the output to get the actual URL
         DEPLOY_OUTPUT=$(firebase hosting:channel:deploy pr-${{ github.event.number }}-coverage \
           --project minecraft-server-automation \
-          --public coverage-deploy \
-          --expires 7d \
+          --config coverage-firebase.json \
           --json)
         
         # Validate JSON and extract the URL from the JSON output
