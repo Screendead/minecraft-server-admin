@@ -23,6 +23,13 @@ class CpuOptionSelector extends StatelessWidget {
         .where((option) => option.isAvailableFor(category))
         .toList();
 
+    // Auto-select the single option if only one is available
+    if (availableOptions.length == 1 && selectedOption == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onChanged(availableOptions.first);
+      });
+    }
+
     // Hide selector if only one option is available
     if (availableOptions.length <= 1) {
       return const SizedBox.shrink();

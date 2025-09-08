@@ -498,14 +498,16 @@ class _CpuCategorySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final availableCategories =
         configProvider.getAvailableCategoriesForArchitecture(architecture);
-
-    // If only one category is available, hide the selector
-    if (availableCategories.length <= 1) {
-      return const SizedBox.shrink();
+    
+    // Auto-select the single category if only one is available
+    if (availableCategories.length == 1 && selectedCategory == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onChanged(availableCategories.first);
+      });
     }
 
     return DropdownButtonFormField<CpuCategory>(
-      initialValue: selectedCategory,
+      initialValue: selectedCategory ?? (availableCategories.length == 1 ? availableCategories.first : null),
       decoration: const InputDecoration(
         labelText: 'CPU Category',
         border: OutlineInputBorder(),
@@ -593,7 +595,7 @@ class _DropletSizeDropdown extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Select location, CPU architecture, category, option, and storage first',
+                  'Complete the selection steps above',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),

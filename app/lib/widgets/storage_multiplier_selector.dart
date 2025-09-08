@@ -26,6 +26,13 @@ class StorageMultiplierSelector extends StatelessWidget {
         .where((multiplier) => multiplier.isAvailableFor(category, option))
         .toList();
 
+    // Auto-select the single multiplier if only one is available
+    if (availableMultipliers.length == 1 && selectedMultiplier == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onChanged(availableMultipliers.first);
+      });
+    }
+
     // Hide selector if only one option is available
     if (availableMultipliers.length <= 1) {
       return const SizedBox.shrink();
