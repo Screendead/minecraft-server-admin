@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import '../services/digitalocean_api_service.dart';
 import '../services/minecraft_versions_service.dart';
+import '../models/cpu_architecture.dart';
+import '../models/cpu_category.dart';
+import '../models/cpu_option.dart';
+import '../models/storage_multiplier.dart';
 
 /// Provider for managing droplet configuration data
 class DropletConfigProvider extends ChangeNotifier {
@@ -56,6 +60,79 @@ class DropletConfigProvider extends ChangeNotifier {
         'memory_optimized',
         'storage_optimized'
       ];
+
+  /// Get droplet sizes filtered by CPU architecture
+  List<DropletSize> getSizesForArchitecture(
+      String regionSlug, CpuArchitecture architecture) {
+    return _dropletSizes.where((size) {
+      return size.available &&
+          size.isAvailableInRegion(regionSlug) &&
+          size.cpuArchitecture == architecture;
+    }).toList();
+  }
+
+  /// Get droplet sizes filtered by CPU architecture and category
+  List<DropletSize> getSizesForCategory(
+      String regionSlug, CpuArchitecture architecture, CpuCategory category) {
+    return _dropletSizes.where((size) {
+      return size.available &&
+          size.isAvailableInRegion(regionSlug) &&
+          size.cpuArchitecture == architecture &&
+          size.cpuCategory == category;
+    }).toList();
+  }
+
+  /// Get droplet sizes filtered by CPU architecture, category, and option
+  List<DropletSize> getSizesForOption(String regionSlug,
+      CpuArchitecture architecture, CpuCategory category, CpuOption option) {
+    return _dropletSizes.where((size) {
+      return size.available &&
+          size.isAvailableInRegion(regionSlug) &&
+          size.cpuArchitecture == architecture &&
+          size.cpuCategory == category &&
+          size.cpuOption == option;
+    }).toList();
+  }
+
+  /// Get droplet sizes filtered by CPU architecture, category, option, and storage multiplier
+  List<DropletSize> getSizesForStorage(
+      String regionSlug,
+      CpuArchitecture architecture,
+      CpuCategory category,
+      CpuOption option,
+      StorageMultiplier multiplier) {
+    return _dropletSizes.where((size) {
+      return size.available &&
+          size.isAvailableInRegion(regionSlug) &&
+          size.cpuArchitecture == architecture &&
+          size.cpuCategory == category &&
+          size.cpuOption == option &&
+          size.storageMultiplier == multiplier;
+    }).toList();
+  }
+
+  /// Get available CPU categories for a given architecture
+  List<CpuCategory> getAvailableCategoriesForArchitecture(
+      CpuArchitecture architecture) {
+    return CpuCategory.values
+        .where((category) => category.isAvailableFor(architecture))
+        .toList();
+  }
+
+  /// Get available CPU options for a given category
+  List<CpuOption> getAvailableOptionsForCategory(CpuCategory category) {
+    return CpuOption.values
+        .where((option) => option.isAvailableFor(category))
+        .toList();
+  }
+
+  /// Get available storage multipliers for a given category and option
+  List<StorageMultiplier> getAvailableStorageMultipliersFor(
+      CpuCategory category, CpuOption option) {
+    return StorageMultiplier.values
+        .where((multiplier) => multiplier.isAvailableFor(category, option))
+        .toList();
+  }
 
   /// Get available regions
   List<Region> get availableRegions =>
