@@ -5,6 +5,7 @@ import '../providers/droplets_provider.dart';
 import '../widgets/api_key_management_banner.dart';
 import '../widgets/droplets_list.dart';
 import 'add_droplet_page.dart';
+import 'logs_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +31,17 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Minecraft Server Admin'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.analytics),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const LogsPage(),
+                ),
+              );
+            },
+            tooltip: 'View Logs',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {

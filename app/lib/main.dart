@@ -9,6 +9,8 @@ import 'firebase_options.dart';
 import 'providers/auth_provider.dart' as auth_provider;
 import 'providers/droplets_provider.dart';
 import 'providers/droplet_config_provider.dart';
+import 'providers/logs_provider.dart';
+import 'services/logging_service.dart';
 import 'widgets/auth_wrapper.dart';
 
 void main() async {
@@ -34,6 +36,9 @@ void main() async {
 
   // Initialize shared preferences
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // Initialize logging service
+  await LoggingService().initialize();
 
   runApp(MyApp(sharedPreferences: sharedPreferences));
 }
@@ -61,6 +66,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => DropletConfigProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => LogsProvider(),
         ),
       ],
       child: MaterialApp(
