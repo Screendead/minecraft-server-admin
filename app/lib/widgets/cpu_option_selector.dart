@@ -43,21 +43,23 @@ class CpuOptionSelector extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        Row(
-          children: availableOptions.map((option) {
-            final isSelected = selectedOption == option;
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _CpuOptionCard(
-                  option: option,
-                  isSelected: isSelected,
-                  isEnabled: isEnabled,
-                  onTap: () => onChanged(option),
+        IntrinsicHeight(
+          child: Row(
+            children: availableOptions.map((option) {
+              final isSelected = selectedOption == option;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _CpuOptionCard(
+                    option: option,
+                    isSelected: isSelected,
+                    isEnabled: isEnabled,
+                    onTap: () => onChanged(option),
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
@@ -135,15 +137,6 @@ class _CpuOptionCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              option.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 4),
             Wrap(
               spacing: 8,
               runSpacing: 4,
