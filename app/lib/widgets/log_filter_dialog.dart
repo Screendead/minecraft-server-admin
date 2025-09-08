@@ -71,9 +71,9 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _getLogLevelIcon(level),
+                        level.icon,
                         size: 16,
-                        color: _getLogLevelColor(level),
+                        color: level.color,
                       ),
                       const SizedBox(width: 4),
                       Text(level.displayName),
@@ -312,33 +312,4 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
     Navigator.of(context).pop();
   }
 
-  IconData _getLogLevelIcon(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return Icons.bug_report;
-      case LogLevel.info:
-        return Icons.info;
-      case LogLevel.warning:
-        return Icons.warning;
-      case LogLevel.error:
-        return Icons.error;
-      case LogLevel.fatal:
-        return Icons.dangerous;
-    }
-  }
-
-  Color _getLogLevelColor(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return Colors.blue;
-      case LogLevel.info:
-        return Colors.green;
-      case LogLevel.warning:
-        return Colors.orange;
-      case LogLevel.error:
-        return Colors.red;
-      case LogLevel.fatal:
-        return Colors.purple;
-    }
-  }
 }

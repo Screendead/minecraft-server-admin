@@ -350,8 +350,8 @@ class _LogsPageState extends State<LogsPage> with TickerProviderStateMixin {
         title: Row(
           children: [
             Icon(
-              _getLogLevelIcon(log.level),
-              color: _getLogLevelColor(log.level),
+              log.level.icon,
+              color: log.level.color,
             ),
             const SizedBox(width: 8),
             Expanded(child: Text(log.level.displayName)),
@@ -517,35 +517,6 @@ class _LogsPageState extends State<LogsPage> with TickerProviderStateMixin {
     );
   }
 
-  IconData _getLogLevelIcon(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return Icons.bug_report;
-      case LogLevel.info:
-        return Icons.info;
-      case LogLevel.warning:
-        return Icons.warning;
-      case LogLevel.error:
-        return Icons.error;
-      case LogLevel.fatal:
-        return Icons.dangerous;
-    }
-  }
-
-  Color _getLogLevelColor(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return Colors.blue;
-      case LogLevel.info:
-        return Colors.green;
-      case LogLevel.warning:
-        return Colors.orange;
-      case LogLevel.error:
-        return Colors.red;
-      case LogLevel.fatal:
-        return Colors.purple;
-    }
-  }
 
   Widget _buildFixedWidthTab(String text, IconData icon) {
     return SizedBox(

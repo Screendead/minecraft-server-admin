@@ -26,9 +26,9 @@ class LogEntryCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    _getLogLevelIcon(log.level),
+                    log.level.icon,
                     size: 20,
-                    color: _getLogLevelColor(log.level),
+                    color: log.level.color,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -36,7 +36,7 @@ class LogEntryCard extends StatelessWidget {
                       log.level.displayName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _getLevelColor(log.level),
+                        color: log.level.color,
                       ),
                     ),
                   ),
@@ -173,33 +173,4 @@ class LogEntryCard extends StatelessWidget {
     }
   }
 
-  IconData _getLogLevelIcon(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return Icons.bug_report;
-      case LogLevel.info:
-        return Icons.info;
-      case LogLevel.warning:
-        return Icons.warning;
-      case LogLevel.error:
-        return Icons.error;
-      case LogLevel.fatal:
-        return Icons.dangerous;
-    }
-  }
-
-  Color _getLogLevelColor(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return Colors.blue;
-      case LogLevel.info:
-        return Colors.green;
-      case LogLevel.warning:
-        return Colors.orange;
-      case LogLevel.error:
-        return Colors.red;
-      case LogLevel.fatal:
-        return Colors.purple;
-    }
-  }
 }
