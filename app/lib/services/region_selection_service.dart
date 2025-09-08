@@ -7,45 +7,32 @@ class RegionSelectionService {
   /// Get the user's current location
   static Future<Position?> getCurrentLocation() async {
     try {
-      print('Checking location services...');
-
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      print('Location services enabled: $serviceEnabled');
       if (!serviceEnabled) {
-        print('Location services are disabled');
         return null;
       }
 
       // Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
-      print('Current permission status: $permission');
-
+      
       if (permission == LocationPermission.denied) {
-        print('Requesting location permission...');
         permission = await Geolocator.requestPermission();
-        print('Permission after request: $permission');
         if (permission == LocationPermission.denied) {
-          print('Permission denied by user');
           return null;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        print('Permission permanently denied');
         return null;
       }
 
-      print('Getting current position...');
       // Get current position with high accuracy
-      final position = await Geolocator.getCurrentPosition(
+      return await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
       );
-      print('Got position: ${position.latitude}, ${position.longitude}');
-      return position;
     } catch (e) {
-      print('Error getting location: $e');
       return null;
     }
   }
@@ -54,16 +41,12 @@ class RegionSelectionService {
   static Future<Region?> findClosestRegion(List<Region> regions) async {
     final position = await getCurrentLocation();
     if (position == null) {
-      print('Location detection failed - no position available');
       // If we can't get location, try to find a reasonable default
       return _getDefaultRegion(regions);
     }
 
-    print('User location: ${position.latitude}, ${position.longitude}');
-    final closestRegion = findClosestRegionToPosition(
+    return findClosestRegionToPosition(
         regions, position.latitude, position.longitude);
-    print('Closest region: ${closestRegion?.name} (${closestRegion?.slug})');
-    return closestRegion;
   }
 
   /// Get a reasonable default region when location detection fails
@@ -87,12 +70,9 @@ class RegionSelectionService {
     Region? closestRegion;
     double minDistance = double.infinity;
 
-    print('Calculating distances from user location: $lat, $lng');
-
     for (final region in regions) {
       final regionCoords = getRegionCoordinates(region.slug);
       if (regionCoords == null) {
-        print('No coordinates found for region: ${region.slug}');
         continue;
       }
 
@@ -103,17 +83,12 @@ class RegionSelectionService {
         regionCoords['lng']!,
       );
 
-      print(
-          '${region.name} (${region.slug}): ${distance.toStringAsFixed(1)} km');
-
       if (distance < minDistance) {
         minDistance = distance;
         closestRegion = region;
       }
     }
 
-    print(
-        'Selected closest region: ${closestRegion?.name} at ${minDistance.toStringAsFixed(1)} km');
     return closestRegion ?? regions.first;
   }
 

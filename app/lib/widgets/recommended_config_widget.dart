@@ -47,7 +47,7 @@ class _RecommendedConfigWidgetState extends State<RecommendedConfigWidget> {
       }
     } catch (e) {
       // If location finding fails, don't select anything
-      print('Failed to find closest region: $e');
+      // Error is silently handled - user can manually select region
     } finally {
       if (mounted) {
         setState(() {
