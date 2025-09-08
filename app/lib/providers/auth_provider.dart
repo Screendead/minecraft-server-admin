@@ -5,12 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/encryption_service.dart';
 import '../services/ios_biometric_encryption_service.dart';
 import '../services/ios_secure_api_key_service.dart';
+import '../services/logging_service.dart';
+import '../models/log_entry.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final SharedPreferences _sharedPreferences;
   final EncryptionService _encryptionService;
+  final LoggingService _loggingService = LoggingService();
 
   User? _user;
   bool _isLoading = true;
@@ -59,8 +62,29 @@ class AuthProvider extends ChangeNotifier {
     // Listen to Firebase Auth state changes
     _firebaseAuth.authStateChanges().listen(
       (User? user) {
+        final previousUser = _user;
         _user = user;
         _isLoading = false;
+
+        // Update logging service with user context
+        _loggingService.setUserId(user?.uid);
+
+        // Log auth state changes
+        if (user != null && previousUser == null) {
+          _loggingService.logInfo(
+            'User authenticated',
+            category: LogCategory.authentication,
+            details: 'User ID: ${user.uid}, Email: ${user.email}',
+            metadata: {'userId': user.uid, 'email': user.email},
+          );
+        } else if (user == null && previousUser != null) {
+          _loggingService.logInfo(
+            'User signed out',
+            category: LogCategory.authentication,
+            details: 'Previous User ID: ${previousUser.uid}',
+            metadata: {'previousUserId': previousUser.uid},
+          );
+        }
 
         // Clear API key services when user signs out
         if (user == null) {
@@ -71,7 +95,11 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       },
       onError: (error) {
-        print('Firebase Auth error: $error');
+        _loggingService.logError(
+          'Firebase Auth state change error',
+          category: LogCategory.authentication,
+          error: error,
+        );
         _setError('Authentication error: $error');
         _isLoading = false;
         notifyListeners();

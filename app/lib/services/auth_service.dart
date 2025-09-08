@@ -2,12 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'encryption_service.dart';
+import 'logging_service.dart';
+import '../models/log_entry.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final SharedPreferences _sharedPreferences;
   final EncryptionService _encryptionService;
+  final LoggingService _loggingService = LoggingService();
 
   AuthService({
     required FirebaseAuth firebaseAuth,
@@ -22,6 +25,12 @@ class AuthService {
   /// Signs up a new user with email and password
   Future<bool> signUp(String email, String password) async {
     try {
+      await _loggingService.logUserInteraction(
+        'User sign up attempt',
+        details: 'Email: $email',
+        metadata: {'email': email},
+      );
+
       // Create user account
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -29,7 +38,15 @@ class AuthService {
       );
 
       final user = userCredential.user;
-      if (user == null) return false;
+      if (user == null) {
+        await _loggingService.logError(
+          'User sign up failed - no user returned',
+          category: LogCategory.authentication,
+          details: 'Email: $email',
+          metadata: {'email': email},
+        );
+        return false;
+      }
 
       // Create user document in Firestore
       await _firestore.collection('users').doc(user.uid).set({
@@ -38,9 +55,22 @@ class AuthService {
         'lastLoginAt': FieldValue.serverTimestamp(),
       });
 
+      await _loggingService.logInfo(
+        'User successfully signed up',
+        category: LogCategory.authentication,
+        details: 'User ID: ${user.uid}, Email: $email',
+        metadata: {'userId': user.uid, 'email': email},
+      );
+
       return true;
     } catch (e) {
-      print('Sign up error: $e');
+      await _loggingService.logError(
+        'User sign up failed',
+        category: LogCategory.authentication,
+        details: 'Email: $email, Error: $e',
+        metadata: {'email': email},
+        error: e,
+      );
       return false;
     }
   }
@@ -48,6 +78,12 @@ class AuthService {
   /// Signs in an existing user with email and password
   Future<bool> signIn(String email, String password) async {
     try {
+      await _loggingService.logUserInteraction(
+        'User sign in attempt',
+        details: 'Email: $email',
+        metadata: {'email': email},
+      );
+
       await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -59,17 +95,39 @@ class AuthService {
         await _firestore.collection('users').doc(user.uid).update({
           'lastLoginAt': FieldValue.serverTimestamp(),
         });
+
+        await _loggingService.logInfo(
+          'User successfully signed in',
+          category: LogCategory.authentication,
+          details: 'User ID: ${user.uid}, Email: $email',
+          metadata: {'userId': user.uid, 'email': email},
+        );
       }
 
       return true;
     } catch (e) {
-      print('Sign in error: $e');
+      await _loggingService.logError(
+        'User sign in failed',
+        category: LogCategory.authentication,
+        details: 'Email: $email, Error: $e',
+        metadata: {'email': email},
+        error: e,
+      );
       return false;
     }
   }
 
   /// Signs out the current user
   Future<void> signOut() async {
+    final user = _firebaseAuth.currentUser;
+    final userId = user?.uid;
+
+    await _loggingService.logUserInteraction(
+      'User sign out',
+      details: userId != null ? 'User ID: $userId' : 'Unknown user',
+      metadata: userId != null ? {'userId': userId} : null,
+    );
+
     await _firebaseAuth.signOut();
     // Clear stored API key
     await _sharedPreferences.remove('encrypted_api_key');
@@ -89,11 +147,30 @@ class AuthService {
   Future<String?> getDecryptedApiKey(String password) async {
     try {
       final encryptedApiKey = _sharedPreferences.getString('encrypted_api_key');
-      if (encryptedApiKey == null) return null;
+      if (encryptedApiKey == null) {
+        await _loggingService.logWarning(
+          'API key decryption attempted but no encrypted key found',
+          category: LogCategory.security,
+        );
+        return null;
+      }
 
-      return _encryptionService.decrypt(encryptedApiKey, password);
+      final decryptedKey =
+          _encryptionService.decrypt(encryptedApiKey, password);
+
+      await _loggingService.logInfo(
+        'API key successfully decrypted',
+        category: LogCategory.security,
+        details: 'Key length: ${decryptedKey.length}',
+      );
+
+      return decryptedKey;
     } catch (e) {
-      print('Error decrypting API key: $e');
+      await _loggingService.logError(
+        'API key decryption failed',
+        category: LogCategory.security,
+        error: e,
+      );
       return null;
     }
   }
@@ -101,11 +178,28 @@ class AuthService {
   /// Updates the user's API key
   Future<bool> updateApiKey(String newApiKey, String password) async {
     try {
+      await _loggingService.logUserInteraction(
+        'API key update attempt',
+        details: 'Key length: ${newApiKey.length}',
+        metadata: {'keyLength': newApiKey.length},
+      );
+
       final encryptedApiKey = _encryptionService.encrypt(newApiKey, password);
       await _sharedPreferences.setString('encrypted_api_key', encryptedApiKey);
+
+      await _loggingService.logInfo(
+        'API key successfully updated',
+        category: LogCategory.security,
+        details: 'Key length: ${newApiKey.length}',
+      );
+
       return true;
     } catch (e) {
-      print('Error updating API key: $e');
+      await _loggingService.logError(
+        'API key update failed',
+        category: LogCategory.security,
+        error: e,
+      );
       return false;
     }
   }
