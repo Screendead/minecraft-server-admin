@@ -53,20 +53,20 @@ void main() {
       });
 
       test(
-          'should return true only for regular option with dedicated categories',
+          'should return true for both regular and premium Intel options with dedicated categories',
           () {
         expect(CpuOption.regular.isAvailableFor(CpuCategory.generalPurpose),
             isTrue);
         expect(
             CpuOption.premiumIntel.isAvailableFor(CpuCategory.generalPurpose),
-            isFalse);
+            isTrue);
         expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.generalPurpose),
             isFalse);
 
         expect(
             CpuOption.regular.isAvailableFor(CpuCategory.cpuOptimized), isTrue);
         expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.cpuOptimized),
-            isFalse);
+            isTrue);
         expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.cpuOptimized),
             isFalse);
 
@@ -74,7 +74,7 @@ void main() {
             isTrue);
         expect(
             CpuOption.premiumIntel.isAvailableFor(CpuCategory.memoryOptimized),
-            isFalse);
+            isTrue);
         expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.memoryOptimized),
             isFalse);
 
@@ -82,13 +82,13 @@ void main() {
             isTrue);
         expect(
             CpuOption.premiumIntel.isAvailableFor(CpuCategory.storageOptimized),
-            isFalse);
+            isTrue);
         expect(
             CpuOption.premiumAmd.isAvailableFor(CpuCategory.storageOptimized),
             isFalse);
 
         expect(CpuOption.regular.isAvailableFor(CpuCategory.gpu), isTrue);
-        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.gpu), isFalse);
+        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.gpu), isTrue);
         expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.gpu), isFalse);
       });
     });
