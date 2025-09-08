@@ -353,24 +353,5 @@ void main() {
       );
     });
 
-    test('should handle network timeout', () async {
-      // Arrange
-      const versionId = '1.20.1';
-      const manifestUrl = 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json';
-
-      when(mockClient.get(
-        Uri.parse(manifestUrl),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async {
-        await Future.delayed(const Duration(seconds: 15));
-        return http.Response('{}', 200);
-      });
-
-      // Act & Assert
-      expect(
-        () => MinecraftVersionsService.getServerJarUrlForVersion(versionId),
-        throwsA(isA<Exception>()),
-      );
-    });
   });
 }

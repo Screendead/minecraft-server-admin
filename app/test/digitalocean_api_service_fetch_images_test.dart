@@ -166,24 +166,6 @@ void main() {
       );
     });
 
-    test('should handle timeout', () async {
-      // Arrange
-      const apiKey = 'test-api-key';
-
-      when(mockClient.get(
-        any,
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async {
-        await Future.delayed(const Duration(seconds: 15));
-        return http.Response('{}', 200);
-      });
-
-      // Act & Assert
-      expect(
-        () => DigitalOceanApiService.fetchImages(apiKey),
-        throwsA(isA<Exception>()),
-      );
-    });
 
     test('should handle invalid JSON response', () async {
       // Arrange

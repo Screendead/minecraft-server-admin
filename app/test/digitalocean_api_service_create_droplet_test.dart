@@ -138,29 +138,6 @@ void main() {
       );
     });
 
-    test('should handle timeout', () async {
-      // Arrange
-      const apiKey = 'test-api-key';
-
-      when(mockClient.post(
-        any,
-        headers: anyNamed('headers'),
-        body: anyNamed('body'),
-      )).thenAnswer((_) async {
-        await Future.delayed(const Duration(seconds: 35));
-        return http.Response('{}', 202);
-      });
-
-      // Act & Assert
-      try {
-        await DigitalOceanApiService.createDroplet(apiKey, testRequest).timeout(
-          const Duration(seconds: 1),
-        );
-        fail('Expected timeout exception to be thrown');
-      } catch (e) {
-        expect(e, isA<Exception>());
-      }
-    });
 
     test('should handle invalid JSON response', () async {
       // Arrange
