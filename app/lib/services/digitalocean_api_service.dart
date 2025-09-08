@@ -264,6 +264,95 @@ class DigitalOceanApiService {
     return regions.map((region) => Region.fromJson(region)).toList();
   }
 
+  /// Gets all available images
+  /// Throws an exception if the API key is invalid or request fails
+  static Future<List<Map<String, dynamic>>> fetchImages(String apiKey) async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      await _loggingService.logApiCall(
+        '/images',
+        'GET',
+        metadata: {'operation': 'fetch_images'},
+      );
+
+      final response = await _httpClient.get(
+        Uri.parse('$_baseUrl/images?per_page=200'),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      stopwatch.stop();
+
+      if (response.statusCode != 200) {
+        await _loggingService.logError(
+          'Failed to fetch images',
+          category: LogCategory.apiCall,
+          details: 'Status: ${response.statusCode}, Response: ${response.body}',
+          metadata: {
+            'endpoint': '/images',
+            'method': 'GET',
+            'operation': 'fetch_images',
+            'statusCode': response.statusCode,
+          },
+        );
+
+        throw Exception('Failed to fetch images: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      final images = data['images'] as List<dynamic>?;
+      
+      if (images == null) {
+        await _loggingService.logError(
+          'Images response missing images array',
+          category: LogCategory.apiCall,
+          details: 'Response: ${response.body}',
+          metadata: {
+            'endpoint': '/images',
+            'method': 'GET',
+            'operation': 'fetch_images',
+            'statusCode': response.statusCode,
+          },
+        );
+        throw Exception('Invalid response: missing images array');
+      }
+      
+      final imageList = images.cast<Map<String, dynamic>>();
+
+      await _loggingService.logApiCall(
+        '/images',
+        'GET',
+        statusCode: response.statusCode,
+        duration: stopwatch.elapsed,
+        metadata: {
+          'operation': 'fetch_images',
+          'imageCount': imageList.length,
+        },
+      );
+
+      return imageList;
+    } catch (e) {
+      stopwatch.stop();
+
+      await _loggingService.logError(
+        'Images request failed',
+        category: LogCategory.apiCall,
+        details: 'Endpoint: /images, Error: $e',
+        metadata: {
+          'endpoint': '/images',
+          'method': 'GET',
+          'operation': 'fetch_images',
+        },
+        error: e,
+      );
+
+      rethrow;
+    }
+  }
+
   /// Creates a new droplet using the DigitalOcean API
   /// Throws an exception if the API key is invalid or request fails
   static Future<Map<String, dynamic>> createDroplet(

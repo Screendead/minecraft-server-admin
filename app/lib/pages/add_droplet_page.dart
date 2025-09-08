@@ -339,17 +339,31 @@ class _AddDropletPageState extends State<AddDropletPage> {
             'No API key found. Please configure your DigitalOcean API key first.');
       }
 
+      // Fetch available images and select latest Ubuntu LTS image
+      final images = await DigitalOceanApiService.fetchImages(apiKey);
+      final ubuntuImages = images.where((img) =>
+        img['distribution'] == 'Ubuntu' &&
+        img['slug'] != null &&
+        img['slug'].toString().contains('x64')
+      ).toList();
+      ubuntuImages.sort((a, b) =>
+        b['name'].toString().compareTo(a['name'].toString())
+      );
+      final selectedImageSlug = ubuntuImages.isNotEmpty
+          ? ubuntuImages.first['slug'].toString()
+          : 'ubuntu-22-04-x64'; // fallback if no images found
+
       // Create droplet creation request
       final request = DropletCreationRequest.fromFormData(
         name: _nameController.text.trim(),
         region: _selectedRegion!.slug,
         size: _selectedDropletSize!.slug,
-        image: 'ubuntu-22-04-x64', // Default Ubuntu image
+        image: selectedImageSlug,
         tags: [
           'minecraft-server',
           'minecraft-${_selectedMinecraftVersion!.id}'
         ],
-        userData: _generateUserData(),
+        userData: await _generateUserData(),
       );
 
       // Create the droplet
@@ -387,9 +401,9 @@ class _AddDropletPageState extends State<AddDropletPage> {
   }
 
   /// Generates user data script for initial server setup
-  String _generateUserData() {
+  Future<String> _generateUserData() async {
     final minecraftVersion = _selectedMinecraftVersion!.id;
-    final serverJarUrl = _getServerJarUrl(minecraftVersion);
+    final serverJarUrl = await _getServerJarUrl(minecraftVersion);
 
     return '''
 #cloud-config
@@ -432,10 +446,15 @@ write_files:
   }
 
   /// Gets the server JAR URL for the specified Minecraft version
-  String _getServerJarUrl(String version) {
-    // For now, use a generic URL. In a real implementation, you'd want to
-    // fetch the actual download URL from the Minecraft version manifest
-    return 'https://launcher.mojang.com/v1/objects/1b557e7b033b583cd9f66746b7a9ab1ec60ec15b/server.jar';
+  Future<String> _getServerJarUrl(String version) async {
+    try {
+      // Use the MinecraftVersionsService to fetch the actual download URL from the Minecraft version manifest
+      return await MinecraftVersionsService.getServerJarUrlForVersion(version);
+    } catch (e) {
+      // Fallback to a generic URL if version-specific fetching fails
+      // This ensures the droplet creation doesn't fail due to version manifest issues
+      return 'https://launcher.mojang.com/v1/objects/1b557e7b033b583cd9f66746b7a9ab1ec60ec15b/server.jar';
+    }
   }
 
   @override
