@@ -144,18 +144,12 @@ class _CpuOptionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Text(
-                  'Disk: ',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: isSelected
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  option.diskType,
+                  'Disk: ${option.diskType}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: isSelected
                         ? colorScheme.primary
@@ -168,17 +162,8 @@ class _CpuOptionCard extends StatelessWidget {
                         : null,
                   ),
                 ),
-                const SizedBox(width: 16),
                 Text(
-                  'Network: ',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: isSelected
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  option.networkSpeed,
+                  'Network: ${option.networkSpeed}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: isSelected
                         ? colorScheme.primary
