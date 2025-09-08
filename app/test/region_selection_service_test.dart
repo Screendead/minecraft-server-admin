@@ -156,9 +156,6 @@ void main() {
         amsterdamLng,
       );
 
-      print('Folkestone to London: ${distanceToLondon.toStringAsFixed(1)} km');
-      print(
-          'Folkestone to Amsterdam: ${distanceToAmsterdam.toStringAsFixed(1)} km');
 
       // London should be closer than Amsterdam
       expect(distanceToLondon, lessThan(distanceToAmsterdam));
