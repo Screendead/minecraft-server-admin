@@ -8,6 +8,12 @@ import '../services/ios_biometric_encryption_service.dart';
 import '../services/digitalocean_api_service.dart';
 import '../services/minecraft_versions_service.dart';
 import '../utils/unit_formatter.dart';
+import '../models/cpu_architecture.dart';
+import '../models/cpu_category.dart';
+import '../models/cpu_option.dart';
+import '../models/storage_multiplier.dart';
+import '../widgets/cpu_option_selector.dart';
+import '../widgets/storage_multiplier_selector.dart';
 
 class AddDropletPage extends StatefulWidget {
   const AddDropletPage({super.key});
@@ -22,8 +28,10 @@ class _AddDropletPageState extends State<AddDropletPage> {
 
   // Selection state
   Region? _selectedRegion;
-  String? _selectedCpuType; // 'basic' or 'dedicated'
-  String? _selectedDedicatedCategory; // for dedicated CPU
+  CpuArchitecture? _selectedCpuArchitecture;
+  CpuCategory? _selectedCpuCategory;
+  CpuOption? _selectedCpuOption;
+  StorageMultiplier? _selectedStorageMultiplier;
   DropletSize? _selectedDropletSize;
   MinecraftVersion? _selectedMinecraftVersion;
   String? _selectedWorldSavePath;
@@ -133,25 +141,48 @@ class _AddDropletPageState extends State<AddDropletPage> {
     setState(() {
       _selectedRegion = region;
       // Clear dependent selections when region changes
-      _selectedCpuType = null;
-      _selectedDedicatedCategory = null;
+      _selectedCpuArchitecture = null;
+      _selectedCpuCategory = null;
+      _selectedCpuOption = null;
+      _selectedStorageMultiplier = null;
       _selectedDropletSize = null;
     });
   }
 
-  void _onCpuTypeChanged(String? cpuType) {
+  void _onCpuArchitectureChanged(CpuArchitecture? architecture) {
     setState(() {
-      _selectedCpuType = cpuType;
-      // Clear dependent selections when CPU type changes
-      _selectedDedicatedCategory = null;
+      _selectedCpuArchitecture = architecture;
+      // Clear dependent selections when architecture changes
+      _selectedCpuCategory = null;
+      _selectedCpuOption = null;
+      _selectedStorageMultiplier = null;
       _selectedDropletSize = null;
     });
   }
 
-  void _onDedicatedCategoryChanged(String? category) {
+  void _onCpuCategoryChanged(CpuCategory? category) {
     setState(() {
-      _selectedDedicatedCategory = category;
-      // Clear droplet size selection when category changes
+      _selectedCpuCategory = category;
+      // Clear dependent selections when category changes
+      _selectedCpuOption = null;
+      _selectedStorageMultiplier = null;
+      _selectedDropletSize = null;
+    });
+  }
+
+  void _onCpuOptionChanged(CpuOption? option) {
+    setState(() {
+      _selectedCpuOption = option;
+      // Clear dependent selections when option changes
+      _selectedStorageMultiplier = null;
+      _selectedDropletSize = null;
+    });
+  }
+
+  void _onStorageMultiplierChanged(StorageMultiplier? multiplier) {
+    setState(() {
+      _selectedStorageMultiplier = multiplier;
+      // Clear droplet size selection when storage changes
       _selectedDropletSize = null;
     });
   }
@@ -165,18 +196,30 @@ class _AddDropletPageState extends State<AddDropletPage> {
         return;
       }
 
-      if (_selectedCpuType == null) {
+      if (_selectedCpuArchitecture == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a CPU type')),
+          const SnackBar(content: Text('Please select a CPU architecture')),
         );
         return;
       }
 
-      if (_selectedCpuType == 'dedicated' &&
-          _selectedDedicatedCategory == null) {
+      if (_selectedCpuCategory == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Please select a dedicated CPU category')),
+          const SnackBar(content: Text('Please select a CPU category')),
+        );
+        return;
+      }
+
+      if (_selectedCpuOption == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a CPU option')),
+        );
+        return;
+      }
+
+      if (_selectedStorageMultiplier == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a storage option')),
         );
         return;
       }
@@ -259,21 +302,44 @@ class _AddDropletPageState extends State<AddDropletPage> {
                             ),
                             const SizedBox(height: 16),
 
-                            // CPU Type selection
-                            _CpuTypeDropdown(
-                              selectedType: _selectedCpuType,
-                              onChanged: _onCpuTypeChanged,
+                            // CPU Architecture selection
+                            _CpuArchitectureSelector(
+                              selectedArchitecture: _selectedCpuArchitecture,
+                              onChanged: _onCpuArchitectureChanged,
                               isEnabled: _selectedRegion != null,
                             ),
                             const SizedBox(height: 16),
 
-                            // Dedicated CPU category (only if dedicated is selected)
-                            if (_selectedCpuType == 'dedicated') ...[
-                              _DedicatedCategoryDropdown(
-                                selectedCategory: _selectedDedicatedCategory,
-                                categories:
-                                    configProvider.dedicatedCpuCategories,
-                                onChanged: _onDedicatedCategoryChanged,
+                            // CPU Category selection (only if architecture is selected)
+                            if (_selectedCpuArchitecture != null) ...[
+                              _CpuCategorySelector(
+                                selectedCategory: _selectedCpuCategory,
+                                architecture: _selectedCpuArchitecture!,
+                                configProvider: configProvider,
+                                onChanged: _onCpuCategoryChanged,
+                                isEnabled: _selectedRegion != null,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+
+                            // CPU Option selection (only if category is selected)
+                            if (_selectedCpuCategory != null) ...[
+                              CpuOptionSelector(
+                                selectedOption: _selectedCpuOption,
+                                category: _selectedCpuCategory!,
+                                onChanged: _onCpuOptionChanged,
+                                isEnabled: _selectedRegion != null,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+
+                            // Storage Multiplier selection (only if option is selected)
+                            if (_selectedCpuOption != null) ...[
+                              StorageMultiplierSelector(
+                                selectedMultiplier: _selectedStorageMultiplier,
+                                category: _selectedCpuCategory!,
+                                option: _selectedCpuOption!,
+                                onChanged: _onStorageMultiplierChanged,
                                 isEnabled: _selectedRegion != null,
                               ),
                               const SizedBox(height: 16),
@@ -284,9 +350,11 @@ class _AddDropletPageState extends State<AddDropletPage> {
                               selectedSize: _selectedDropletSize,
                               configProvider: configProvider,
                               selectedRegion: _selectedRegion,
-                              selectedCpuType: _selectedCpuType,
-                              selectedDedicatedCategory:
-                                  _selectedDedicatedCategory,
+                              selectedCpuArchitecture: _selectedCpuArchitecture,
+                              selectedCpuCategory: _selectedCpuCategory,
+                              selectedCpuOption: _selectedCpuOption,
+                              selectedStorageMultiplier:
+                                  _selectedStorageMultiplier,
                               onChanged: (size) =>
                                   setState(() => _selectedDropletSize = size),
                             ),
@@ -380,76 +448,73 @@ class _LocationDropdown extends StatelessWidget {
   }
 }
 
-class _CpuTypeDropdown extends StatelessWidget {
-  final String? selectedType;
-  final ValueChanged<String?> onChanged;
+class _CpuArchitectureSelector extends StatelessWidget {
+  final CpuArchitecture? selectedArchitecture;
+  final ValueChanged<CpuArchitecture?> onChanged;
   final bool isEnabled;
 
-  const _CpuTypeDropdown({
-    required this.selectedType,
+  const _CpuArchitectureSelector({
+    required this.selectedArchitecture,
     required this.onChanged,
     required this.isEnabled,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: selectedType,
+    return DropdownButtonFormField<CpuArchitecture>(
+      initialValue: selectedArchitecture,
       decoration: const InputDecoration(
-        labelText: 'CPU Type',
+        labelText: 'CPU Architecture',
         border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.memory),
       ),
-      items: const [
-        DropdownMenuItem(value: 'basic', child: Text('Basic (Shared CPU)')),
-        DropdownMenuItem(value: 'dedicated', child: Text('Dedicated CPU')),
-      ],
+      items: CpuArchitecture.values.map((architecture) {
+        return DropdownMenuItem<CpuArchitecture>(
+          value: architecture,
+          child: Text(architecture.displayName),
+        );
+      }).toList(),
       onChanged: isEnabled ? onChanged : null,
     );
   }
 }
 
-class _DedicatedCategoryDropdown extends StatelessWidget {
-  final String? selectedCategory;
-  final List<String> categories;
-  final ValueChanged<String?> onChanged;
+class _CpuCategorySelector extends StatelessWidget {
+  final CpuCategory? selectedCategory;
+  final CpuArchitecture architecture;
+  final DropletConfigProvider configProvider;
+  final ValueChanged<CpuCategory?> onChanged;
   final bool isEnabled;
 
-  const _DedicatedCategoryDropdown({
+  const _CpuCategorySelector({
     required this.selectedCategory,
-    required this.categories,
+    required this.architecture,
+    required this.configProvider,
     required this.onChanged,
     required this.isEnabled,
   });
 
-  String _getCategoryDisplayName(String category) {
-    switch (category) {
-      case 'general_purpose':
-        return 'General Purpose';
-      case 'cpu_optimized':
-        return 'CPU Optimized';
-      case 'memory_optimized':
-        return 'Memory Optimized';
-      case 'storage_optimized':
-        return 'Storage Optimized';
-      default:
-        return category;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
+    final availableCategories =
+        configProvider.getAvailableCategoriesForArchitecture(architecture);
+
+    // If only one category is available, hide the selector
+    if (availableCategories.length <= 1) {
+      return const SizedBox.shrink();
+    }
+
+    return DropdownButtonFormField<CpuCategory>(
       initialValue: selectedCategory,
       decoration: const InputDecoration(
-        labelText: 'Dedicated CPU Category',
+        labelText: 'CPU Category',
         border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.tune),
       ),
-      items: categories.map((category) {
-        return DropdownMenuItem<String>(
+      items: availableCategories.map((category) {
+        return DropdownMenuItem<CpuCategory>(
           value: category,
-          child: Text(_getCategoryDisplayName(category)),
+          child: Text(category.displayName),
         );
       }).toList(),
       onChanged: isEnabled ? onChanged : null,
@@ -461,38 +526,49 @@ class _DropletSizeDropdown extends StatelessWidget {
   final DropletSize? selectedSize;
   final DropletConfigProvider configProvider;
   final Region? selectedRegion;
-  final String? selectedCpuType;
-  final String? selectedDedicatedCategory;
+  final CpuArchitecture? selectedCpuArchitecture;
+  final CpuCategory? selectedCpuCategory;
+  final CpuOption? selectedCpuOption;
+  final StorageMultiplier? selectedStorageMultiplier;
   final ValueChanged<DropletSize?> onChanged;
 
   const _DropletSizeDropdown({
     required this.selectedSize,
     required this.configProvider,
     required this.selectedRegion,
-    required this.selectedCpuType,
-    required this.selectedDedicatedCategory,
+    required this.selectedCpuArchitecture,
+    required this.selectedCpuCategory,
+    required this.selectedCpuOption,
+    required this.selectedStorageMultiplier,
     required this.onChanged,
   });
 
   List<DropletSize> _getAvailableSizes() {
-    if (selectedRegion == null || selectedCpuType == null) return [];
-
-    if (selectedCpuType == 'basic') {
-      return configProvider.getSharedCpuSizesForRegion(selectedRegion!.slug);
-    } else if (selectedCpuType == 'dedicated') {
-      return configProvider.getDedicatedCpuSizesForRegion(
-          selectedRegion!.slug, selectedDedicatedCategory);
+    if (selectedRegion == null ||
+        selectedCpuArchitecture == null ||
+        selectedCpuCategory == null ||
+        selectedCpuOption == null ||
+        selectedStorageMultiplier == null) {
+      return [];
     }
 
-    return [];
+    return configProvider.getSizesForStorage(
+      selectedRegion!.slug,
+      selectedCpuArchitecture!,
+      selectedCpuCategory!,
+      selectedCpuOption!,
+      selectedStorageMultiplier!,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final availableSizes = _getAvailableSizes();
     final isEnabled = selectedRegion != null &&
-        selectedCpuType != null &&
-        (selectedCpuType != 'dedicated' || selectedDedicatedCategory != null);
+        selectedCpuArchitecture != null &&
+        selectedCpuCategory != null &&
+        selectedCpuOption != null &&
+        selectedStorageMultiplier != null;
 
     if (!isEnabled) {
       return Column(
@@ -517,7 +593,7 @@ class _DropletSizeDropdown extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Select location and CPU type first',
+                  'Select location, CPU architecture, category, option, and storage first',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
