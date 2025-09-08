@@ -404,6 +404,13 @@ class _AddDropletPageState extends State<AddDropletPage> {
   Future<String> _generateUserData() async {
     final minecraftVersion = _selectedMinecraftVersion!.id;
     final serverJarUrl = await _getServerJarUrl(minecraftVersion);
+    
+    // Calculate memory allocation based on droplet RAM
+    final totalRamMB = _selectedDropletSize!.memory;
+    final osRamMB = _calculateOSRamUsage(totalRamMB);
+    final availableRamMB = totalRamMB - osRamMB;
+    final jvmRamMB = _calculateJvmRamAllocation(availableRamMB);
+    final serverProperties = _generateServerProperties(jvmRamMB);
 
     return '''
 #cloud-config
@@ -416,6 +423,9 @@ runcmd:
   - cd /opt/minecraft
   - wget -O server.jar $serverJarUrl
   - echo "eula=true" > eula.txt
+  - cat > server.properties << 'EOF'
+$serverProperties
+EOF
   - chown -R minecraft:minecraft /opt/minecraft
   - systemctl enable minecraft-server
   - systemctl start minecraft-server
@@ -434,7 +444,7 @@ write_files:
       Type=simple
       User=minecraft
       WorkingDirectory=/opt/minecraft
-      ExecStart=/usr/bin/java -Xmx1G -Xms1G -jar server.jar nogui
+      ExecStart=/usr/bin/java -Xmx${jvmRamMB}M -Xms${jvmRamMB}M -jar server.jar nogui
       Restart=always
       RestartSec=10
 
@@ -442,6 +452,129 @@ write_files:
       WantedBy=multi-user.target
     owner: root:root
     permissions: '0644'
+''';
+  }
+
+  /// Calculates OS RAM usage based on total system RAM
+  int _calculateOSRamUsage(int totalRamMB) {
+    // Ubuntu 22.04 LTS typically uses:
+    // - 512MB: ~200MB for OS
+    // - 1GB: ~300MB for OS  
+    // - 2GB+: ~400MB for OS
+    if (totalRamMB <= 512) {
+      return 200; // Conservative for small droplets
+    } else if (totalRamMB <= 1024) {
+      return 300;
+    } else if (totalRamMB <= 2048) {
+      return 400;
+    } else {
+      return 500; // More services running on larger droplets
+    }
+  }
+
+  /// Calculates appropriate JVM memory allocation
+  int _calculateJvmRamAllocation(int availableRamMB) {
+    // Reserve some memory for JVM overhead and other processes
+    // Use 80% of available RAM, with minimum 256MB and maximum 8GB
+    final jvmRam = (availableRamMB * 0.8).round();
+    return jvmRam.clamp(256, 8192);
+  }
+
+  /// Generates server.properties with appropriate settings for the available RAM
+  String _generateServerProperties(int jvmRamMB) {
+    // Calculate view distance and simulation distance based on available RAM
+    // More RAM = higher distances for better gameplay experience
+    int viewDistance;
+    int simulationDistance;
+    
+    if (jvmRamMB < 512) {
+      // Very limited RAM - minimal settings
+      viewDistance = 6;
+      simulationDistance = 4;
+    } else if (jvmRamMB < 1024) {
+      // Limited RAM - conservative settings
+      viewDistance = 8;
+      simulationDistance = 6;
+    } else if (jvmRamMB < 2048) {
+      // Moderate RAM - balanced settings
+      viewDistance = 10;
+      simulationDistance = 8;
+    } else if (jvmRamMB < 4096) {
+      // Good RAM - comfortable settings
+      viewDistance = 12;
+      simulationDistance = 10;
+    } else {
+      // Plenty of RAM - high settings
+      viewDistance = 16;
+      simulationDistance = 12;
+    }
+
+    return '''# Minecraft server properties
+# Generated for ${jvmRamMB}MB JVM allocation
+
+# Server settings
+server-port=25565
+enable-query=false
+enable-rcon=true
+rcon.port=25575
+rcon.password=minecraft123
+enable-command-block=false
+gamemode=survival
+force-gamemode=false
+hardcore=false
+difficulty=easy
+allow-flight=false
+allow-nether=true
+enable-command-block=false
+spawn-protection=16
+max-world-size=29999984
+
+# Performance settings (optimized for ${jvmRamMB}MB RAM)
+view-distance=$viewDistance
+simulation-distance=$simulationDistance
+max-tick-time=60000
+max-players=20
+network-compression-threshold=256
+max-chunk-loads-per-tick=8
+max-chunk-sends-per-tick=4
+
+# World settings
+level-name=world
+level-seed=
+level-type=minecraft\:normal
+generate-structures=true
+generator-settings={}
+level-name=world
+level-seed=
+level-type=minecraft\:normal
+generate-structures=true
+generator-settings={}
+
+# Player settings
+online-mode=true
+prevent-proxy-connections=false
+pvp=true
+player-idle-timeout=0
+require-resource-pack=false
+resource-pack=
+resource-pack-prompt=
+resource-pack-sha1=
+
+# Chat settings
+enable-status=true
+motd=A Minecraft Server
+enforce-whitelist=false
+white-list=false
+
+# Other settings
+function-permission-level=2
+op-permission-level=4
+broadcast-console-to-ops=true
+broadcast-rcon-to-ops=true
+sync-chunk-writes=true
+enable-jmx-monitoring=false
+enable-query=false
+query.port=25565
 ''';
   }
 
