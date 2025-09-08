@@ -45,8 +45,7 @@ enum CpuOption {
       case CpuCategory.memoryOptimized:
       case CpuCategory.storageOptimized:
       case CpuCategory.gpu:
-        return this ==
-            CpuOption.regular; // Only regular for dedicated categories
+        return this == CpuOption.regular || this == CpuOption.premiumIntel;
     }
   }
 }

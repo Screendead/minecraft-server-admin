@@ -82,7 +82,7 @@ class DigitalOceanApiService {
   /// Throws an exception if the API key is invalid or request fails
   static Future<List<DropletSize>> getDropletSizes(String apiKey) async {
     final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/sizes'),
+      Uri.parse('$_baseUrl/sizes?per_page=200'),
       headers: {
         'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
@@ -205,7 +205,10 @@ class DropletSize {
       if (slug.contains('-amd')) return CpuOption.premiumAmd;
       return CpuOption.regular;
     }
-    return CpuOption.regular; // All dedicated CPU options are regular
+
+    // Handle dedicated CPU Intel variants
+    if (slug.contains('-intel')) return CpuOption.premiumIntel;
+    return CpuOption.regular;
   }
 
   /// Returns the storage multiplier for this droplet
