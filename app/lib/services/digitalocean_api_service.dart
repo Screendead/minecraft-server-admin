@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../utils/unit_formatter.dart';
+import '../models/cpu_architecture.dart';
+import '../models/cpu_category.dart';
+import '../models/cpu_option.dart';
+import '../models/storage_multiplier.dart';
 
 /// Service for interacting with DigitalOcean API
 class DigitalOceanApiService {
@@ -160,26 +164,66 @@ class DropletSize {
   bool get isSharedCpu => slug.startsWith('s-');
 
   /// Returns true if this is a dedicated CPU droplet
-  bool get isDedicatedCpu => slug.startsWith('c-');
+  bool get isDedicatedCpu =>
+      slug.startsWith('c-') ||
+      slug.startsWith('g-') ||
+      slug.startsWith('m-') ||
+      slug.startsWith('so-') ||
+      slug.startsWith('gpu-');
 
-  /// Returns the dedicated CPU category
+  /// Returns the CPU architecture for this droplet
+  CpuArchitecture get cpuArchitecture {
+    if (isSharedCpu) return CpuArchitecture.shared;
+    return CpuArchitecture.dedicated;
+  }
+
+  /// Returns the CPU category for this droplet
+  CpuCategory get cpuCategory {
+    if (isSharedCpu) return CpuCategory.basic;
+
+    if (slug.startsWith('g-') || slug.startsWith('gd-')) {
+      return CpuCategory.generalPurpose;
+    } else if (slug.startsWith('c-') || slug.startsWith('c2-')) {
+      return CpuCategory.cpuOptimized;
+    } else if (slug.startsWith('m-') ||
+        slug.startsWith('m3-') ||
+        slug.startsWith('m6-')) {
+      return CpuCategory.memoryOptimized;
+    } else if (slug.startsWith('so-')) {
+      return CpuCategory.storageOptimized;
+    } else if (slug.startsWith('gpu-')) {
+      return CpuCategory.gpu;
+    }
+
+    return CpuCategory.generalPurpose; // Default fallback
+  }
+
+  /// Returns the CPU option for this droplet
+  CpuOption get cpuOption {
+    if (isSharedCpu) {
+      if (slug.contains('-intel')) return CpuOption.premiumIntel;
+      if (slug.contains('-amd')) return CpuOption.premiumAmd;
+      return CpuOption.regular;
+    }
+    return CpuOption.regular; // All dedicated CPU options are regular
+  }
+
+  /// Returns the storage multiplier for this droplet
+  StorageMultiplier get storageMultiplier {
+    if (slug.startsWith('gd-') || slug.startsWith('c2-')) {
+      return StorageMultiplier.x2;
+    } else if (slug.startsWith('m3-')) {
+      return StorageMultiplier.x3;
+    } else if (slug.startsWith('m6-')) {
+      return StorageMultiplier.x6;
+    }
+    return StorageMultiplier.x1; // Default to 1x
+  }
+
+  /// Returns the dedicated CPU category (legacy method for backward compatibility)
   String? get dedicatedCpuCategory {
     if (!isDedicatedCpu) return null;
-
-    if (slug.startsWith('c-2') ||
-        slug.startsWith('c-4') ||
-        slug.startsWith('c-8')) {
-      return 'general_purpose';
-    } else if (slug.startsWith('c-2-') ||
-        slug.startsWith('c-4-') ||
-        slug.startsWith('c-8-')) {
-      return 'cpu_optimized';
-    } else if (slug.startsWith('c-16') || slug.startsWith('c-32')) {
-      return 'memory_optimized';
-    } else if (slug.startsWith('c-2-') && disk > 100) {
-      return 'storage_optimized';
-    }
-    return 'general_purpose';
+    return cpuCategory.value;
   }
 
   /// Returns true if this droplet is available in the given region
