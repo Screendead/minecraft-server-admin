@@ -414,7 +414,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
   Future<String> _generateUserData() async {
     final minecraftVersion = _selectedMinecraftVersion!.id;
     final serverJarUrl = await _getServerJarUrl(minecraftVersion);
-    
+
     // Calculate memory allocation based on droplet RAM
     final totalRamMB = _selectedDropletSize!.memory;
     final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
@@ -524,7 +524,6 @@ write_files:
     permissions: '0644'
 ''';
   }
-
 
   /// Gets the server JAR URL for the specified Minecraft version
   Future<String> _getServerJarUrl(String version) async {
