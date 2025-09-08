@@ -80,13 +80,12 @@ jobs:
       uses: hrishikesh-kadam/setup-lcov@v1
       
     - name: Generate coverage report
-      uses: zgosalvez/github-actions-report-lcov@v4
-      with:
-        coverage-files: app/coverage/lcov.info
-        artifact-name: code-coverage-report
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: app
-        update-comment: true
+      run: |
+        cd app
+        # Generate HTML coverage report with correct prefix to avoid path duplication
+        genhtml coverage/lcov.info -o coverage/html --prefix $PWD/lib
+      env:
+        LCOV_VERSION: 2.3.1
         
     - name: Deploy coverage report to Firebase
       id: deploy-coverage
@@ -98,12 +97,8 @@ jobs:
         echo "Available coverage files:"
         ls -la app/coverage/
         
-        # The zgosalvez/github-actions-report-lcov action generates HTML in a temp directory
-        # We need to copy from there instead of app/coverage
-        if [ -d "/tmp/__zgosalvez_github-actions-report-lcov/html" ]; then
-          echo "Copying HTML coverage report from LCOV action temp directory..."
-          cp -r /tmp/__zgosalvez_github-actions-report-lcov/html/* coverage-deploy/
-        elif [ -d "app/coverage/html" ]; then
+        # Copy the HTML coverage report generated with correct prefix
+        if [ -d "app/coverage/html" ]; then
           echo "Copying HTML coverage report from html/ subdirectory..."
           cp -r app/coverage/html/* coverage-deploy/
         else
