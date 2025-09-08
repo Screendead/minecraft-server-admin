@@ -54,14 +54,13 @@ void main() {
           .thenAnswer((_) async => http.Response('{"account": {}}', 200));
       DigitalOceanApiService.setClient(mockHttpClient);
 
-      // Create a fresh cache service for each test
-      final cacheService = ApiKeyCacheService();
+      // Reset the singleton cache service between tests
+      ApiKeyCacheService.resetInstance();
 
       service = IOSSecureApiKeyService(
         firestore: mockFirestore,
         auth: mockAuth,
         biometricService: mockBiometricService,
-        cacheService: cacheService,
       );
     });
 

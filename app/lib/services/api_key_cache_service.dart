@@ -23,8 +23,15 @@ class ApiKeyCacheException implements Exception {
 /// - Cache is cleared on user sign out
 /// - Thread-safe operations
 class ApiKeyCacheService {
-  /// Create a new instance
-  ApiKeyCacheService();
+  static ApiKeyCacheService? _instance;
+  factory ApiKeyCacheService() => _instance ??= ApiKeyCacheService._internal();
+  ApiKeyCacheService._internal();
+  
+  /// Reset the singleton instance (for testing only)
+  static void resetInstance() {
+    _instance?.dispose();
+    _instance = null;
+  }
 
   // Private fields
   String? _cachedApiKey;

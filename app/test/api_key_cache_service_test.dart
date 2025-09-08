@@ -1,13 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/services/api_key_cache_service.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
 import 'package:app/services/ios_secure_api_key_service.dart';
 
 import 'api_key_cache_service_test.mocks.dart';
 
-@GenerateMocks([IOSBiometricEncryptionService, IOSSecureApiKeyService])
+@GenerateMocks([
+  IOSBiometricEncryptionService, 
+  IOSSecureApiKeyService,
+  FirebaseFirestore,
+  FirebaseAuth,
+])
 void main() {
   group('ApiKeyCacheService', () {
     late ApiKeyCacheService cacheService;
@@ -15,10 +22,13 @@ void main() {
     late MockIOSSecureApiKeyService mockApiKeyService;
 
     setUp(() {
+      // Reset the singleton instance for each test
+      ApiKeyCacheService.resetInstance();
+      
       cacheService = ApiKeyCacheService();
       mockBiometricService = MockIOSBiometricEncryptionService();
       mockApiKeyService = MockIOSSecureApiKeyService();
-
+      
       // Initialize the service
       cacheService.initialize(
         biometricService: mockBiometricService,
@@ -36,6 +46,8 @@ void main() {
       });
 
       test('should throw exception when not initialized', () {
+        // Reset and create a new instance without initializing
+        ApiKeyCacheService.resetInstance();
         final uninitializedService = ApiKeyCacheService();
         expect(
           () => uninitializedService.getCachedApiKey(),
@@ -189,6 +201,29 @@ void main() {
         
         // Should be cached
         expect(cacheService.getCachedApiKey(), testApiKey);
+      });
+
+      test('should share cache across multiple service instances', () async {
+        const testApiKey = 'shared-cache-key';
+        when(mockApiKeyService.decryptApiKeyFromStorage()).thenAnswer((_) async => testApiKey);
+        
+        // First service instance gets the key
+        final result1 = await cacheService.getApiKey();
+        expect(result1, testApiKey);
+        
+        // Create a new service instance (simulating different parts of the app)
+        final anotherService = IOSSecureApiKeyService(
+          firestore: MockFirebaseFirestore(),
+          auth: MockFirebaseAuth(),
+          biometricService: MockIOSBiometricEncryptionService(),
+        );
+        
+        // Second service instance should get the cached key without decryption
+        final result2 = await anotherService.getApiKey();
+        expect(result2, testApiKey);
+        
+        // Should only call the service once (from the first instance)
+        verify(mockApiKeyService.decryptApiKeyFromStorage()).called(1);
       });
     });
 
