@@ -2,19 +2,20 @@
 
 ## Problem Analysis
 
-The droplet sizes list in the app is missing many available sizes for dedicated CPU categories. After thorough investigation, I identified the root cause:
+The droplet sizes list in the app was missing many available sizes for dedicated CPU categories. After thorough investigation, I identified the root cause:
 
 ### Missing Droplet Sizes
-- **40 Intel variants** for dedicated CPU droplets are not being categorized correctly
+- **127 additional sizes** were not being returned by the API due to pagination
+- **40 Intel variants** for dedicated CPU droplets were not being categorized correctly
 - **6 CPU optimized Intel variants** (c-*-intel)
 - **7 General purpose Intel variants** (g-*-intel, gd-*-intel)
 - **27 Other dedicated CPU Intel variants** (m-*, m3-*, m6-*, so-*, so1_5-*, gpu-*)
-- Current logic only shows regular (non-Intel) variants for dedicated CPU categories
+- Current logic only showed regular (non-Intel) variants for dedicated CPU categories
 
 ### Current vs Expected Count
 - **doctl CLI shows**: 147 total droplet sizes
-- **App currently shows**: ~107 droplet sizes (missing ~40 Intel variants)
-- **Missing**: All Intel variants for dedicated CPU categories
+- **App was showing**: 20 droplet sizes (missing 127 due to pagination + categorization issues)
+- **Missing**: All Intel variants for dedicated CPU categories + most other sizes due to pagination
 
 ### Missing Size Examples
 ```
@@ -36,20 +37,27 @@ so-2vcpu-16gb-intel, so-4vcpu-32gb-intel, so-8vcpu-64gb-intel, so-16vcpu-128gb-i
 ## Root Cause Analysis
 
 ### Issue Location
-The problem is in two files:
+The problem was in three areas:
 
-1. **`app/lib/services/digitalocean_api_service.dart`** - `DropletSize.cpuOption` getter (line 208)
-2. **`app/lib/models/cpu_option.dart`** - `CpuOption.isAvailableFor()` method (lines 48-49)
+1. **API Pagination** - `app/lib/services/digitalocean_api_service.dart` - Missing `per_page=200` parameter
+2. **`app/lib/services/digitalocean_api_service.dart`** - `DropletSize.cpuOption` getter (line 208)
+3. **`app/lib/models/cpu_option.dart`** - `CpuOption.isAvailableFor()` method (lines 48-49)
 
 ### Current Logic Issues
 
-**Issue 1: DropletSize.cpuOption getter**
+**Issue 1: API Pagination**
+```dart
+// Missing per_page parameter - only returned 20 results instead of 147
+Uri.parse('$_baseUrl/sizes')
+```
+
+**Issue 2: DropletSize.cpuOption getter**
 ```dart
 // Current logic in cpuOption getter (line 208)
 return CpuOption.regular; // All dedicated CPU options are regular
 ```
 
-**Issue 2: CpuOption.isAvailableFor() method**
+**Issue 3: CpuOption.isAvailableFor() method**
 ```dart
 // Current logic in isAvailableFor method (lines 48-49)
 return this == CpuOption.regular; // Only regular for dedicated categories
@@ -64,7 +72,22 @@ return this == CpuOption.regular; // Only regular for dedicated categories
 
 ## Required Changes
 
-### 1. Fix DropletSize CPU Option Categorization
+### 1. Fix API Pagination
+
+**File**: `app/lib/services/digitalocean_api_service.dart`
+
+Add `per_page=200` parameter to get all sizes:
+```dart
+final response = await _httpClient.get(
+  Uri.parse('$_baseUrl/sizes?per_page=200'),
+  headers: {
+    'Authorization': 'Bearer $apiKey',
+    'Content-Type': 'application/json',
+  },
+).timeout(const Duration(seconds: 10));
+```
+
+### 2. Fix DropletSize CPU Option Categorization
 
 **File**: `app/lib/services/digitalocean_api_service.dart`
 
@@ -84,7 +107,7 @@ CpuOption get cpuOption {
 }
 ```
 
-### 2. Fix CPU Option Availability Logic
+### 3. Fix CPU Option Availability Logic
 
 **File**: `app/lib/models/cpu_option.dart`
 
@@ -105,7 +128,7 @@ bool isAvailableFor(CpuCategory category) {
 }
 ```
 
-### 3. Update Tests
+### 4. Update Tests
 
 **File**: `app/test/droplet_size_mapping_test.dart`
 
