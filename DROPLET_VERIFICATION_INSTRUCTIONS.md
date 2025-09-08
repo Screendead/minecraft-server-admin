@@ -104,7 +104,8 @@ cat /opt/minecraft/server.properties | grep -E "(view-distance|simulation-distan
 - **512MB RAM**: view-distance=6, simulation-distance=4
 - **1GB RAM**: view-distance=8, simulation-distance=6
 - **2GB RAM**: view-distance=10, simulation-distance=8
-- **4GB+ RAM**: Higher values (12-16 view distance)
+- **4GB RAM**: view-distance=12, simulation-distance=10
+- **8GB+ RAM**: view-distance=16, simulation-distance=12
 
 ### 10. Check JVM Memory Settings
 

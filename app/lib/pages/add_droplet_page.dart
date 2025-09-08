@@ -431,7 +431,7 @@ runcmd:
   - mkdir -p /opt/minecraft
   - chown minecraft:minecraft /opt/minecraft
   - cd /opt/minecraft
-  - wget -O server.jar $serverJarUrl
+  - wget -O server.jar "$serverJarUrl"
   - echo "eula=true" > eula.txt
   - |
     cat > server.properties << 'EOF'
@@ -533,7 +533,8 @@ write_files:
     } catch (e) {
       // Fallback to a generic URL if version-specific fetching fails
       // This ensures the droplet creation doesn't fail due to version manifest issues
-      // Using a more recent stable version as fallback - this should be updated periodically
+      // TODO: Consider implementing a more robust fallback strategy that fetches
+      // the latest stable version or uses a configurable fallback URL
       return 'https://launcher.mojang.com/v1/objects/1b557e7b033b583cd9f66746b7a9ab1ec60ec15b/server.jar';
     }
   }
