@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/digitalocean_api_service.dart';
 import '../services/minecraft_server_service.dart';
-import '../services/ios_secure_api_key_service.dart';
-import '../services/ios_biometric_encryption_service.dart';
+import 'auth_provider.dart' as auth_provider;
 
 /// Provider for managing DigitalOcean droplets and their Minecraft server status
 class DropletsProvider with ChangeNotifier {
@@ -24,20 +22,56 @@ class DropletsProvider with ChangeNotifier {
   List<DropletInfo> get nonMinecraftDroplets =>
       _droplets.where((droplet) => !droplet.isMinecraftServer).toList();
 
-  /// Load all droplets and check for Minecraft servers
-  Future<void> loadDroplets() async {
+  /// Load all droplets and check for Minecraft servers (for testing)
+  Future<void> loadDropletsWithApiKey(String apiKey) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // Get the API key from secure storage
-      final biometricService = IOSBiometricEncryptionService();
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: FirebaseFirestore.instance,
-        auth: FirebaseAuth.instance,
-        biometricService: biometricService,
-      );
+      // Load droplets using the provided API key
+      final dropletsData = await DigitalOceanApiService.getDroplets(apiKey);
+      _droplets = dropletsData.map((data) => DropletInfo.fromJson(data)).toList();
+
+      // Check Minecraft server status for each droplet
+      for (final droplet in _droplets) {
+        if (droplet.publicIp != null) {
+          final minecraftInfo = await MinecraftServerService.checkMinecraftServer(
+            droplet.publicIp!,
+          );
+          if (minecraftInfo != null) {
+            droplet.setMinecraftInfo(minecraftInfo);
+          }
+        }
+      }
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = 'Failed to load droplets: $e';
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Load all droplets and check for Minecraft servers
+  Future<void> loadDroplets(BuildContext context) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Get the API key from the AuthProvider's cached service
+      final authProvider = context.read<auth_provider.AuthProvider>();
+      final apiKeyService = authProvider.iosApiKeyService;
+
+      if (apiKeyService == null) {
+        _error = 'User not authenticated. Please sign in.';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+
       final apiKey = await apiKeyService.getApiKey();
       if (apiKey == null) {
         _error = 'No API key found. Please add your DigitalOcean API key.';
@@ -77,8 +111,8 @@ class DropletsProvider with ChangeNotifier {
   }
 
   /// Refresh the droplets data
-  Future<void> refresh() async {
-    await loadDroplets();
+  Future<void> refresh(BuildContext context) async {
+    await loadDroplets(context);
   }
 }
 

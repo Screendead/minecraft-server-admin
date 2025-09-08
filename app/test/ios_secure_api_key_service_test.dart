@@ -6,7 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/services/ios_secure_api_key_service.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
 import 'package:app/services/digitalocean_api_service.dart';
+import 'package:app/services/api_key_cache_service.dart';
 import 'package:http/http.dart' as http;
+import 'test_helpers.dart';
 
 import 'ios_secure_api_key_service_test.mocks.dart';
 
@@ -52,6 +54,9 @@ void main() {
       when(mockHttpClient.get(any, headers: anyNamed('headers')))
           .thenAnswer((_) async => http.Response('{"account": {}}', 200));
       DigitalOceanApiService.setClient(mockHttpClient);
+
+      // Reset all singletons between tests
+      TestHelpers.resetSingletons();
 
       service = IOSSecureApiKeyService(
         firestore: mockFirestore,

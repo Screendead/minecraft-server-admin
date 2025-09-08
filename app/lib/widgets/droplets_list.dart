@@ -40,7 +40,7 @@ class DropletsList extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => dropletsProvider.refresh(),
+                  onPressed: () => dropletsProvider.refresh(context),
                   child: const Text('Retry'),
                 ),
               ],
@@ -77,7 +77,7 @@ class DropletsList extends StatelessWidget {
         final nonMinecraftDroplets = dropletsProvider.nonMinecraftDroplets;
 
         return RefreshIndicator(
-          onRefresh: () => dropletsProvider.refresh(),
+          onRefresh: () => dropletsProvider.refresh(context),
           child: CustomScrollView(
             slivers: [
               // Minecraft servers section

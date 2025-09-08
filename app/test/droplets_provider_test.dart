@@ -1,13 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:app/providers/droplets_provider.dart';
+import 'package:app/providers/auth_provider.dart';
 import 'package:app/services/digitalocean_api_service.dart';
 import 'package:app/services/minecraft_server_service.dart';
 import 'package:app/services/ios_secure_api_key_service.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
+import 'package:app/services/api_key_cache_service.dart';
+import 'test_helpers.dart';
 
 import 'droplets_provider_test.mocks.dart';
 
@@ -16,6 +21,7 @@ import 'droplets_provider_test.mocks.dart';
   FirebaseFirestore,
   IOSSecureApiKeyService,
   IOSBiometricEncryptionService,
+  BuildContext,
 ])
 void main() {
   group('DropletsProvider', () {
@@ -26,6 +32,9 @@ void main() {
     late MockIOSBiometricEncryptionService mockBiometricService;
 
     setUp(() {
+      // Reset all singletons between tests
+      TestHelpers.resetSingletons();
+      
       mockAuth = MockFirebaseAuth();
       mockFirestore = MockFirebaseFirestore();
       mockApiKeyService = MockIOSSecureApiKeyService();
@@ -42,13 +51,21 @@ void main() {
       expect(provider.nonMinecraftDroplets, isEmpty);
     });
 
-    test('refresh calls loadDroplets', () async {
+    test('refresh method exists and can be called', () {
       // This test verifies that refresh method exists and can be called
       // The actual implementation testing would require mocking static methods
       // which is complex in this architecture
+      
+      // Create a mock BuildContext
+      final mockContext = MockBuildContext();
+      
+      // Act & Assert - should not throw when called
+      expect(() => provider.refresh(mockContext), returnsNormally);
+    });
 
-      // Act & Assert - should not throw
-      expect(() => provider.refresh(), returnsNormally);
+    test('loadDropletsWithApiKey method exists and can be called', () {
+      // This test verifies that the test-friendly method exists
+      expect(() => provider.loadDropletsWithApiKey('test-key'), returnsNormally);
     });
   });
 

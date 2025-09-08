@@ -77,7 +77,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
       }
 
       // Load configuration data using the provider
-      await configProvider.loadConfigurationData(apiKey);
+      await configProvider.loadConfigurationData(context);
 
       if (!mounted) return;
 

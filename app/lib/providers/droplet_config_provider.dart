@@ -1,10 +1,12 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/digitalocean_api_service.dart';
 import '../services/minecraft_versions_service.dart';
 import '../models/cpu_architecture.dart';
 import '../models/cpu_category.dart';
 import '../models/cpu_option.dart';
 import '../models/storage_multiplier.dart';
+import 'auth_provider.dart' as auth_provider;
 
 /// Provider for managing droplet configuration data
 class DropletConfigProvider extends ChangeNotifier {
@@ -143,11 +145,28 @@ class DropletConfigProvider extends ChangeNotifier {
       _minecraftVersions.where((version) => version.isRelease).toList();
 
   /// Load all configuration data
-  Future<void> loadConfigurationData(String apiKey) async {
+  Future<void> loadConfigurationData(BuildContext context) async {
     _setLoading(true);
     _error = null;
 
     try {
+      // Get the API key from the AuthProvider's cached service
+      final authProvider = context.read<auth_provider.AuthProvider>();
+      final apiKeyService = authProvider.iosApiKeyService;
+
+      if (apiKeyService == null) {
+        _error = 'User not authenticated. Please sign in.';
+        _setLoading(false);
+        return;
+      }
+
+      final apiKey = await apiKeyService.getApiKey();
+      if (apiKey == null) {
+        _error = 'No API key found. Please add your DigitalOcean API key.';
+        _setLoading(false);
+        return;
+      }
+
       // Load data in parallel
       final results = await Future.wait([
         DigitalOceanApiService.getDropletSizes(apiKey),
