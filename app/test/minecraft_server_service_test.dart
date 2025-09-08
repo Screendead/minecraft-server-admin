@@ -113,7 +113,6 @@ void main() {
         expect(result, isNull);
       });
 
-
       test('should handle malformed JSON', () async {
         const ipAddress = '192.168.1.100';
         final mockResponse = http.Response('invalid json', 200);

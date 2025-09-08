@@ -84,7 +84,6 @@ void main() {
 
         expect(result, isFalse);
       });
-
     });
 
     group('getAccountInfo', () {

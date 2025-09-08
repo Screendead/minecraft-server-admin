@@ -156,7 +156,6 @@ void main() {
         amsterdamLng,
       );
 
-
       // London should be closer than Amsterdam
       expect(distanceToLondon, lessThan(distanceToAmsterdam));
       expect(distanceToLondon,
