@@ -4,10 +4,10 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i7;
-import 'dart:typed_data' as _i9;
+import 'dart:typed_data' as _i11;
 
-import 'package:app/services/ios_biometric_encryption_service.dart' as _i12;
-import 'package:app/services/ios_secure_api_key_service.dart' as _i10;
+import 'package:app/services/ios_biometric_encryption_service.dart' as _i14;
+import 'package:app/services/ios_secure_api_key_service.dart' as _i12;
 import 'package:cloud_firestore/cloud_firestore.dart' as _i6;
 import 'package:cloud_firestore_platform_interface/cloud_firestore_platform_interface.dart'
     as _i5;
@@ -15,9 +15,12 @@ import 'package:firebase_auth/firebase_auth.dart' as _i4;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart'
     as _i3;
 import 'package:firebase_core/firebase_core.dart' as _i2;
-import 'package:local_auth/local_auth.dart' as _i11;
+import 'package:flutter/foundation.dart' as _i9;
+import 'package:flutter/src/widgets/framework.dart' as _i8;
+import 'package:flutter/src/widgets/notification_listener.dart' as _i15;
+import 'package:local_auth/local_auth.dart' as _i13;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:mockito/src/dummies.dart' as _i10;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -171,6 +174,53 @@ class _FakeFuture_12<T1> extends _i1.SmartFake implements _i7.Future<T1> {
           parent,
           parentInvocation,
         );
+}
+
+class _FakeWidget_13 extends _i1.SmartFake implements _i8.Widget {
+  _FakeWidget_13(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+
+  @override
+  String toString({_i9.DiagnosticLevel? minLevel = _i9.DiagnosticLevel.info}) =>
+      super.toString();
+}
+
+class _FakeInheritedWidget_14 extends _i1.SmartFake
+    implements _i8.InheritedWidget {
+  _FakeInheritedWidget_14(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+
+  @override
+  String toString({_i9.DiagnosticLevel? minLevel = _i9.DiagnosticLevel.info}) =>
+      super.toString();
+}
+
+class _FakeDiagnosticsNode_15 extends _i1.SmartFake
+    implements _i9.DiagnosticsNode {
+  _FakeDiagnosticsNode_15(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+
+  @override
+  String toString({
+    _i9.TextTreeConfiguration? parentConfiguration,
+    _i9.DiagnosticLevel? minLevel = _i9.DiagnosticLevel.info,
+  }) =>
+      super.toString();
 }
 
 /// A class which mocks [FirebaseAuth].
@@ -625,7 +675,7 @@ class MockFirebaseAuth extends _i1.Mock implements _i4.FirebaseAuth {
           #verifyPasswordResetCode,
           [code],
         ),
-        returnValue: _i7.Future<String>.value(_i8.dummyValue<String>(
+        returnValue: _i7.Future<String>.value(_i10.dummyValue<String>(
           this,
           Invocation.method(
             #verifyPasswordResetCode,
@@ -747,7 +797,7 @@ class MockFirebaseFirestore extends _i1.Mock implements _i6.FirebaseFirestore {
   @override
   String get databaseId => (super.noSuchMethod(
         Invocation.getter(#databaseId),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i10.dummyValue<String>(
           this,
           Invocation.getter(#databaseId),
         ),
@@ -838,7 +888,7 @@ class MockFirebaseFirestore extends _i1.Mock implements _i6.FirebaseFirestore {
       ) as _i7.Future<void>);
 
   @override
-  _i6.LoadBundleTask loadBundle(_i9.Uint8List? bundle) => (super.noSuchMethod(
+  _i6.LoadBundleTask loadBundle(_i11.Uint8List? bundle) => (super.noSuchMethod(
         Invocation.method(
           #loadBundle,
           [bundle],
@@ -1004,8 +1054,8 @@ class MockFirebaseFirestore extends _i1.Mock implements _i6.FirebaseFirestore {
             #maxAttempts: maxAttempts,
           },
         ),
-        returnValue: _i8.ifNotNull(
-              _i8.dummyValueOrNull<T>(
+        returnValue: _i10.ifNotNull(
+              _i10.dummyValueOrNull<T>(
                 this,
                 Invocation.method(
                   #runTransaction,
@@ -1067,7 +1117,7 @@ class MockFirebaseFirestore extends _i1.Mock implements _i6.FirebaseFirestore {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockIOSSecureApiKeyService extends _i1.Mock
-    implements _i10.IOSSecureApiKeyService {
+    implements _i12.IOSSecureApiKeyService {
   MockIOSSecureApiKeyService() {
     _i1.throwOnMissingStub(this);
   }
@@ -1086,6 +1136,15 @@ class MockIOSSecureApiKeyService extends _i1.Mock
   _i7.Future<String?> getApiKey() => (super.noSuchMethod(
         Invocation.method(
           #getApiKey,
+          [],
+        ),
+        returnValue: _i7.Future<String?>.value(),
+      ) as _i7.Future<String?>);
+
+  @override
+  _i7.Future<String?> decryptApiKeyFromStorage() => (super.noSuchMethod(
+        Invocation.method(
+          #decryptApiKeyFromStorage,
           [],
         ),
         returnValue: _i7.Future<String?>.value(),
@@ -1139,22 +1198,58 @@ class MockIOSSecureApiKeyService extends _i1.Mock
       ) as _i7.Future<bool>);
 
   @override
-  _i7.Future<List<_i11.BiometricType>> getAvailableBiometrics() =>
+  _i7.Future<List<_i13.BiometricType>> getAvailableBiometrics() =>
       (super.noSuchMethod(
         Invocation.method(
           #getAvailableBiometrics,
           [],
         ),
         returnValue:
-            _i7.Future<List<_i11.BiometricType>>.value(<_i11.BiometricType>[]),
-      ) as _i7.Future<List<_i11.BiometricType>>);
+            _i7.Future<List<_i13.BiometricType>>.value(<_i13.BiometricType>[]),
+      ) as _i7.Future<List<_i13.BiometricType>>);
+
+  @override
+  void onAppPaused() => super.noSuchMethod(
+        Invocation.method(
+          #onAppPaused,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void onAppResumed() => super.noSuchMethod(
+        Invocation.method(
+          #onAppResumed,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void onSignOut() => super.noSuchMethod(
+        Invocation.method(
+          #onSignOut,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  Map<String, dynamic> getCacheStatus() => (super.noSuchMethod(
+        Invocation.method(
+          #getCacheStatus,
+          [],
+        ),
+        returnValue: <String, dynamic>{},
+      ) as Map<String, dynamic>);
 }
 
 /// A class which mocks [IOSBiometricEncryptionService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockIOSBiometricEncryptionService extends _i1.Mock
-    implements _i12.IOSBiometricEncryptionService {
+    implements _i14.IOSBiometricEncryptionService {
   MockIOSBiometricEncryptionService() {
     _i1.throwOnMissingStub(this);
   }
@@ -1169,15 +1264,15 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
       ) as _i7.Future<bool>);
 
   @override
-  _i7.Future<List<_i11.BiometricType>> getAvailableBiometrics() =>
+  _i7.Future<List<_i13.BiometricType>> getAvailableBiometrics() =>
       (super.noSuchMethod(
         Invocation.method(
           #getAvailableBiometrics,
           [],
         ),
         returnValue:
-            _i7.Future<List<_i11.BiometricType>>.value(<_i11.BiometricType>[]),
-      ) as _i7.Future<List<_i11.BiometricType>>);
+            _i7.Future<List<_i13.BiometricType>>.value(<_i13.BiometricType>[]),
+      ) as _i7.Future<List<_i13.BiometricType>>);
 
   @override
   _i7.Future<String> encryptWithBiometrics(String? data) => (super.noSuchMethod(
@@ -1185,7 +1280,7 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
           #encryptWithBiometrics,
           [data],
         ),
-        returnValue: _i7.Future<String>.value(_i8.dummyValue<String>(
+        returnValue: _i7.Future<String>.value(_i10.dummyValue<String>(
           this,
           Invocation.method(
             #encryptWithBiometrics,
@@ -1200,7 +1295,7 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
           #decryptWithBiometrics,
           [],
         ),
-        returnValue: _i7.Future<String>.value(_i8.dummyValue<String>(
+        returnValue: _i7.Future<String>.value(_i10.dummyValue<String>(
           this,
           Invocation.method(
             #decryptWithBiometrics,
@@ -1236,4 +1331,154 @@ class MockIOSBiometricEncryptionService extends _i1.Mock
         returnValue: _i7.Future<void>.value(),
         returnValueForMissingStub: _i7.Future<void>.value(),
       ) as _i7.Future<void>);
+}
+
+/// A class which mocks [BuildContext].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockBuildContext extends _i1.Mock implements _i8.BuildContext {
+  MockBuildContext() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i8.Widget get widget => (super.noSuchMethod(
+        Invocation.getter(#widget),
+        returnValue: _FakeWidget_13(
+          this,
+          Invocation.getter(#widget),
+        ),
+      ) as _i8.Widget);
+
+  @override
+  bool get mounted => (super.noSuchMethod(
+        Invocation.getter(#mounted),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get debugDoingBuild => (super.noSuchMethod(
+        Invocation.getter(#debugDoingBuild),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  _i8.InheritedWidget dependOnInheritedElement(
+    _i8.InheritedElement? ancestor, {
+    Object? aspect,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #dependOnInheritedElement,
+          [ancestor],
+          {#aspect: aspect},
+        ),
+        returnValue: _FakeInheritedWidget_14(
+          this,
+          Invocation.method(
+            #dependOnInheritedElement,
+            [ancestor],
+            {#aspect: aspect},
+          ),
+        ),
+      ) as _i8.InheritedWidget);
+
+  @override
+  void visitAncestorElements(_i8.ConditionalElementVisitor? visitor) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #visitAncestorElements,
+          [visitor],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void visitChildElements(_i8.ElementVisitor? visitor) => super.noSuchMethod(
+        Invocation.method(
+          #visitChildElements,
+          [visitor],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void dispatchNotification(_i15.Notification? notification) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #dispatchNotification,
+          [notification],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i9.DiagnosticsNode describeElement(
+    String? name, {
+    _i9.DiagnosticsTreeStyle? style = _i9.DiagnosticsTreeStyle.errorProperty,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #describeElement,
+          [name],
+          {#style: style},
+        ),
+        returnValue: _FakeDiagnosticsNode_15(
+          this,
+          Invocation.method(
+            #describeElement,
+            [name],
+            {#style: style},
+          ),
+        ),
+      ) as _i9.DiagnosticsNode);
+
+  @override
+  _i9.DiagnosticsNode describeWidget(
+    String? name, {
+    _i9.DiagnosticsTreeStyle? style = _i9.DiagnosticsTreeStyle.errorProperty,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #describeWidget,
+          [name],
+          {#style: style},
+        ),
+        returnValue: _FakeDiagnosticsNode_15(
+          this,
+          Invocation.method(
+            #describeWidget,
+            [name],
+            {#style: style},
+          ),
+        ),
+      ) as _i9.DiagnosticsNode);
+
+  @override
+  List<_i9.DiagnosticsNode> describeMissingAncestor(
+          {required Type? expectedAncestorType}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #describeMissingAncestor,
+          [],
+          {#expectedAncestorType: expectedAncestorType},
+        ),
+        returnValue: <_i9.DiagnosticsNode>[],
+      ) as List<_i9.DiagnosticsNode>);
+
+  @override
+  _i9.DiagnosticsNode describeOwnershipChain(String? name) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #describeOwnershipChain,
+          [name],
+        ),
+        returnValue: _FakeDiagnosticsNode_15(
+          this,
+          Invocation.method(
+            #describeOwnershipChain,
+            [name],
+          ),
+        ),
+      ) as _i9.DiagnosticsNode);
 }

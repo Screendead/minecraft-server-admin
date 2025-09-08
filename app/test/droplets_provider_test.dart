@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +17,7 @@ import 'droplets_provider_test.mocks.dart';
   FirebaseFirestore,
   IOSSecureApiKeyService,
   IOSBiometricEncryptionService,
+  BuildContext,
 ])
 void main() {
   group('DropletsProvider', () {
@@ -47,8 +49,11 @@ void main() {
       // The actual implementation testing would require mocking static methods
       // which is complex in this architecture
 
+      // Create a mock BuildContext
+      final mockContext = MockBuildContext();
+
       // Act & Assert - should not throw
-      expect(() => provider.refresh(), returnsNormally);
+      expect(() => provider.refresh(mockContext), returnsNormally);
     });
   });
 

@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/services/ios_secure_api_key_service.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
 import 'package:app/services/digitalocean_api_service.dart';
+import 'package:app/services/api_key_cache_service.dart';
 import 'package:http/http.dart' as http;
 
 import 'ios_secure_api_key_service_test.mocks.dart';
@@ -53,10 +54,14 @@ void main() {
           .thenAnswer((_) async => http.Response('{"account": {}}', 200));
       DigitalOceanApiService.setClient(mockHttpClient);
 
+      // Create a fresh cache service for each test
+      final cacheService = ApiKeyCacheService.test();
+
       service = IOSSecureApiKeyService(
         firestore: mockFirestore,
         auth: mockAuth,
         biometricService: mockBiometricService,
+        cacheService: cacheService,
       );
     });
 

@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/encryption_service.dart';
+import '../services/ios_biometric_encryption_service.dart';
+import '../services/ios_secure_api_key_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth;
@@ -13,6 +15,9 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   bool _isLoading = true;
   String? _errorMessage;
+
+  // API key caching services
+  IOSSecureApiKeyService? _iosApiKeyService;
 
   AuthProvider({
     required FirebaseAuth firebaseAuth,
@@ -30,12 +35,25 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isSignedIn => _user != null;
   String? get errorMessage => _errorMessage;
-  
+
   // Expose services for other providers
   FirebaseAuth get firebaseAuth => _firebaseAuth;
   FirebaseFirestore get firestore => _firestore;
   SharedPreferences get sharedPreferences => _sharedPreferences;
   EncryptionService get encryptionService => _encryptionService;
+
+  // Get the iOS API key service (lazy initialization)
+  IOSSecureApiKeyService? get iosApiKeyService {
+    if (_iosApiKeyService == null && _user != null) {
+      final biometricService = IOSBiometricEncryptionService();
+      _iosApiKeyService = IOSSecureApiKeyService(
+        firestore: _firestore,
+        auth: _firebaseAuth,
+        biometricService: biometricService,
+      );
+    }
+    return _iosApiKeyService;
+  }
 
   void _init() {
     // Listen to Firebase Auth state changes
@@ -43,6 +61,13 @@ class AuthProvider extends ChangeNotifier {
       (User? user) {
         _user = user;
         _isLoading = false;
+
+        // Clear API key services when user signs out
+        if (user == null) {
+          _iosApiKeyService?.onSignOut();
+          _iosApiKeyService = null;
+        }
+
         notifyListeners();
       },
       onError: (error) {
@@ -107,9 +132,15 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> signOut() async {
     try {
+      // Clear API key cache before signing out
+      _iosApiKeyService?.onSignOut();
+
       await _firebaseAuth.signOut();
       // Clear stored API key
       await _sharedPreferences.remove('encrypted_api_key');
+
+      // Clear service references
+      _iosApiKeyService = null;
     } catch (e) {
       _setError('Sign out failed: ${e.toString()}');
     }
@@ -159,5 +190,19 @@ class AuthProvider extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Handle app lifecycle changes
+  void onAppPaused() {
+    _iosApiKeyService?.onAppPaused();
+  }
+
+  void onAppResumed() {
+    _iosApiKeyService?.onAppResumed();
+  }
+
+  /// Get API key cache status for debugging
+  Map<String, dynamic>? getApiKeyCacheStatus() {
+    return _iosApiKeyService?.getCacheStatus();
   }
 }

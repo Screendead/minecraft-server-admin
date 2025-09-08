@@ -7,3 +7,6 @@ firestore-debug.log
 
 # Secrets
 .env
+
+# TODOs
+TODO.md

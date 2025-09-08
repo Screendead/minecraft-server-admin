@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // Load droplets when the page is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DropletsProvider>().loadDroplets();
+      context.read<DropletsProvider>().loadDroplets(context);
     });
   }
 
@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<DropletsProvider>().refresh();
+              context.read<DropletsProvider>().refresh(context);
             },
           ),
           IconButton(

@@ -3,20 +3,31 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:local_auth/local_auth.dart';
 import 'ios_biometric_encryption_service.dart';
 import 'digitalocean_api_service.dart';
+import 'api_key_cache_service.dart';
 
 /// iOS Secure API Key Service for storing encrypted API keys in Firestore
+/// Now includes in-memory caching to reduce Face ID/Touch ID prompts
 class IOSSecureApiKeyService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final IOSBiometricEncryptionService _biometricService;
+  final ApiKeyCacheService _cacheService;
 
   IOSSecureApiKeyService({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     required IOSBiometricEncryptionService biometricService,
+    ApiKeyCacheService? cacheService,
   })  : _firestore = firestore,
         _auth = auth,
-        _biometricService = biometricService;
+        _biometricService = biometricService,
+        _cacheService = cacheService ?? ApiKeyCacheService() {
+    // Initialize the cache service with our dependencies
+    _cacheService.initialize(
+      biometricService: _biometricService,
+      apiKeyService: this,
+    );
+  }
 
   /// Stores an encrypted API key in Firestore with biometric protection
   Future<void> storeApiKey(String apiKey) async {
@@ -66,7 +77,14 @@ class IOSSecureApiKeyService {
   }
 
   /// Retrieves and decrypts the API key using biometric authentication
+  /// Uses in-memory cache to avoid repeated Face ID/Touch ID prompts
   Future<String?> getApiKey() async {
+    return await _cacheService.getApiKey();
+  }
+
+  /// Internal method to decrypt API key from secure storage
+  /// This is called by the cache service when needed
+  Future<String?> decryptApiKeyFromStorage() async {
     final user = _auth.currentUser;
     if (user == null) {
       throw Exception('User must be authenticated to retrieve API key');
@@ -133,6 +151,9 @@ class IOSSecureApiKeyService {
             },
         'lastUpdated': FieldValue.serverTimestamp(),
       });
+
+      // Clear the cache since we have a new API key
+      _cacheService.clearCache();
     } catch (e) {
       if (e is BiometricAuthenticationException ||
           e is BiometricNotAvailableException) {
@@ -179,6 +200,9 @@ class IOSSecureApiKeyService {
 
       // Clear from local secure storage
       await _biometricService.clearEncryptedData();
+
+      // Clear the cache
+      _cacheService.clearCache();
     } catch (e) {
       throw Exception('Failed to clear API key: $e');
     }
@@ -213,5 +237,25 @@ class IOSSecureApiKeyService {
   /// Gets available biometric types
   Future<List<BiometricType>> getAvailableBiometrics() async {
     return await _biometricService.getAvailableBiometrics();
+  }
+
+  /// Handle app lifecycle changes - clear cache when app goes to background
+  void onAppPaused() {
+    _cacheService.onAppPaused();
+  }
+
+  /// Handle app resume
+  void onAppResumed() {
+    _cacheService.onAppResumed();
+  }
+
+  /// Clear cache on sign out
+  void onSignOut() {
+    _cacheService.clearCache();
+  }
+
+  /// Get cache status for debugging
+  Map<String, dynamic> getCacheStatus() {
+    return _cacheService.getCacheStatus();
   }
 }
