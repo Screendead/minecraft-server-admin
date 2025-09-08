@@ -83,7 +83,8 @@ jobs:
       run: |
         cd app
         # Generate HTML coverage report with correct prefix to avoid path duplication
-        genhtml coverage/lcov.info -o coverage/html --prefix "$PWD/lib"
+        # Use absolute path to ensure correct prefix removal
+        genhtml coverage/lcov.info -o coverage/html --prefix "$(pwd)/lib"
       env:
         LCOV_VERSION: 2.3.1
         
@@ -195,7 +196,7 @@ jobs:
           
           const botComment = comments.find(comment => 
             comment.user.type === 'Bot' && 
-            comment.body.includes('🚀 iOS Build completed')
+            comment.body.includes('🚀 iOS Configuration verified!')
           );
           
           const coverageUrl = '${{ steps.deploy-coverage.outputs.coverage-url }}';
