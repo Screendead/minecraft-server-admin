@@ -104,37 +104,14 @@ class _CpuOptionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    option.displayName,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? colorScheme.primary
-                          : colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                if (option == CpuOption.premiumIntel)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'NEW',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-              ],
+            Text(
+              option.displayName,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
