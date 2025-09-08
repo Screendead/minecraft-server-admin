@@ -1,213 +1,241 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app/pages/add_droplet_page.dart';
-import 'package:app/services/digitalocean_api_service.dart';
+import 'package:app/utils/memory_calculator.dart';
 
 void main() {
   group('Memory Allocation Logic', () {
-    late _TestAddDropletPage testPage;
-
-    setUp(() {
-      testPage = _TestAddDropletPage();
-    });
-
     group('OS RAM Usage Calculation', () {
       test('should calculate correct OS RAM for 512MB droplet', () {
-        final osRam = testPage.calculateOSRamUsage(512);
+        final osRam = MemoryCalculator.calculateOSRamUsage(512);
         expect(osRam, 200);
       });
 
       test('should calculate correct OS RAM for 1GB droplet', () {
-        final osRam = testPage.calculateOSRamUsage(1024);
+        final osRam = MemoryCalculator.calculateOSRamUsage(1024);
         expect(osRam, 300);
       });
 
       test('should calculate correct OS RAM for 2GB droplet', () {
-        final osRam = testPage.calculateOSRamUsage(2048);
+        final osRam = MemoryCalculator.calculateOSRamUsage(2048);
         expect(osRam, 400);
       });
 
       test('should calculate correct OS RAM for 4GB+ droplet', () {
-        final osRam = testPage.calculateOSRamUsage(4096);
+        final osRam = MemoryCalculator.calculateOSRamUsage(4096);
         expect(osRam, 500);
       });
 
       test('should calculate correct OS RAM for 8GB droplet', () {
-        final osRam = testPage.calculateOSRamUsage(8192);
+        final osRam = MemoryCalculator.calculateOSRamUsage(8192);
         expect(osRam, 500);
       });
     });
 
     group('JVM RAM Allocation Calculation', () {
       test('should calculate correct JVM RAM for 512MB total (312MB available)', () {
-        final jvmRam = testPage.calculateJvmRamAllocation(312);
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(312);
         expect(jvmRam, 256); // 312 * 0.8 = 249.6, but clamped to minimum 256
       });
 
       test('should calculate correct JVM RAM for 1GB total (724MB available)', () {
-        final jvmRam = testPage.calculateJvmRamAllocation(724);
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(724);
         expect(jvmRam, 579); // 724 * 0.8 = 579.2, rounded to 579
       });
 
       test('should calculate correct JVM RAM for 2GB total (1648MB available)', () {
-        final jvmRam = testPage.calculateJvmRamAllocation(1648);
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(1648);
         expect(jvmRam, 1318); // 1648 * 0.8 = 1318.4, rounded to 1318
       });
 
-      test('should respect minimum JVM RAM of 256MB', () {
-        final jvmRam = testPage.calculateJvmRamAllocation(200);
-        expect(jvmRam, 256); // Should clamp to minimum
+      test('should calculate correct JVM RAM for 4GB total (3596MB available)', () {
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(3596);
+        expect(jvmRam, 2877); // 3596 * 0.8 = 2876.8, rounded to 2877
       });
 
-      test('should not limit JVM RAM for large droplets', () {
-        final jvmRam = testPage.calculateJvmRamAllocation(12000);
-        expect(jvmRam, 9600); // 12000 * 0.8 = 9600, no maximum limit
+      test('should calculate correct JVM RAM for 8GB total (7596MB available)', () {
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(7596);
+        expect(jvmRam, 6077); // 7596 * 0.8 = 6076.8, rounded to 6077
       });
 
-      test('should scale JVM RAM for very large droplets', () {
-        final jvmRam = testPage.calculateJvmRamAllocation(32000);
-        expect(jvmRam, 25600); // 32000 * 0.8 = 25600, scales with available RAM
+      test('should enforce minimum 256MB JVM RAM', () {
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(100);
+        expect(jvmRam, 256); // Should be clamped to minimum 256
+      });
+
+      test('should not enforce maximum JVM RAM limit', () {
+        final jvmRam = MemoryCalculator.calculateJvmRamAllocation(10000);
+        expect(jvmRam, 8000); // 10000 * 0.8 = 8000, no maximum limit
       });
     });
 
-    group('Server Properties Generation', () {
-      test('should generate minimal settings for 256MB JVM', () {
-        final properties = testPage.generateServerProperties(256);
-        expect(properties, contains('view-distance=6'));
-        expect(properties, contains('simulation-distance=4'));
-        expect(properties, contains('Generated for 256MB JVM allocation'));
+    group('View Distance Calculation', () {
+      test('should calculate correct view distance for 256MB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(256);
+        expect(viewDistance, 6);
       });
 
-      test('should generate conservative settings for 512MB JVM', () {
-        final properties = testPage.generateServerProperties(512);
-        expect(properties, contains('view-distance=8'));
-        expect(properties, contains('simulation-distance=6'));
-        expect(properties, contains('Generated for 512MB JVM allocation'));
+      test('should calculate correct view distance for 512MB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(512);
+        expect(viewDistance, 8);
       });
 
-      test('should generate balanced settings for 1GB JVM', () {
-        final properties = testPage.generateServerProperties(1024);
-        expect(properties, contains('view-distance=10'));
-        expect(properties, contains('simulation-distance=8'));
-        expect(properties, contains('Generated for 1024MB JVM allocation'));
+      test('should calculate correct view distance for 768MB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(768);
+        expect(viewDistance, 8);
       });
 
-      test('should generate comfortable settings for 2GB JVM', () {
-        final properties = testPage.generateServerProperties(2048);
-        expect(properties, contains('view-distance=12'));
-        expect(properties, contains('simulation-distance=10'));
-        expect(properties, contains('Generated for 2048MB JVM allocation'));
+      test('should calculate correct view distance for 1GB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(1024);
+        expect(viewDistance, 10);
       });
 
-      test('should generate high settings for 4GB+ JVM', () {
-        final properties = testPage.generateServerProperties(4096);
-        expect(properties, contains('view-distance=16'));
-        expect(properties, contains('simulation-distance=12'));
-        expect(properties, contains('Generated for 4096MB JVM allocation'));
+      test('should calculate correct view distance for 1.5GB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(1536);
+        expect(viewDistance, 10);
+      });
+
+      test('should calculate correct view distance for 2GB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(2048);
+        expect(viewDistance, 12);
+      });
+
+      test('should calculate correct view distance for 3GB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(3072);
+        expect(viewDistance, 12);
+      });
+
+      test('should calculate correct view distance for 4GB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(4096);
+        expect(viewDistance, 16);
+      });
+
+      test('should calculate correct view distance for 8GB JVM', () {
+        final viewDistance = MemoryCalculator.calculateViewDistance(8192);
+        expect(viewDistance, 16);
+      });
+    });
+
+    group('Simulation Distance Calculation', () {
+      test('should calculate correct simulation distance for 256MB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(256);
+        expect(simulationDistance, 4);
+      });
+
+      test('should calculate correct simulation distance for 512MB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(512);
+        expect(simulationDistance, 6);
+      });
+
+      test('should calculate correct simulation distance for 768MB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(768);
+        expect(simulationDistance, 6);
+      });
+
+      test('should calculate correct simulation distance for 1GB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(1024);
+        expect(simulationDistance, 8);
+      });
+
+      test('should calculate correct simulation distance for 1.5GB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(1536);
+        expect(simulationDistance, 8);
+      });
+
+      test('should calculate correct simulation distance for 2GB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(2048);
+        expect(simulationDistance, 10);
+      });
+
+      test('should calculate correct simulation distance for 3GB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(3072);
+        expect(simulationDistance, 10);
+      });
+
+      test('should calculate correct simulation distance for 4GB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(4096);
+        expect(simulationDistance, 12);
+      });
+
+      test('should calculate correct simulation distance for 8GB JVM', () {
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(8192);
+        expect(simulationDistance, 12);
       });
     });
 
     group('End-to-End Memory Calculation', () {
-      test('should work correctly for smallest droplet (512MB total)', () {
-        // 512MB total - 200MB OS = 312MB available
-        // 312MB * 0.8 = 249.6MB, clamped to 256MB minimum
-        final totalRam = 512;
-        final osRam = testPage.calculateOSRamUsage(totalRam);
-        final availableRam = totalRam - osRam;
-        final jvmRam = testPage.calculateJvmRamAllocation(availableRam);
-        
-        expect(osRam, 200);
-        expect(availableRam, 312);
-        expect(jvmRam, 256);
+      test('should calculate correct values for 512MB droplet', () {
+        final totalRamMB = 512;
+        final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
+        final availableRamMB = totalRamMB - osRamMB;
+        final jvmRamMB = MemoryCalculator.calculateJvmRamAllocation(availableRamMB);
+        final viewDistance = MemoryCalculator.calculateViewDistance(jvmRamMB);
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(jvmRamMB);
+
+        expect(osRamMB, 200);
+        expect(availableRamMB, 312);
+        expect(jvmRamMB, 256);
+        expect(viewDistance, 6);
+        expect(simulationDistance, 4);
       });
 
-      test('should work correctly for 1GB droplet', () {
-        // 1024MB total - 300MB OS = 724MB available
-        // 724MB * 0.8 = 579.2MB
-        final totalRam = 1024;
-        final osRam = testPage.calculateOSRamUsage(totalRam);
-        final availableRam = totalRam - osRam;
-        final jvmRam = testPage.calculateJvmRamAllocation(availableRam);
-        
-        expect(osRam, 300);
-        expect(availableRam, 724);
-        expect(jvmRam, 579);
+      test('should calculate correct values for 1GB droplet', () {
+        final totalRamMB = 1024;
+        final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
+        final availableRamMB = totalRamMB - osRamMB;
+        final jvmRamMB = MemoryCalculator.calculateJvmRamAllocation(availableRamMB);
+        final viewDistance = MemoryCalculator.calculateViewDistance(jvmRamMB);
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(jvmRamMB);
+
+        expect(osRamMB, 300);
+        expect(availableRamMB, 724);
+        expect(jvmRamMB, 579);
+        expect(viewDistance, 8);
+        expect(simulationDistance, 6);
       });
 
-      test('should work correctly for 2GB droplet', () {
-        // 2048MB total - 400MB OS = 1648MB available
-        // 1648MB * 0.8 = 1318.4MB
-        final totalRam = 2048;
-        final osRam = testPage.calculateOSRamUsage(totalRam);
-        final availableRam = totalRam - osRam;
-        final jvmRam = testPage.calculateJvmRamAllocation(availableRam);
-        
-        expect(osRam, 400);
-        expect(availableRam, 1648);
-        expect(jvmRam, 1318);
+      test('should calculate correct values for 2GB droplet', () {
+        final totalRamMB = 2048;
+        final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
+        final availableRamMB = totalRamMB - osRamMB;
+        final jvmRamMB = MemoryCalculator.calculateJvmRamAllocation(availableRamMB);
+        final viewDistance = MemoryCalculator.calculateViewDistance(jvmRamMB);
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(jvmRamMB);
+
+        expect(osRamMB, 400);
+        expect(availableRamMB, 1648);
+        expect(jvmRamMB, 1318);
+        expect(viewDistance, 10);
+        expect(simulationDistance, 8);
+      });
+
+      test('should calculate correct values for 4GB droplet', () {
+        final totalRamMB = 4096;
+        final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
+        final availableRamMB = totalRamMB - osRamMB;
+        final jvmRamMB = MemoryCalculator.calculateJvmRamAllocation(availableRamMB);
+        final viewDistance = MemoryCalculator.calculateViewDistance(jvmRamMB);
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(jvmRamMB);
+
+        expect(osRamMB, 500);
+        expect(availableRamMB, 3596);
+        expect(jvmRamMB, 2877);
+        expect(viewDistance, 12);
+        expect(simulationDistance, 10);
+      });
+
+      test('should calculate correct values for 8GB droplet', () {
+        final totalRamMB = 8192;
+        final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
+        final availableRamMB = totalRamMB - osRamMB;
+        final jvmRamMB = MemoryCalculator.calculateJvmRamAllocation(availableRamMB);
+        final viewDistance = MemoryCalculator.calculateViewDistance(jvmRamMB);
+        final simulationDistance = MemoryCalculator.calculateSimulationDistance(jvmRamMB);
+
+        expect(osRamMB, 500);
+        expect(availableRamMB, 7692);
+        expect(jvmRamMB, 6154);
+        expect(viewDistance, 16);
+        expect(simulationDistance, 12);
       });
     });
   });
-}
-
-/// Test class that exposes the private methods for testing
-class _TestAddDropletPage {
-  int calculateOSRamUsage(int totalRamMB) {
-    // Ubuntu 22.04 LTS typically uses:
-    // - 512MB: ~200MB for OS
-    // - 1GB: ~300MB for OS  
-    // - 2GB+: ~400MB for OS
-    if (totalRamMB <= 512) {
-      return 200; // Conservative for small droplets
-    } else if (totalRamMB <= 1024) {
-      return 300;
-    } else if (totalRamMB <= 2048) {
-      return 400;
-    } else {
-      return 500; // More services running on larger droplets
-    }
-  }
-
-  int calculateJvmRamAllocation(int availableRamMB) {
-    // Reserve some memory for JVM overhead and other processes
-    // Use 80% of available RAM, with minimum 256MB (no maximum limit)
-    final jvmRam = (availableRamMB * 0.8).round();
-    return jvmRam < 256 ? 256 : jvmRam; // Only enforce minimum, no maximum
-  }
-
-  String generateServerProperties(int jvmRamMB) {
-    // Calculate view distance and simulation distance based on available RAM
-    // More RAM = higher distances for better gameplay experience
-    int viewDistance;
-    int simulationDistance;
-    
-    if (jvmRamMB < 512) {
-      // Very limited RAM - minimal settings
-      viewDistance = 6;
-      simulationDistance = 4;
-    } else if (jvmRamMB < 1024) {
-      // Limited RAM - conservative settings
-      viewDistance = 8;
-      simulationDistance = 6;
-    } else if (jvmRamMB < 2048) {
-      // Moderate RAM - balanced settings
-      viewDistance = 10;
-      simulationDistance = 8;
-    } else if (jvmRamMB < 4096) {
-      // Good RAM - comfortable settings
-      viewDistance = 12;
-      simulationDistance = 10;
-    } else {
-      // Plenty of RAM - high settings
-      viewDistance = 16;
-      simulationDistance = 12;
-    }
-
-    return '''# Minecraft server properties
-# Generated for ${jvmRamMB}MB JVM allocation
-
-# Performance settings (optimized for ${jvmRamMB}MB RAM)
-view-distance=$viewDistance
-simulation-distance=$simulationDistance
-''';
-  }
 }
