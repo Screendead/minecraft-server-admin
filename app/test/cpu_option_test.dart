@@ -53,7 +53,7 @@ void main() {
       });
 
       test(
-          'should return true for regular and premium Intel options with dedicated categories',
+          'should return true for both regular and premium Intel options with dedicated categories',
           () {
         expect(CpuOption.regular.isAvailableFor(CpuCategory.generalPurpose),
             isTrue);
