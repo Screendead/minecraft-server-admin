@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:app/services/minecraft_server_service.dart';
 
 import 'minecraft_server_service_test.mocks.dart';
@@ -20,17 +20,15 @@ void main() {
       MinecraftServerService.setClient(http.Client());
     });
 
-    test(
-        'checkMinecraftServer returns MinecraftServerInfo when server is online',
-        () async {
-      // Arrange
-      const ipAddress = '192.168.1.100';
-      final mockResponse = http.Response('''
+    group('checkMinecraftServer', () {
+      test('should return server info for online server', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
         {
           "online": true,
-          "ip": "$ipAddress",
+          "hostname": "test.server.com",
+          "ip": "192.168.1.100",
           "port": 25565,
-          "hostname": "Test Server",
           "version": "1.20.1",
           "protocol": 763,
           "players": {
@@ -39,192 +37,521 @@ void main() {
             "list": ["Player1", "Player2"]
           },
           "motd": {
-            "clean": ["A Minecraft Server"],
-            "raw": ["§bA Minecraft Server"]
+            "clean": ["Welcome to our server!"],
+            "raw": ["§aWelcome to our server!"]
           },
           "software": "Paper"
         }
-      ''', 200);
+        ''', 200);
 
-      when(mockClient.get(
-        Uri.parse('https://api.mcsrvstat.us/2/$ipAddress'),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => mockResponse);
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
 
-      // Act
-      final result =
-          await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
 
-      // Assert
-      expect(result, isNotNull);
-      expect(result!.ip, equals(ipAddress));
-      expect(result.port, equals(25565));
-      expect(result.hostname, equals('Test Server'));
-      expect(result.version, equals('1.20.1'));
-      expect(result.protocol, equals('763'));
-      expect(result.playersOnline, equals(5));
-      expect(result.playersMax, equals(20));
-      expect(result.software, equals('Paper'));
-      expect(result.motd, equals('A Minecraft Server'));
-      expect(result.players, equals(['Player1', 'Player2']));
-    });
+        expect(result, isNotNull);
+        expect(result!.hostname, equals('test.server.com'));
+        expect(result.ip, equals('192.168.1.100'));
+        expect(result.port, equals(25565));
+        expect(result.version, equals('1.20.1'));
+        expect(result.protocol, equals('763'));
+        expect(result.playersOnline, equals(5));
+        expect(result.playersMax, equals(20));
+        expect(result.motd, equals('Welcome to our server!'));
+        expect(result.software, equals('Paper'));
+        expect(result.players, equals(['Player1', 'Player2']));
+      });
 
-    test('checkMinecraftServer returns null when server is offline', () async {
-      // Arrange
-      const ipAddress = '192.168.1.100';
-      final mockResponse = http.Response('''
+      test('should return null for offline server', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
         {
           "online": false
         }
-      ''', 200);
+        ''', 200);
 
-      when(mockClient.get(
-        Uri.parse('https://api.mcsrvstat.us/2/$ipAddress'),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => mockResponse);
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
 
-      // Act
-      final result =
-          await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
 
-      // Assert
-      expect(result, isNull);
-    });
+        expect(result, isNull);
+      });
 
-    test('checkMinecraftServer returns null when API returns error status',
-        () async {
-      // Arrange
-      const ipAddress = '192.168.1.100';
-      final mockResponse = http.Response('Not Found', 404);
+      test('should return null for non-200 status code', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('Not Found', 404);
 
-      when(mockClient.get(
-        Uri.parse('https://api.mcsrvstat.us/2/$ipAddress'),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => mockResponse);
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
 
-      // Act
-      final result =
-          await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
 
-      // Assert
-      expect(result, isNull);
-    });
+        expect(result, isNull);
+      });
 
-    test('checkMinecraftServer returns null when network error occurs',
-        () async {
-      // Arrange
-      const ipAddress = '192.168.1.100';
+      test('should return null for network error', () async {
+        const ipAddress = '192.168.1.100';
 
-      when(mockClient.get(
-        Uri.parse('https://api.mcsrvstat.us/2/$ipAddress'),
-        headers: anyNamed('headers'),
-      )).thenThrow(Exception('Network error'));
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenThrow(Exception('Network error'));
 
-      // Act
-      final result =
-          await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
 
-      // Assert
-      expect(result, isNull);
-    });
+        expect(result, isNull);
+      });
 
-    test('checkMinecraftServer handles missing optional fields', () async {
-      // Arrange
-      const ipAddress = '192.168.1.100';
-      final mockResponse = http.Response('''
+      test('should return null for timeout', () async {
+        const ipAddress = '192.168.1.100';
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async {
+          await Future.delayed(Duration(seconds: 10));
+          return http.Response('{}', 200);
+        });
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNull);
+      });
+
+      test('should handle malformed JSON', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('invalid json', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNull);
+      });
+
+      test('should handle missing fields in JSON', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
+        {
+          "online": true
+        }
+        ''', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNotNull);
+        expect(result!.hostname, equals('Unknown'));
+        expect(result.ip, equals('Unknown'));
+        expect(result.port, equals(25565));
+        expect(result.version, equals('Unknown'));
+        expect(result.protocol, equals('Unknown'));
+        expect(result.playersOnline, equals(0));
+        expect(result.playersMax, equals(0));
+        expect(result.motd, isNull);
+        expect(result.software, isNull);
+        expect(result.players, isNull);
+      });
+
+      test('should handle partial player data', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
         {
           "online": true,
-          "ip": "$ipAddress",
+          "hostname": "test.server.com",
+          "ip": "192.168.1.100",
           "port": 25565,
-          "hostname": "Test Server",
+          "version": "1.20.1",
+          "protocol": 763,
+          "players": {
+            "online": 3,
+            "max": 20
+          }
+        }
+        ''', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNotNull);
+        expect(result!.playersOnline, equals(3));
+        expect(result.playersMax, equals(20));
+        expect(result.players, isNull);
+      });
+
+      test('should handle motd with clean text', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
+        {
+          "online": true,
+          "hostname": "test.server.com",
+          "ip": "192.168.1.100",
+          "port": 25565,
           "version": "1.20.1",
           "protocol": 763,
           "players": {
             "online": 0,
-            "max": 0
+            "max": 20
+          },
+          "motd": {
+            "clean": ["Welcome to our server!", "Have fun!"]
           }
         }
-      ''', 200);
+        ''', 200);
 
-      when(mockClient.get(
-        Uri.parse('https://api.mcsrvstat.us/2/$ipAddress'),
-        headers: anyNamed('headers'),
-      )).thenAnswer((_) async => mockResponse);
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
 
-      // Act
-      final result =
-          await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
 
-      // Assert
-      expect(result, isNotNull);
-      expect(result!.ip, equals(ipAddress));
-      expect(result.port, equals(25565));
-      expect(result.hostname, equals('Test Server'));
-      expect(result.version, equals('1.20.1'));
-      expect(result.protocol, equals('763'));
-      expect(result.playersOnline, equals(0));
-      expect(result.playersMax, equals(0));
-      expect(result.software, isNull);
-      expect(result.motd, isNull);
-      expect(result.players, isNull);
+        expect(result, isNotNull);
+        expect(result!.motd, equals('Welcome to our server! Have fun!'));
+      });
+
+      test('should handle motd with raw text when clean is empty', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
+        {
+          "online": true,
+          "hostname": "test.server.com",
+          "ip": "192.168.1.100",
+          "port": 25565,
+          "version": "1.20.1",
+          "protocol": 763,
+          "players": {
+            "online": 0,
+            "max": 20
+          },
+          "motd": {
+            "clean": [],
+            "raw": ["§aWelcome to our server!", "§bHave fun!"]
+          }
+        }
+        ''', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNotNull);
+        expect(result!.motd, equals('§aWelcome to our server! §bHave fun!'));
+      });
+
+      test('should handle empty motd', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
+        {
+          "online": true,
+          "hostname": "test.server.com",
+          "ip": "192.168.1.100",
+          "port": 25565,
+          "version": "1.20.1",
+          "protocol": 763,
+          "players": {
+            "online": 0,
+            "max": 20
+          },
+          "motd": {
+            "clean": [],
+            "raw": []
+          }
+        }
+        ''', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNotNull);
+        expect(result!.motd, isNull);
+      });
+
+      test('should handle null motd', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('''
+        {
+          "online": true,
+          "hostname": "test.server.com",
+          "ip": "192.168.1.100",
+          "port": 25565,
+          "version": "1.20.1",
+          "protocol": 763,
+          "players": {
+            "online": 0,
+            "max": 20
+          }
+        }
+        ''', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNotNull);
+        expect(result!.motd, isNull);
+      });
+
+      test('should use correct URL and headers', () async {
+        const ipAddress = '192.168.1.100';
+        final mockResponse = http.Response('{"online": false}', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        verify(mockClient.get(
+          Uri.parse('https://api.mcsrvstat.us/2/192.168.1.100'),
+          headers: {'Content-Type': 'application/json'},
+        )).called(1);
+      });
     });
-  });
 
-  group('MinecraftServerInfo', () {
-    test('fromJson creates instance with all fields', () {
-      // Arrange
-      final json = {
-        'ip': '192.168.1.100',
-        'port': 25565,
-        'hostname': 'Test Server',
-        'version': '1.20.1',
-        'protocol': 763,
-        'players': {
-          'online': 5,
-          'max': 20,
-          'list': ['Player1', 'Player2']
-        },
-        'motd': {
-          'clean': ['A Minecraft Server'],
-          'raw': ['§bA Minecraft Server']
-        },
-        'software': 'Paper'
-      };
+    group('MinecraftServerInfo', () {
+      test('should create instance with all fields', () {
+        const info = MinecraftServerInfo(
+          hostname: 'test.server.com',
+          ip: '192.168.1.100',
+          port: 25565,
+          version: '1.20.1',
+          protocol: '763',
+          playersOnline: 5,
+          playersMax: 20,
+          motd: 'Welcome!',
+          software: 'Paper',
+          players: ['Player1', 'Player2'],
+        );
 
-      // Act
-      final result = MinecraftServerInfo.fromJson(json);
+        expect(info.hostname, equals('test.server.com'));
+        expect(info.ip, equals('192.168.1.100'));
+        expect(info.port, equals(25565));
+        expect(info.version, equals('1.20.1'));
+        expect(info.protocol, equals('763'));
+        expect(info.playersOnline, equals(5));
+        expect(info.playersMax, equals(20));
+        expect(info.motd, equals('Welcome!'));
+        expect(info.software, equals('Paper'));
+        expect(info.players, equals(['Player1', 'Player2']));
+      });
 
-      // Assert
-      expect(result.ip, equals('192.168.1.100'));
-      expect(result.port, equals(25565));
-      expect(result.hostname, equals('Test Server'));
-      expect(result.version, equals('1.20.1'));
-      expect(result.protocol, equals('763'));
-      expect(result.playersOnline, equals(5));
-      expect(result.playersMax, equals(20));
-      expect(result.software, equals('Paper'));
-      expect(result.motd, equals('A Minecraft Server'));
-      expect(result.players, equals(['Player1', 'Player2']));
+      test('should create instance with minimal fields', () {
+        const info = MinecraftServerInfo(
+          hostname: 'test.server.com',
+          ip: '192.168.1.100',
+          port: 25565,
+          version: '1.20.1',
+          protocol: '763',
+          playersOnline: 0,
+          playersMax: 20,
+        );
+
+        expect(info.hostname, equals('test.server.com'));
+        expect(info.ip, equals('192.168.1.100'));
+        expect(info.port, equals(25565));
+        expect(info.version, equals('1.20.1'));
+        expect(info.protocol, equals('763'));
+        expect(info.playersOnline, equals(0));
+        expect(info.playersMax, equals(20));
+        expect(info.motd, isNull);
+        expect(info.software, isNull);
+        expect(info.players, isNull);
+      });
+
+      test('should parse from JSON with all fields', () {
+        final json = {
+          'hostname': 'test.server.com',
+          'ip': '192.168.1.100',
+          'port': 25565,
+          'version': '1.20.1',
+          'protocol': 763,
+          'players': {
+            'online': 5,
+            'max': 20,
+            'list': ['Player1', 'Player2']
+          },
+          'motd': {
+            'clean': ['Welcome to our server!']
+          },
+          'software': 'Paper'
+        };
+
+        final info = MinecraftServerInfo.fromJson(json);
+
+        expect(info.hostname, equals('test.server.com'));
+        expect(info.ip, equals('192.168.1.100'));
+        expect(info.port, equals(25565));
+        expect(info.version, equals('1.20.1'));
+        expect(info.protocol, equals('763'));
+        expect(info.playersOnline, equals(5));
+        expect(info.playersMax, equals(20));
+        expect(info.motd, equals('Welcome to our server!'));
+        expect(info.software, equals('Paper'));
+        expect(info.players, equals(['Player1', 'Player2']));
+      });
+
+      test('should parse from JSON with missing fields', () {
+        final json = {
+          'online': true
+        };
+
+        final info = MinecraftServerInfo.fromJson(json);
+
+        expect(info.hostname, equals('Unknown'));
+        expect(info.ip, equals('Unknown'));
+        expect(info.port, equals(25565));
+        expect(info.version, equals('Unknown'));
+        expect(info.protocol, equals('Unknown'));
+        expect(info.playersOnline, equals(0));
+        expect(info.playersMax, equals(0));
+        expect(info.motd, isNull);
+        expect(info.software, isNull);
+        expect(info.players, isNull);
+      });
+
+      test('should handle null values in JSON', () {
+        final json = {
+          'hostname': null,
+          'ip': null,
+          'port': null,
+          'version': null,
+          'protocol': null,
+          'players': null,
+          'motd': null,
+          'software': null,
+        };
+
+        final info = MinecraftServerInfo.fromJson(json);
+
+        expect(info.hostname, equals('Unknown'));
+        expect(info.ip, equals('Unknown'));
+        expect(info.port, equals(25565));
+        expect(info.version, equals('Unknown'));
+        expect(info.protocol, equals('Unknown'));
+        expect(info.playersOnline, equals(0));
+        expect(info.playersMax, equals(0));
+        expect(info.motd, isNull);
+        expect(info.software, isNull);
+        expect(info.players, isNull);
+      });
+
+      test('should handle empty motd arrays', () {
+        final json = {
+          'hostname': 'test.server.com',
+          'ip': '192.168.1.100',
+          'port': 25565,
+          'version': '1.20.1',
+          'protocol': 763,
+          'players': {'online': 0, 'max': 20},
+          'motd': {
+            'clean': [],
+            'raw': []
+          }
+        };
+
+        final info = MinecraftServerInfo.fromJson(json);
+
+        expect(info.motd, isNull);
+      });
+
+      test('should handle motd with only raw text', () {
+        final json = {
+          'hostname': 'test.server.com',
+          'ip': '192.168.1.100',
+          'port': 25565,
+          'version': '1.20.1',
+          'protocol': 763,
+          'players': {'online': 0, 'max': 20},
+          'motd': {
+            'raw': ['§aWelcome!', '§bHave fun!']
+          }
+        };
+
+        final info = MinecraftServerInfo.fromJson(json);
+
+        expect(info.motd, equals('§aWelcome! §bHave fun!'));
+      });
     });
 
-    test('fromJson handles missing fields with defaults', () {
-      // Arrange
-      final json = <String, dynamic>{};
+    group('Edge cases', () {
+      test('should handle empty IP address', () async {
+        final mockResponse = http.Response('{"online": false}', 200);
 
-      // Act
-      final result = MinecraftServerInfo.fromJson(json);
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
 
-      // Assert
-      expect(result.ip, equals('Unknown'));
-      expect(result.port, equals(25565));
-      expect(result.hostname, equals('Unknown'));
-      expect(result.version, equals('Unknown'));
-      expect(result.protocol, equals('Unknown'));
-      expect(result.playersOnline, equals(0));
-      expect(result.playersMax, equals(0));
-      expect(result.software, isNull);
-      expect(result.motd, isNull);
-      expect(result.players, isNull);
+        final result = await MinecraftServerService.checkMinecraftServer('');
+
+        expect(result, isNull);
+      });
+
+      test('should handle IP address with port', () async {
+        const ipAddress = '192.168.1.100:25565';
+        final mockResponse = http.Response('{"online": false}', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNull);
+        verify(mockClient.get(
+          Uri.parse('https://api.mcsrvstat.us/2/192.168.1.100:25565'),
+          headers: anyNamed('headers'),
+        )).called(1);
+      });
+
+      test('should handle domain names', () async {
+        const ipAddress = 'minecraft.example.com';
+        final mockResponse = http.Response('{"online": false}', 200);
+
+        when(mockClient.get(
+          any,
+          headers: anyNamed('headers'),
+        )).thenAnswer((_) async => mockResponse);
+
+        final result = await MinecraftServerService.checkMinecraftServer(ipAddress);
+
+        expect(result, isNull);
+        verify(mockClient.get(
+          Uri.parse('https://api.mcsrvstat.us/2/minecraft.example.com'),
+          headers: anyNamed('headers'),
+        )).called(1);
+      });
     });
   });
 }
