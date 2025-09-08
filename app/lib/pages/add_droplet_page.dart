@@ -459,11 +459,6 @@ runcmd:
     level-type=minecraft\\:normal
     generate-structures=true
     generator-settings={}
-    level-name=world
-    level-seed=
-    level-type=minecraft\\:normal
-    generate-structures=true
-    generator-settings={}
     
     # Player settings
     online-mode=true
@@ -488,8 +483,6 @@ runcmd:
     broadcast-rcon-to-ops=true
     sync-chunk-writes=true
     enable-jmx-monitoring=false
-    enable-query=true
-    query.port=25565
     EOF
   - chown -R minecraft:minecraft /opt/minecraft
   - systemctl enable minecraft-server
