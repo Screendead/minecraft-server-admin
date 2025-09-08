@@ -74,7 +74,7 @@ jobs:
       run: |
         cd app
         # Generate HTML coverage report with correct prefix to avoid path duplication
-        genhtml coverage/lcov.info -o coverage/html --prefix $PWD/lib
+        genhtml coverage/lcov.info -o coverage/html --prefix "$PWD/lib"
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

@@ -83,7 +83,7 @@ jobs:
       run: |
         cd app
         # Generate HTML coverage report with correct prefix to avoid path duplication
-        genhtml coverage/lcov.info -o coverage/html --prefix $PWD/lib
+        genhtml coverage/lcov.info -o coverage/html --prefix "$PWD/lib"
       env:
         LCOV_VERSION: 2.3.1
         
