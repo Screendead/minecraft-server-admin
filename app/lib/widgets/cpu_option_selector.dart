@@ -38,7 +38,8 @@ class CpuOptionSelector extends StatelessWidget {
 
     // Filter options that have available configurations
     final availableOptions = allOptions.where((option) {
-      final availableMultipliers = configProvider.getAvailableStorageMultipliersFor(category, option);
+      final availableMultipliers =
+          configProvider.getAvailableStorageMultipliersFor(category, option);
       return availableMultipliers.any((multiplier) {
         final sizes = configProvider.getSizesForStorage(
           selectedRegion!.slug,

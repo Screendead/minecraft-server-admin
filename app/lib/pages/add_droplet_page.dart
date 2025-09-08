@@ -509,13 +509,16 @@ class _CpuCategorySelector extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final allCategories = configProvider.getAvailableCategoriesForArchitecture(architecture);
-    
+    final allCategories =
+        configProvider.getAvailableCategoriesForArchitecture(architecture);
+
     // Filter categories that have available configurations
     final availableCategories = allCategories.where((category) {
-      final availableOptions = configProvider.getAvailableOptionsForCategory(category);
+      final availableOptions =
+          configProvider.getAvailableOptionsForCategory(category);
       return availableOptions.any((option) {
-        final availableMultipliers = configProvider.getAvailableStorageMultipliersFor(category, option);
+        final availableMultipliers =
+            configProvider.getAvailableStorageMultipliersFor(category, option);
         return availableMultipliers.any((multiplier) {
           final sizes = configProvider.getSizesForStorage(
             selectedRegion!.slug,
