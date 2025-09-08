@@ -146,9 +146,8 @@ void main() {
       });
 
       test('should handle same unit conversion', () {
-        expect(
-            UnitFormatter.formatSize(1024, 'GB', 'GB'), equals('InfinityGB'));
-        expect(UnitFormatter.formatSize(512, 'MB', 'MB'), equals('InfinityMB'));
+        expect(UnitFormatter.formatSize(1024, 'GB', 'GB'), equals('1024GB'));
+        expect(UnitFormatter.formatSize(512, 'MB', 'MB'), equals('512MB'));
       });
 
       // test('should handle invalid units', () {
