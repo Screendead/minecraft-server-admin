@@ -423,6 +423,9 @@ runcmd:
   - cd /opt/minecraft
   - wget -O server.jar $serverJarUrl
   - echo "eula=true" > eula.txt
+  - cat > server.properties << 'EOF'
+$serverProperties
+EOF
   - chown -R minecraft:minecraft /opt/minecraft
   - systemctl enable minecraft-server
   - systemctl start minecraft-server
@@ -448,11 +451,6 @@ write_files:
       [Install]
       WantedBy=multi-user.target
     owner: root:root
-    permissions: '0644'
-  - path: /opt/minecraft/server.properties
-    content: |
-$serverProperties
-    owner: minecraft:minecraft
     permissions: '0644'
 ''';
   }
