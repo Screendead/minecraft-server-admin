@@ -10,6 +10,8 @@ echo "Generating HTML coverage report..."
 genhtml coverage/lcov.info -o coverage/html
 
 echo "Fixing directory path duplication in HTML files..."
+
+# Fix display text and href attributes
 find coverage/html -name "*.html" -exec sed -i '' 's|/lib/models/lib/models|/models|g' {} \;
 find coverage/html -name "*.html" -exec sed -i '' 's|/lib/providers/lib/providers|/providers|g' {} \;
 find coverage/html -name "*.html" -exec sed -i '' 's|/lib/services/lib/services|/services|g' {} \;
@@ -18,6 +20,12 @@ find coverage/html -name "*.html" -exec sed -i '' 's|models/lib/models|models|g'
 find coverage/html -name "*.html" -exec sed -i '' 's|providers/lib/providers|providers|g' {} \;
 find coverage/html -name "*.html" -exec sed -i '' 's|services/lib/services|services|g' {} \;
 find coverage/html -name "*.html" -exec sed -i '' 's|utils/lib/utils|utils|g' {} \;
+
+# Fix href attributes to point to correct file paths
+find coverage/html -name "*.html" -exec sed -i '' 's|href="models/|href="models/lib/models/|g' {} \;
+find coverage/html -name "*.html" -exec sed -i '' 's|href="providers/|href="providers/lib/providers/|g' {} \;
+find coverage/html -name "*.html" -exec sed -i '' 's|href="services/|href="services/lib/services/|g' {} \;
+find coverage/html -name "*.html" -exec sed -i '' 's|href="utils/|href="utils/lib/utils/|g' {} \;
 
 echo "Coverage report generated successfully!"
 echo "Open coverage/html/index.html in your browser to view the report."
