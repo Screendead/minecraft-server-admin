@@ -36,6 +36,9 @@ class ApiKeyCacheService {
 
   // Services
   IOSSecureApiKeyService? _apiKeyService;
+  
+  // Synchronization for concurrent access
+  Future<String?>? _pendingDecryption;
 
   /// Initialize the cache service with required dependencies
   void initialize({
@@ -95,11 +98,30 @@ class ApiKeyCacheService {
       return cachedKey;
     }
 
+    // If there's already a decryption in progress, wait for it
+    if (_pendingDecryption != null) {
+      return await _pendingDecryption!;
+    }
+
     // If not in cache, decrypt from secure storage using biometrics
     if (_apiKeyService == null) {
       throw ApiKeyCacheException('API key service not initialized');
     }
 
+    // Create a new decryption future and store it
+    _pendingDecryption = _performDecryption();
+    
+    try {
+      final result = await _pendingDecryption!;
+      return result;
+    } finally {
+      // Clear the pending decryption when done
+      _pendingDecryption = null;
+    }
+  }
+
+  /// Internal method to perform the actual decryption
+  Future<String?> _performDecryption() async {
     try {
       // Call the internal decryption method to avoid circular dependency
       final decryptedKey = await _apiKeyService!.decryptApiKeyFromStorage();
@@ -147,6 +169,7 @@ class ApiKeyCacheService {
     _cacheTimestamp = null;
     _cacheTimer?.cancel();
     _cacheTimer = null;
+    _pendingDecryption = null;
   }
 
   /// Set up automatic cache expiration timer

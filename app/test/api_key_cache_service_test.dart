@@ -166,6 +166,30 @@ void main() {
         expect(result, null);
         expect(cacheService.hasCachedApiKey(), false);
       });
+
+      test('should handle concurrent calls without multiple decryptions', () async {
+        const testApiKey = 'concurrent-test-key';
+        when(mockApiKeyService.decryptApiKeyFromStorage()).thenAnswer((_) async {
+          // Simulate some delay to ensure concurrent calls happen
+          await Future.delayed(const Duration(milliseconds: 100));
+          return testApiKey;
+        });
+        
+        // Make multiple concurrent calls
+        final futures = List.generate(5, (_) => cacheService.getApiKey());
+        final results = await Future.wait(futures);
+        
+        // All should return the same key
+        for (final result in results) {
+          expect(result, testApiKey);
+        }
+        
+        // Should only call the service once
+        verify(mockApiKeyService.decryptApiKeyFromStorage()).called(1);
+        
+        // Should be cached
+        expect(cacheService.getCachedApiKey(), testApiKey);
+      });
     });
 
     group('Cache Status', () {
