@@ -487,6 +487,7 @@ runcmd:
   - chown -R minecraft:minecraft /opt/minecraft
   - systemctl enable minecraft-server
   - systemctl start minecraft-server
+  - ufw allow ssh
   - ufw allow 25565
   - ufw allow 25575
   - ufw --force enable
