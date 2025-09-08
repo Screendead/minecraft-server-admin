@@ -415,7 +415,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
 #cloud-config
 runcmd:
   - apt-get update
-  - apt-get install -y openjdk-17-jdk
+  - apt-get install -y openjdk-21-jdk
   - useradd -m -s /bin/bash minecraft
   - mkdir -p /opt/minecraft
   - chown minecraft:minecraft /opt/minecraft
@@ -503,7 +503,7 @@ write_files:
       Type=simple
       User=minecraft
       WorkingDirectory=/opt/minecraft
-      ExecStart=/usr/bin/java -Xmx${jvmRamMB}M -Xms${jvmRamMB}M -jar server.jar nogui
+      ExecStart=/usr/lib/jvm/java-21-openjdk-amd64/bin/java -Xmx${jvmRamMB}M -Xms${jvmRamMB}M -jar server.jar nogui
       Restart=always
       RestartSec=10
 
