@@ -236,36 +236,130 @@ void main() {
       )).called(1);
     });
 
-    test('should handle different HTTP status codes', () async {
+    test('should handle 400 Bad Request', () async {
       // Arrange
       const apiKey = 'test-api-key';
-      final testCases = [
-        (400, 'Bad Request'),
-        (401, 'Unauthorized'),
-        (403, 'Forbidden'),
-        (404, 'Not Found'),
-        (429, 'Too Many Requests'),
-        (500, 'Internal Server Error'),
-      ];
+      
+      when(mockClient.post(
+        any,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response(
+            '{"error": "Bad Request"}',
+            400,
+            headers: {'content-type': 'application/json'},
+          ));
 
-      for (final (statusCode, description) in testCases) {
-        when(mockClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
-        )).thenAnswer((_) async => http.Response(
-              '{"error": "$description"}',
-              statusCode,
-              headers: {'content-type': 'application/json'},
-            ));
+      // Act & Assert
+      expect(
+        () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
+        throwsA(isA<Exception>()),
+      );
+    });
 
-        // Act & Assert
-        expect(
-          () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
-          throwsA(isA<Exception>()),
-          reason: 'Should throw for status code $statusCode',
-        );
-      }
+    test('should handle 401 Unauthorized', () async {
+      // Arrange
+      const apiKey = 'test-api-key';
+      
+      when(mockClient.post(
+        any,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response(
+            '{"error": "Unauthorized"}',
+            401,
+            headers: {'content-type': 'application/json'},
+          ));
+
+      // Act & Assert
+      expect(
+        () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('should handle 403 Forbidden', () async {
+      // Arrange
+      const apiKey = 'test-api-key';
+      
+      when(mockClient.post(
+        any,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response(
+            '{"error": "Forbidden"}',
+            403,
+            headers: {'content-type': 'application/json'},
+          ));
+
+      // Act & Assert
+      expect(
+        () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('should handle 404 Not Found', () async {
+      // Arrange
+      const apiKey = 'test-api-key';
+      
+      when(mockClient.post(
+        any,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response(
+            '{"error": "Not Found"}',
+            404,
+            headers: {'content-type': 'application/json'},
+          ));
+
+      // Act & Assert
+      expect(
+        () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('should handle 429 Too Many Requests', () async {
+      // Arrange
+      const apiKey = 'test-api-key';
+      
+      when(mockClient.post(
+        any,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response(
+            '{"error": "Too Many Requests"}',
+            429,
+            headers: {'content-type': 'application/json'},
+          ));
+
+      // Act & Assert
+      expect(
+        () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('should handle 500 Internal Server Error', () async {
+      // Arrange
+      const apiKey = 'test-api-key';
+      
+      when(mockClient.post(
+        any,
+        headers: anyNamed('headers'),
+        body: anyNamed('body'),
+      )).thenAnswer((_) async => http.Response(
+            '{"error": "Internal Server Error"}',
+            500,
+            headers: {'content-type': 'application/json'},
+          ));
+
+      // Act & Assert
+      expect(
+        () => DigitalOceanApiService.createDroplet(apiKey, testRequest),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }
