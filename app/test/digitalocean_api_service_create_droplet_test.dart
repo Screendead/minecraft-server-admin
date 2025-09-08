@@ -20,10 +20,10 @@ void main() {
     setUp(() {
       mockClient = MockClient();
       mockLoggingService = MockLoggingService();
-      
+
       // Set the mock client
       DigitalOceanApiService.setClient(mockClient);
-      
+
       // Create test request
       testRequest = DropletCreationRequest(
         name: 'test-droplet',
@@ -57,13 +57,14 @@ void main() {
         headers: anyNamed('headers'),
         body: anyNamed('body'),
       )).thenAnswer((_) async => http.Response(
-        json.encode(responseBody),
-        202,
-        headers: {'content-type': 'application/json'},
-      ));
+            json.encode(responseBody),
+            202,
+            headers: {'content-type': 'application/json'},
+          ));
 
       // Act
-      final result = await DigitalOceanApiService.createDroplet(apiKey, testRequest);
+      final result =
+          await DigitalOceanApiService.createDroplet(apiKey, testRequest);
 
       // Assert
       expect(result, isA<Map<String, dynamic>>());
@@ -96,10 +97,10 @@ void main() {
         headers: anyNamed('headers'),
         body: anyNamed('body'),
       )).thenAnswer((_) async => http.Response(
-        json.encode(errorResponse),
-        422,
-        headers: {'content-type': 'application/json'},
-      ));
+            json.encode(errorResponse),
+            422,
+            headers: {'content-type': 'application/json'},
+          ));
 
       // Act & Assert
       try {
@@ -170,10 +171,10 @@ void main() {
         headers: anyNamed('headers'),
         body: anyNamed('body'),
       )).thenAnswer((_) async => http.Response(
-        'invalid json',
-        202,
-        headers: {'content-type': 'application/json'},
-      ));
+            'invalid json',
+            202,
+            headers: {'content-type': 'application/json'},
+          ));
 
       // Act & Assert
       expect(
@@ -195,10 +196,10 @@ void main() {
         headers: anyNamed('headers'),
         body: anyNamed('body'),
       )).thenAnswer((_) async => http.Response(
-        json.encode(responseBody),
-        202,
-        headers: {'content-type': 'application/json'},
-      ));
+            json.encode(responseBody),
+            202,
+            headers: {'content-type': 'application/json'},
+          ));
 
       // Act & Assert
       try {
@@ -239,10 +240,10 @@ void main() {
         headers: anyNamed('headers'),
         body: anyNamed('body'),
       )).thenAnswer((_) async => http.Response(
-        json.encode(responseBody),
-        202,
-        headers: {'content-type': 'application/json'},
-      ));
+            json.encode(responseBody),
+            202,
+            headers: {'content-type': 'application/json'},
+          ));
 
       // Act
       await DigitalOceanApiService.createDroplet(apiKey, requestWithAllParams);
@@ -276,10 +277,10 @@ void main() {
           headers: anyNamed('headers'),
           body: anyNamed('body'),
         )).thenAnswer((_) async => http.Response(
-          '{"error": "$description"}',
-          statusCode,
-          headers: {'content-type': 'application/json'},
-        ));
+              '{"error": "$description"}',
+              statusCode,
+              headers: {'content-type': 'application/json'},
+            ));
 
         // Act & Assert
         expect(

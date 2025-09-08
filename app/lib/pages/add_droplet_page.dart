@@ -335,7 +335,8 @@ class _AddDropletPageState extends State<AddDropletPage> {
       final apiKey = await apiKeyService.getApiKey();
 
       if (apiKey == null) {
-        throw Exception('No API key found. Please configure your DigitalOcean API key first.');
+        throw Exception(
+            'No API key found. Please configure your DigitalOcean API key first.');
       }
 
       // Create droplet creation request
@@ -344,12 +345,16 @@ class _AddDropletPageState extends State<AddDropletPage> {
         region: _selectedRegion!.slug,
         size: _selectedDropletSize!.slug,
         image: 'ubuntu-22-04-x64', // Default Ubuntu image
-        tags: ['minecraft-server', 'minecraft-${_selectedMinecraftVersion!.id}'],
+        tags: [
+          'minecraft-server',
+          'minecraft-${_selectedMinecraftVersion!.id}'
+        ],
         userData: _generateUserData(),
       );
 
       // Create the droplet
-      final droplet = await DigitalOceanApiService.createDroplet(apiKey, request);
+      final droplet =
+          await DigitalOceanApiService.createDroplet(apiKey, request);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -385,7 +390,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
   String _generateUserData() {
     final minecraftVersion = _selectedMinecraftVersion!.id;
     final serverJarUrl = _getServerJarUrl(minecraftVersion);
-    
+
     return '''
 #cloud-config
 runcmd:
@@ -484,7 +489,9 @@ write_files:
                             // Configuration mode selection
                             _ConfigurationModeSelector(
                               isRecommended: _isRecommendedMode,
-                              onChanged: _isCreatingDroplet ? (_) {} : _onConfigurationModeChanged,
+                              onChanged: _isCreatingDroplet
+                                  ? (_) {}
+                                  : _onConfigurationModeChanged,
                             ),
                             const SizedBox(height: 16),
 
@@ -496,7 +503,9 @@ write_files:
                                 selectedRegion: _selectedRegion,
                                 availableRegions:
                                     configProvider.availableRegions,
-                                onRegionChanged: _isCreatingDroplet ? (_) {} : _onRegionChanged,
+                                onRegionChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onRegionChanged,
                                 isLoading: _isLoadingData,
                               ),
                             ] else ...[
@@ -512,13 +521,25 @@ write_files:
                                 availableRegions:
                                     configProvider.availableRegions,
                                 configProvider: configProvider,
-                                onRegionChanged: _isCreatingDroplet ? (_) {} : _onRegionChanged,
-                                onCpuArchitectureChanged: _isCreatingDroplet ? (_) {} : _onCpuArchitectureChanged,
-                                onCpuCategoryChanged: _isCreatingDroplet ? (_) {} : _onCpuCategoryChanged,
-                                onCpuOptionChanged: _isCreatingDroplet ? (_) {} : _onCpuOptionChanged,
-                                onStorageMultiplierChanged: _isCreatingDroplet ? (_) {} : _onStorageMultiplierChanged,
-                                onDropletSizeChanged: _isCreatingDroplet ? (_) {} : (size) =>
-                                    setState(() => _selectedDropletSize = size),
+                                onRegionChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onRegionChanged,
+                                onCpuArchitectureChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onCpuArchitectureChanged,
+                                onCpuCategoryChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onCpuCategoryChanged,
+                                onCpuOptionChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onCpuOptionChanged,
+                                onStorageMultiplierChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onStorageMultiplierChanged,
+                                onDropletSizeChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : (size) => setState(
+                                        () => _selectedDropletSize = size),
                               ),
                             ],
                             const SizedBox(height: 16),
@@ -527,22 +548,27 @@ write_files:
                             _MinecraftVersionDropdown(
                               selectedVersion: _selectedMinecraftVersion,
                               versions: configProvider.releaseVersions,
-                              onChanged: _isCreatingDroplet ? (_) {} : (version) => setState(
-                                  () => _selectedMinecraftVersion = version),
+                              onChanged: _isCreatingDroplet
+                                  ? (_) {}
+                                  : (version) => setState(() =>
+                                      _selectedMinecraftVersion = version),
                             ),
                             const SizedBox(height: 16),
 
                             // World save upload (always shown)
                             _WorldSaveUpload(
                               selectedPath: _selectedWorldSavePath,
-                              onPickFile: _isCreatingDroplet ? null : _pickWorldSave,
-                              onRemoveFile: _isCreatingDroplet ? null : _removeWorldSave,
+                              onPickFile:
+                                  _isCreatingDroplet ? null : _pickWorldSave,
+                              onRemoveFile:
+                                  _isCreatingDroplet ? null : _removeWorldSave,
                             ),
                             const SizedBox(height: 32),
 
                             // Submit button
                             _SubmitButton(
-                              onPressed: _isCreatingDroplet ? null : _submitForm,
+                              onPressed:
+                                  _isCreatingDroplet ? null : _submitForm,
                               isLoading: _isCreatingDroplet,
                             ),
                           ],

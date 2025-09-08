@@ -284,14 +284,16 @@ class DigitalOceanApiService {
         },
       );
 
-      final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/droplets'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(request.toJson()),
-      ).timeout(const Duration(seconds: 30));
+      final response = await _httpClient
+          .post(
+            Uri.parse('$_baseUrl/droplets'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
 
       stopwatch.stop();
 
@@ -311,12 +313,13 @@ class DigitalOceanApiService {
           },
         );
 
-        throw Exception('Failed to create droplet: ${response.statusCode} - ${response.body}');
+        throw Exception(
+            'Failed to create droplet: ${response.statusCode} - ${response.body}');
       }
 
       final data = json.decode(response.body);
       final droplet = data['droplet'] as Map<String, dynamic>?;
-      
+
       if (droplet == null) {
         await _loggingService.logError(
           'Droplet creation response missing droplet data',
