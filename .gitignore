@@ -4,3 +4,6 @@ emulator-data/
 # Firebase debug logs
 firebase-debug.log
 firestore-debug.log
+
+# Secrets
+.env
