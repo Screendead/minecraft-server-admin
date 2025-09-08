@@ -22,6 +22,38 @@ class DropletsProvider with ChangeNotifier {
   List<DropletInfo> get nonMinecraftDroplets =>
       _droplets.where((droplet) => !droplet.isMinecraftServer).toList();
 
+  /// Load all droplets and check for Minecraft servers (for testing)
+  Future<void> loadDropletsWithApiKey(String apiKey) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Load droplets using the provided API key
+      final dropletsData = await DigitalOceanApiService.getDroplets(apiKey);
+      _droplets = dropletsData.map((data) => DropletInfo.fromJson(data)).toList();
+
+      // Check Minecraft server status for each droplet
+      for (final droplet in _droplets) {
+        if (droplet.publicIp != null) {
+          final minecraftInfo = await MinecraftServerService.checkMinecraftServer(
+            droplet.publicIp!,
+          );
+          if (minecraftInfo != null) {
+            droplet.setMinecraftInfo(minecraftInfo);
+          }
+        }
+      }
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = 'Failed to load droplets: $e';
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Load all droplets and check for Minecraft servers
   Future<void> loadDroplets(BuildContext context) async {
     _isLoading = true;
