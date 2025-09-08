@@ -75,7 +75,7 @@ jobs:
         cd app
         # Generate HTML coverage report with correct prefix to avoid path duplication
         # Use absolute path to ensure correct prefix removal
-        genhtml coverage/lcov.info -o coverage/html --prefix "$(pwd)/lib"
+        genhtml coverage/lcov.info -o coverage/html --prefix lib
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
