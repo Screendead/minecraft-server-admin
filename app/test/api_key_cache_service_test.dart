@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/services/api_key_cache_service.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
 import 'package:app/services/ios_secure_api_key_service.dart';
+import 'test_helpers.dart';
 
 import 'api_key_cache_service_test.mocks.dart';
 
@@ -22,8 +23,8 @@ void main() {
     late MockIOSSecureApiKeyService mockApiKeyService;
 
     setUp(() {
-      // Reset the singleton instance for each test
-      ApiKeyCacheService.resetInstance();
+      // Reset all singletons for each test
+      TestHelpers.resetSingletons();
       
       cacheService = ApiKeyCacheService();
       mockBiometricService = MockIOSBiometricEncryptionService();

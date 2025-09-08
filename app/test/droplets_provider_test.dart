@@ -9,6 +9,8 @@ import 'package:app/services/digitalocean_api_service.dart';
 import 'package:app/services/minecraft_server_service.dart';
 import 'package:app/services/ios_secure_api_key_service.dart';
 import 'package:app/services/ios_biometric_encryption_service.dart';
+import 'package:app/services/api_key_cache_service.dart';
+import 'test_helpers.dart';
 
 import 'droplets_provider_test.mocks.dart';
 
@@ -28,6 +30,9 @@ void main() {
     late MockIOSBiometricEncryptionService mockBiometricService;
 
     setUp(() {
+      // Reset all singletons between tests
+      TestHelpers.resetSingletons();
+      
       mockAuth = MockFirebaseAuth();
       mockFirestore = MockFirebaseFirestore();
       mockApiKeyService = MockIOSSecureApiKeyService();
