@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/cpu_option.dart';
 import '../models/cpu_category.dart';
+import '../models/cpu_architecture.dart';
+import '../providers/droplet_config_provider.dart';
+import '../services/digitalocean_api_service.dart';
 
 /// Widget for selecting CPU options (Regular, Premium Intel, Premium AMD)
 class CpuOptionSelector extends StatelessWidget {
   final CpuOption? selectedOption;
   final CpuCategory category;
+  final CpuArchitecture architecture;
+  final Region? selectedRegion;
+  final DropletConfigProvider configProvider;
   final ValueChanged<CpuOption?> onChanged;
   final bool isEnabled;
 
@@ -13,21 +19,48 @@ class CpuOptionSelector extends StatelessWidget {
     super.key,
     required this.selectedOption,
     required this.category,
+    required this.architecture,
+    required this.selectedRegion,
+    required this.configProvider,
     required this.onChanged,
     this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final availableOptions = CpuOption.values
+    if (selectedRegion == null) {
+      return const SizedBox.shrink();
+    }
+
+    final allOptions = CpuOption.values
         .where((option) => option.isAvailableFor(category))
         .toList();
+
+    // Filter options that have available configurations
+    final availableOptions = allOptions.where((option) {
+      final availableMultipliers = configProvider.getAvailableStorageMultipliersFor(category, option);
+      return availableMultipliers.any((multiplier) {
+        final sizes = configProvider.getSizesForStorage(
+          selectedRegion!.slug,
+          architecture,
+          category,
+          option,
+          multiplier,
+        );
+        return sizes.isNotEmpty;
+      });
+    }).toList();
 
     // Auto-select the single option if only one is available
     if (availableOptions.length == 1 && selectedOption == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onChanged(availableOptions.first);
       });
+    }
+
+    // Hide selector if no options have available configurations
+    if (availableOptions.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     // Hide selector if only one option is available
@@ -108,9 +141,7 @@ class _CpuOptionCard extends StatelessWidget {
               option.displayName,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurface,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),

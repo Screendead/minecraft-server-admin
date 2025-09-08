@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import '../models/storage_multiplier.dart';
 import '../models/cpu_category.dart';
 import '../models/cpu_option.dart';
+import '../models/cpu_architecture.dart';
+import '../providers/droplet_config_provider.dart';
+import '../services/digitalocean_api_service.dart';
 
 /// Widget for selecting storage multipliers (1x, 2x, 3x, 6x SSD)
 class StorageMultiplierSelector extends StatelessWidget {
   final StorageMultiplier? selectedMultiplier;
   final CpuCategory category;
   final CpuOption option;
+  final CpuArchitecture architecture;
+  final Region? selectedRegion;
+  final DropletConfigProvider configProvider;
   final ValueChanged<StorageMultiplier?> onChanged;
   final bool isEnabled;
 
@@ -16,21 +22,45 @@ class StorageMultiplierSelector extends StatelessWidget {
     required this.selectedMultiplier,
     required this.category,
     required this.option,
+    required this.architecture,
+    required this.selectedRegion,
+    required this.configProvider,
     required this.onChanged,
     this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final availableMultipliers = StorageMultiplier.values
+    if (selectedRegion == null) {
+      return const SizedBox.shrink();
+    }
+
+    final allMultipliers = StorageMultiplier.values
         .where((multiplier) => multiplier.isAvailableFor(category, option))
         .toList();
+
+    // Filter multipliers that have available configurations
+    final availableMultipliers = allMultipliers.where((multiplier) {
+      final sizes = configProvider.getSizesForStorage(
+        selectedRegion!.slug,
+        architecture,
+        category,
+        option,
+        multiplier,
+      );
+      return sizes.isNotEmpty;
+    }).toList();
 
     // Auto-select the single multiplier if only one is available
     if (availableMultipliers.length == 1 && selectedMultiplier == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onChanged(availableMultipliers.first);
       });
+    }
+
+    // Hide selector if no multipliers have available configurations
+    if (availableMultipliers.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     // Hide selector if only one option is available

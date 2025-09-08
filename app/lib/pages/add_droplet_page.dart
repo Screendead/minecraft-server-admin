@@ -316,6 +316,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
                                 selectedCategory: _selectedCpuCategory,
                                 architecture: _selectedCpuArchitecture!,
                                 configProvider: configProvider,
+                                selectedRegion: _selectedRegion,
                                 onChanged: _onCpuCategoryChanged,
                                 isEnabled: _selectedRegion != null,
                               ),
@@ -327,6 +328,9 @@ class _AddDropletPageState extends State<AddDropletPage> {
                               CpuOptionSelector(
                                 selectedOption: _selectedCpuOption,
                                 category: _selectedCpuCategory!,
+                                architecture: _selectedCpuArchitecture!,
+                                selectedRegion: _selectedRegion,
+                                configProvider: configProvider,
                                 onChanged: _onCpuOptionChanged,
                                 isEnabled: _selectedRegion != null,
                               ),
@@ -339,6 +343,9 @@ class _AddDropletPageState extends State<AddDropletPage> {
                                 selectedMultiplier: _selectedStorageMultiplier,
                                 category: _selectedCpuCategory!,
                                 option: _selectedCpuOption!,
+                                architecture: _selectedCpuArchitecture!,
+                                selectedRegion: _selectedRegion,
+                                configProvider: configProvider,
                                 onChanged: _onStorageMultiplierChanged,
                                 isEnabled: _selectedRegion != null,
                               ),
@@ -483,6 +490,7 @@ class _CpuCategorySelector extends StatelessWidget {
   final CpuCategory? selectedCategory;
   final CpuArchitecture architecture;
   final DropletConfigProvider configProvider;
+  final Region? selectedRegion;
   final ValueChanged<CpuCategory?> onChanged;
   final bool isEnabled;
 
@@ -490,15 +498,37 @@ class _CpuCategorySelector extends StatelessWidget {
     required this.selectedCategory,
     required this.architecture,
     required this.configProvider,
+    required this.selectedRegion,
     required this.onChanged,
     required this.isEnabled,
   });
 
   @override
   Widget build(BuildContext context) {
-    final availableCategories =
-        configProvider.getAvailableCategoriesForArchitecture(architecture);
+    if (selectedRegion == null) {
+      return const SizedBox.shrink();
+    }
+
+    final allCategories = configProvider.getAvailableCategoriesForArchitecture(architecture);
     
+    // Filter categories that have available configurations
+    final availableCategories = allCategories.where((category) {
+      final availableOptions = configProvider.getAvailableOptionsForCategory(category);
+      return availableOptions.any((option) {
+        final availableMultipliers = configProvider.getAvailableStorageMultipliersFor(category, option);
+        return availableMultipliers.any((multiplier) {
+          final sizes = configProvider.getSizesForStorage(
+            selectedRegion!.slug,
+            architecture,
+            category,
+            option,
+            multiplier,
+          );
+          return sizes.isNotEmpty;
+        });
+      });
+    }).toList();
+
     // Auto-select the single category if only one is available
     if (availableCategories.length == 1 && selectedCategory == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -506,8 +536,14 @@ class _CpuCategorySelector extends StatelessWidget {
       });
     }
 
+    // Hide selector if no categories have available configurations
+    if (availableCategories.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return DropdownButtonFormField<CpuCategory>(
-      initialValue: selectedCategory ?? (availableCategories.length == 1 ? availableCategories.first : null),
+      initialValue: selectedCategory ??
+          (availableCategories.length == 1 ? availableCategories.first : null),
       decoration: const InputDecoration(
         labelText: 'CPU Category',
         border: OutlineInputBorder(),
