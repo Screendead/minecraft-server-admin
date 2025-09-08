@@ -55,5 +55,11 @@
 	<array>
 		<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to find the closest DigitalOcean region for optimal server performance.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app uses your location to find the closest DigitalOcean region for optimal server performance.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>This app uses your location to find the closest DigitalOcean region for optimal server performance.</string>
 </dict>
 </plist>

@@ -7,13 +7,12 @@ import '../services/ios_secure_api_key_service.dart';
 import '../services/ios_biometric_encryption_service.dart';
 import '../services/digitalocean_api_service.dart';
 import '../services/minecraft_versions_service.dart';
-import '../utils/unit_formatter.dart';
 import '../models/cpu_architecture.dart';
 import '../models/cpu_category.dart';
 import '../models/cpu_option.dart';
 import '../models/storage_multiplier.dart';
-import '../widgets/cpu_option_selector.dart';
-import '../widgets/storage_multiplier_selector.dart';
+import '../widgets/recommended_config_widget.dart';
+import '../widgets/custom_config_widget.dart';
 
 class AddDropletPage extends StatefulWidget {
   const AddDropletPage({super.key});
@@ -25,6 +24,10 @@ class AddDropletPage extends StatefulWidget {
 class _AddDropletPageState extends State<AddDropletPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+
+  // Configuration mode
+  bool?
+      _isRecommendedMode; // null = no selection, true = recommended, false = custom
 
   // Selection state
   Region? _selectedRegion;
@@ -91,9 +94,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
 
       // Set default selections
       setState(() {
-        _selectedRegion = configProvider.availableRegions.isNotEmpty
-            ? configProvider.availableRegions.first
-            : null;
+        _selectedRegion = null; // No default selection
         _selectedMinecraftVersion = configProvider.releaseVersions.isNotEmpty
             ? configProvider.releaseVersions.first
             : null;
@@ -147,6 +148,11 @@ class _AddDropletPageState extends State<AddDropletPage> {
       _selectedStorageMultiplier = null;
       _selectedDropletSize = null;
     });
+
+    // If in recommended mode and region is selected, set up recommended configuration
+    if (_isRecommendedMode == true && region != null) {
+      _setRecommendedConfiguration();
+    }
   }
 
   void _onCpuArchitectureChanged(CpuArchitecture? architecture) {
@@ -187,6 +193,58 @@ class _AddDropletPageState extends State<AddDropletPage> {
     });
   }
 
+  void _onConfigurationModeChanged(bool? isRecommended) {
+    setState(() {
+      _isRecommendedMode = isRecommended;
+      if (isRecommended == true) {
+        // Clear custom selections when switching to recommended
+        _selectedCpuArchitecture = null;
+        _selectedCpuCategory = null;
+        _selectedCpuOption = null;
+        _selectedStorageMultiplier = null;
+        _selectedDropletSize = null;
+        _selectedRegion = null; // Clear region so it can be auto-detected
+      } else if (isRecommended == false) {
+        // Clear recommended selections when switching to custom
+        _selectedCpuArchitecture = null;
+        _selectedCpuCategory = null;
+        _selectedCpuOption = null;
+        _selectedStorageMultiplier = null;
+        _selectedDropletSize = null;
+        _selectedRegion = null;
+      }
+    });
+  }
+
+  void _setRecommendedConfiguration() {
+    if (_selectedRegion == null) return;
+
+    setState(() {
+      // Set recommended configuration: Shared CPU / Basic / Regular
+      _selectedCpuArchitecture = CpuArchitecture.shared;
+      _selectedCpuCategory = CpuCategory.basic;
+      _selectedCpuOption = CpuOption.regular;
+      _selectedStorageMultiplier = StorageMultiplier.x1;
+
+      // Find the s-1vcpu-512mb-10gb size
+      final configProvider = context.read<DropletConfigProvider>();
+      final availableSizes = configProvider.getSizesForStorage(
+        _selectedRegion!.slug,
+        CpuArchitecture.shared,
+        CpuCategory.basic,
+        CpuOption.regular,
+        StorageMultiplier.x1,
+      );
+
+      if (availableSizes.isNotEmpty) {
+        _selectedDropletSize = availableSizes.firstWhere(
+          (size) => size.slug == 's-1vcpu-512mb-10gb',
+          orElse: () => availableSizes.first,
+        );
+      }
+    });
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       if (_selectedRegion == null) {
@@ -196,39 +254,58 @@ class _AddDropletPageState extends State<AddDropletPage> {
         return;
       }
 
-      if (_selectedCpuArchitecture == null) {
+      if (_isRecommendedMode == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a CPU architecture')),
+          const SnackBar(content: Text('Please select a configuration mode')),
         );
         return;
       }
 
-      if (_selectedCpuCategory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a CPU category')),
-        );
-        return;
-      }
+      if (_isRecommendedMode == true) {
+        // For recommended mode, validate that we have the basic required selections
+        if (_selectedDropletSize == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Please wait for configuration to load')),
+          );
+          return;
+        }
+      } else {
+        // For custom mode, validate all selections
+        if (_selectedCpuArchitecture == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a CPU architecture')),
+          );
+          return;
+        }
 
-      if (_selectedCpuOption == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a CPU option')),
-        );
-        return;
-      }
+        if (_selectedCpuCategory == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a CPU category')),
+          );
+          return;
+        }
 
-      if (_selectedStorageMultiplier == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a storage option')),
-        );
-        return;
-      }
+        if (_selectedCpuOption == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a CPU option')),
+          );
+          return;
+        }
 
-      if (_selectedDropletSize == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a droplet size')),
-        );
-        return;
+        if (_selectedStorageMultiplier == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a storage option')),
+          );
+          return;
+        }
+
+        if (_selectedDropletSize == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a droplet size')),
+          );
+          return;
+        }
       }
 
       if (_selectedMinecraftVersion == null) {
@@ -294,80 +371,51 @@ class _AddDropletPageState extends State<AddDropletPage> {
                             _DropletNameField(controller: _nameController),
                             const SizedBox(height: 16),
 
-                            // Location selection (first)
-                            _LocationDropdown(
-                              selectedRegion: _selectedRegion,
-                              regions: configProvider.availableRegions,
-                              onChanged: _onRegionChanged,
+                            // Configuration mode selection
+                            _ConfigurationModeSelector(
+                              isRecommended: _isRecommendedMode,
+                              onChanged: _onConfigurationModeChanged,
                             ),
                             const SizedBox(height: 16),
 
-                            // CPU Architecture selection
-                            _CpuArchitectureSelector(
-                              selectedArchitecture: _selectedCpuArchitecture,
-                              onChanged: _onCpuArchitectureChanged,
-                              isEnabled: _selectedRegion != null,
-                            ),
+                            // Configuration widgets based on mode
+                            if (_isRecommendedMode == null) ...[
+                              _ModeSelectionPrompt(),
+                            ] else if (_isRecommendedMode == true) ...[
+                              RecommendedConfigWidget(
+                                selectedRegion: _selectedRegion,
+                                availableRegions:
+                                    configProvider.availableRegions,
+                                onRegionChanged: _onRegionChanged,
+                                isLoading: _isLoadingData,
+                              ),
+                            ] else ...[
+                              CustomConfigWidget(
+                                selectedRegion: _selectedRegion,
+                                selectedCpuArchitecture:
+                                    _selectedCpuArchitecture,
+                                selectedCpuCategory: _selectedCpuCategory,
+                                selectedCpuOption: _selectedCpuOption,
+                                selectedStorageMultiplier:
+                                    _selectedStorageMultiplier,
+                                selectedDropletSize: _selectedDropletSize,
+                                availableRegions:
+                                    configProvider.availableRegions,
+                                configProvider: configProvider,
+                                onRegionChanged: _onRegionChanged,
+                                onCpuArchitectureChanged:
+                                    _onCpuArchitectureChanged,
+                                onCpuCategoryChanged: _onCpuCategoryChanged,
+                                onCpuOptionChanged: _onCpuOptionChanged,
+                                onStorageMultiplierChanged:
+                                    _onStorageMultiplierChanged,
+                                onDropletSizeChanged: (size) =>
+                                    setState(() => _selectedDropletSize = size),
+                              ),
+                            ],
                             const SizedBox(height: 16),
 
-                            // CPU Category selection (only if architecture is selected)
-                            if (_selectedCpuArchitecture != null) ...[
-                              _CpuCategorySelector(
-                                selectedCategory: _selectedCpuCategory,
-                                architecture: _selectedCpuArchitecture!,
-                                configProvider: configProvider,
-                                selectedRegion: _selectedRegion,
-                                onChanged: _onCpuCategoryChanged,
-                                isEnabled: _selectedRegion != null,
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-
-                            // CPU Option selection (only if category is selected)
-                            if (_selectedCpuCategory != null) ...[
-                              CpuOptionSelector(
-                                selectedOption: _selectedCpuOption,
-                                category: _selectedCpuCategory!,
-                                architecture: _selectedCpuArchitecture!,
-                                selectedRegion: _selectedRegion,
-                                configProvider: configProvider,
-                                onChanged: _onCpuOptionChanged,
-                                isEnabled: _selectedRegion != null,
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-
-                            // Storage Multiplier selection (only if option is selected)
-                            if (_selectedCpuOption != null) ...[
-                              StorageMultiplierSelector(
-                                selectedMultiplier: _selectedStorageMultiplier,
-                                category: _selectedCpuCategory!,
-                                option: _selectedCpuOption!,
-                                architecture: _selectedCpuArchitecture!,
-                                selectedRegion: _selectedRegion,
-                                configProvider: configProvider,
-                                onChanged: _onStorageMultiplierChanged,
-                                isEnabled: _selectedRegion != null,
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-
-                            // Droplet size selection
-                            _DropletSizeDropdown(
-                              selectedSize: _selectedDropletSize,
-                              configProvider: configProvider,
-                              selectedRegion: _selectedRegion,
-                              selectedCpuArchitecture: _selectedCpuArchitecture,
-                              selectedCpuCategory: _selectedCpuCategory,
-                              selectedCpuOption: _selectedCpuOption,
-                              selectedStorageMultiplier:
-                                  _selectedStorageMultiplier,
-                              onChanged: (size) =>
-                                  setState(() => _selectedDropletSize = size),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Minecraft version
+                            // Minecraft version (always shown)
                             _MinecraftVersionDropdown(
                               selectedVersion: _selectedMinecraftVersion,
                               versions: configProvider.releaseVersions,
@@ -376,7 +424,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
                             ),
                             const SizedBox(height: 16),
 
-                            // World save upload
+                            // World save upload (always shown)
                             _WorldSaveUpload(
                               selectedPath: _selectedWorldSavePath,
                               onPickFile: _pickWorldSave,
@@ -420,479 +468,6 @@ class _DropletNameField extends StatelessWidget {
         }
         return null;
       },
-    );
-  }
-}
-
-class _LocationDropdown extends StatelessWidget {
-  final Region? selectedRegion;
-  final List<Region> regions;
-  final ValueChanged<Region?> onChanged;
-
-  const _LocationDropdown({
-    required this.selectedRegion,
-    required this.regions,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<Region>(
-      initialValue: selectedRegion,
-      decoration: const InputDecoration(
-        labelText: 'Location',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.location_on),
-      ),
-      items: regions.map((region) {
-        return DropdownMenuItem<Region>(
-          value: region,
-          child: Text('${region.name} (${region.slug.toUpperCase()})'),
-        );
-      }).toList(),
-      onChanged: onChanged,
-    );
-  }
-}
-
-class _CpuArchitectureSelector extends StatelessWidget {
-  final CpuArchitecture? selectedArchitecture;
-  final ValueChanged<CpuArchitecture?> onChanged;
-  final bool isEnabled;
-
-  const _CpuArchitectureSelector({
-    required this.selectedArchitecture,
-    required this.onChanged,
-    required this.isEnabled,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<CpuArchitecture>(
-      initialValue: selectedArchitecture,
-      decoration: const InputDecoration(
-        labelText: 'CPU Architecture',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.memory),
-      ),
-      items: CpuArchitecture.values.map((architecture) {
-        return DropdownMenuItem<CpuArchitecture>(
-          value: architecture,
-          child: Text(architecture.displayName),
-        );
-      }).toList(),
-      onChanged: isEnabled ? onChanged : null,
-    );
-  }
-}
-
-class _CpuCategorySelector extends StatelessWidget {
-  final CpuCategory? selectedCategory;
-  final CpuArchitecture architecture;
-  final DropletConfigProvider configProvider;
-  final Region? selectedRegion;
-  final ValueChanged<CpuCategory?> onChanged;
-  final bool isEnabled;
-
-  const _CpuCategorySelector({
-    required this.selectedCategory,
-    required this.architecture,
-    required this.configProvider,
-    required this.selectedRegion,
-    required this.onChanged,
-    required this.isEnabled,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (selectedRegion == null) {
-      return const SizedBox.shrink();
-    }
-
-    final allCategories =
-        configProvider.getAvailableCategoriesForArchitecture(architecture);
-
-    // Filter categories that have available configurations
-    final availableCategories = allCategories.where((category) {
-      final availableOptions =
-          configProvider.getAvailableOptionsForCategory(category);
-      return availableOptions.any((option) {
-        final availableMultipliers =
-            configProvider.getAvailableStorageMultipliersFor(category, option);
-        return availableMultipliers.any((multiplier) {
-          final sizes = configProvider.getSizesForStorage(
-            selectedRegion!.slug,
-            architecture,
-            category,
-            option,
-            multiplier,
-          );
-          return sizes.isNotEmpty;
-        });
-      });
-    }).toList();
-
-    // Auto-select the single category if only one is available
-    if (availableCategories.length == 1 && selectedCategory == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        onChanged(availableCategories.first);
-      });
-    }
-
-    // Hide selector if no categories have available configurations
-    if (availableCategories.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return DropdownButtonFormField<CpuCategory>(
-      initialValue: selectedCategory ??
-          (availableCategories.length == 1 ? availableCategories.first : null),
-      decoration: const InputDecoration(
-        labelText: 'CPU Category',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.tune),
-      ),
-      items: availableCategories.map((category) {
-        return DropdownMenuItem<CpuCategory>(
-          value: category,
-          child: Text(category.displayName),
-        );
-      }).toList(),
-      onChanged: isEnabled ? onChanged : null,
-    );
-  }
-}
-
-class _DropletSizeDropdown extends StatelessWidget {
-  final DropletSize? selectedSize;
-  final DropletConfigProvider configProvider;
-  final Region? selectedRegion;
-  final CpuArchitecture? selectedCpuArchitecture;
-  final CpuCategory? selectedCpuCategory;
-  final CpuOption? selectedCpuOption;
-  final StorageMultiplier? selectedStorageMultiplier;
-  final ValueChanged<DropletSize?> onChanged;
-
-  const _DropletSizeDropdown({
-    required this.selectedSize,
-    required this.configProvider,
-    required this.selectedRegion,
-    required this.selectedCpuArchitecture,
-    required this.selectedCpuCategory,
-    required this.selectedCpuOption,
-    required this.selectedStorageMultiplier,
-    required this.onChanged,
-  });
-
-  List<DropletSize> _getAvailableSizes() {
-    if (selectedRegion == null ||
-        selectedCpuArchitecture == null ||
-        selectedCpuCategory == null ||
-        selectedCpuOption == null ||
-        selectedStorageMultiplier == null) {
-      return [];
-    }
-
-    return configProvider.getSizesForStorage(
-      selectedRegion!.slug,
-      selectedCpuArchitecture!,
-      selectedCpuCategory!,
-      selectedCpuOption!,
-      selectedStorageMultiplier!,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final availableSizes = _getAvailableSizes();
-    final isEnabled = selectedRegion != null &&
-        selectedCpuArchitecture != null &&
-        selectedCpuCategory != null &&
-        selectedCpuOption != null &&
-        selectedStorageMultiplier != null;
-
-    if (!isEnabled) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Droplet Size',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.memory,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Complete the selection steps above',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (availableSizes.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Droplet Size',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.error),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.warning,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'No sizes available for the selected configuration',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Droplet Size',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        Container(
-          constraints: const BoxConstraints(maxHeight: 300),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outline),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SingleChildScrollView(
-              child: Column(
-                children: availableSizes.asMap().entries.expand((entry) {
-                  final index = entry.key;
-                  final size = entry.value;
-                  final isSelected = selectedSize?.slug == size.slug;
-                  final isLast = index == availableSizes.length - 1;
-
-                  return [
-                    _DropletSizeCard(
-                      size: size,
-                      isSelected: isSelected,
-                      isLast: isLast,
-                      onTap: () => onChanged(size),
-                    ),
-                    if (!isLast)
-                      Divider(
-                        height: 8,
-                        thickness: 1,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outline
-                            .withValues(alpha: 0.3),
-                        indent: 16,
-                        endIndent: 16,
-                      ),
-                  ];
-                }).toList(),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DropletSizeCard extends StatelessWidget {
-  final DropletSize size;
-  final bool isSelected;
-  final bool isLast;
-  final VoidCallback onTap;
-
-  const _DropletSizeCard({
-    required this.size,
-    required this.isSelected,
-    required this.isLast,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surface,
-          border: null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    size.slug,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                  ),
-                ),
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 16,
-              runSpacing: 4,
-              children: [
-                _SpecChip(
-                  icon: Icons.memory,
-                  label: 'RAM',
-                  value: UnitFormatter.formatMemory(size.memory),
-                  isSelected: isSelected,
-                ),
-                _SpecChip(
-                  icon: Icons.speed,
-                  label: 'vCPUs',
-                  value: UnitFormatter.formatCpuCount(size.vcpus),
-                  isSelected: isSelected,
-                ),
-                _SpecChip(
-                  icon: Icons.storage,
-                  label: 'Storage',
-                  value: '${UnitFormatter.formatStorage(size.disk)} SSD',
-                  isSelected: isSelected,
-                ),
-                _SpecChip(
-                  icon: Icons.cloud_upload,
-                  label: 'Transfer',
-                  value: UnitFormatter.formatTransfer(size.transfer),
-                  isSelected: isSelected,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  UnitFormatter.formatPrice(size.priceMonthly, isMonthly: true),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                            : Theme.of(context).colorScheme.primary,
-                      ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '(${UnitFormatter.formatPrice(size.priceHourly, isMonthly: false)})',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isSelected
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer
-                                .withValues(alpha: 0.7)
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SpecChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool isSelected;
-
-  const _SpecChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.isSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 14,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            '$label: $value',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -997,6 +572,168 @@ class _WorldSaveUpload extends StatelessWidget {
                   ],
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeSelectionPrompt extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Icon(
+              Icons.settings_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Choose Configuration Mode',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Select how you want to configure your droplet above to get started.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfigurationModeSelector extends StatelessWidget {
+  final bool? isRecommended;
+  final ValueChanged<bool?> onChanged;
+
+  const _ConfigurationModeSelector({
+    required this.isRecommended,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Configuration Mode',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _ModeOption(
+                    title: 'Recommended',
+                    subtitle: 'Optimized for most Minecraft servers',
+                    icon: Icons.star,
+                    isSelected: isRecommended == true,
+                    onTap: () => onChanged(true),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ModeOption(
+                    title: 'Custom',
+                    subtitle: 'Full control over all settings',
+                    icon: Icons.tune,
+                    isSelected: isRecommended == false,
+                    onTap: () => onChanged(false),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeOption extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ModeOption({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outline,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          color: isSelected
+              ? Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withValues(alpha: 0.3)
+              : Theme.of(context).colorScheme.surface,
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
           ],
         ),
       ),
