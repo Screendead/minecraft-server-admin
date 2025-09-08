@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Represents different log levels
 enum LogLevel {
   debug,
@@ -33,6 +35,39 @@ enum LogLevel {
         return 'error';
       case LogLevel.fatal:
         return 'dangerous';
+    }
+  }
+}
+
+/// Extension methods for LogLevel to provide icon and color utilities
+extension LogLevelExtension on LogLevel {
+  IconData get icon {
+    switch (this) {
+      case LogLevel.debug:
+        return Icons.bug_report;
+      case LogLevel.info:
+        return Icons.info;
+      case LogLevel.warning:
+        return Icons.warning;
+      case LogLevel.error:
+        return Icons.error;
+      case LogLevel.fatal:
+        return Icons.dangerous;
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case LogLevel.debug:
+        return Colors.blue;
+      case LogLevel.info:
+        return Colors.green;
+      case LogLevel.warning:
+        return Colors.orange;
+      case LogLevel.error:
+        return Colors.red;
+      case LogLevel.fatal:
+        return Colors.purple;
     }
   }
 }
