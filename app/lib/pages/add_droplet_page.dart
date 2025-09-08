@@ -475,9 +475,9 @@ write_files:
   /// Calculates appropriate JVM memory allocation
   int _calculateJvmRamAllocation(int availableRamMB) {
     // Reserve some memory for JVM overhead and other processes
-    // Use 80% of available RAM, with minimum 256MB and maximum 8GB
+    // Use 80% of available RAM, with minimum 256MB (no maximum limit)
     final jvmRam = (availableRamMB * 0.8).round();
-    return jvmRam.clamp(256, 8192);
+    return jvmRam < 256 ? 256 : jvmRam; // Only enforce minimum, no maximum
   }
 
   /// Generates server.properties with appropriate settings for the available RAM
