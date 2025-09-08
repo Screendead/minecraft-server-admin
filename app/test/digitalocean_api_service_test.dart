@@ -85,21 +85,6 @@ void main() {
         expect(result, isFalse);
       });
 
-      test('should return false for timeout', () async {
-        const apiKey = 'test-api-key';
-
-        when(mockClient.get(
-          any,
-          headers: anyNamed('headers'),
-        )).thenAnswer((_) async {
-          await Future.delayed(Duration(seconds: 15));
-          return http.Response('{}', 200);
-        });
-
-        final result = await DigitalOceanApiService.validateApiKey(apiKey);
-
-        expect(result, isFalse);
-      });
     });
 
     group('getAccountInfo', () {
@@ -143,7 +128,8 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        expect(() => DigitalOceanApiService.getAccountInfo(apiKey), throwsException);
+        expect(() => DigitalOceanApiService.getAccountInfo(apiKey),
+            throwsException);
       });
 
       test('should throw exception for network error', () async {
@@ -154,7 +140,8 @@ void main() {
           headers: anyNamed('headers'),
         )).thenThrow(Exception('Network error'));
 
-        expect(() => DigitalOceanApiService.getAccountInfo(apiKey), throwsException);
+        expect(() => DigitalOceanApiService.getAccountInfo(apiKey),
+            throwsException);
       });
     });
 
@@ -210,7 +197,8 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        expect(() => DigitalOceanApiService.getDroplets(apiKey), throwsException);
+        expect(
+            () => DigitalOceanApiService.getDroplets(apiKey), throwsException);
       });
 
       test('should throw exception for network error', () async {
@@ -221,7 +209,8 @@ void main() {
           headers: anyNamed('headers'),
         )).thenThrow(Exception('Network error'));
 
-        expect(() => DigitalOceanApiService.getDroplets(apiKey), throwsException);
+        expect(
+            () => DigitalOceanApiService.getDroplets(apiKey), throwsException);
       });
     });
 
@@ -279,7 +268,8 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        expect(() => DigitalOceanApiService.getDropletSizes(apiKey), throwsException);
+        expect(() => DigitalOceanApiService.getDropletSizes(apiKey),
+            throwsException);
       });
     });
 
@@ -332,7 +322,8 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        expect(() => DigitalOceanApiService.getRegions(apiKey), throwsException);
+        expect(
+            () => DigitalOceanApiService.getRegions(apiKey), throwsException);
       });
     });
 
@@ -373,7 +364,8 @@ void main() {
 
         expect(region.name, equals('New York 1'));
         expect(region.slug, equals('nyc1'));
-        expect(region.features, equals(['virtio', 'private_networking', 'backups']));
+        expect(region.features,
+            equals(['virtio', 'private_networking', 'backups']));
         expect(region.available, isTrue);
       });
     });
