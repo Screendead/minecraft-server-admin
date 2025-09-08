@@ -200,7 +200,7 @@ jobs:
           
           const botComment = comments.find(comment => 
             comment.user.type === 'Bot' && 
-            comment.body.includes('🚀 iOS Build completed')
+            comment.body.includes('🚀 iOS Configuration verified!')
           );
           
           const coverageUrl = '${{ steps.deploy-coverage.outputs.coverage-url }}';
