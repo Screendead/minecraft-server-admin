@@ -12,23 +12,19 @@ class ApiKeyCacheException implements Exception {
 }
 
 /// Secure in-memory API key cache service
-///
+/// 
 /// This service provides a secure way to cache decrypted API keys in memory
 /// to avoid repeated Face ID/Touch ID prompts. The cache is automatically
 /// cleared when the app goes to background or when the user signs out.
-///
+/// 
 /// Security features:
 /// - Keys are stored in memory only (not persisted)
 /// - Automatic cache invalidation on app backgrounding
 /// - Cache is cleared on user sign out
 /// - Thread-safe operations
 class ApiKeyCacheService {
-  static final ApiKeyCacheService _instance = ApiKeyCacheService._internal();
-  factory ApiKeyCacheService() => _instance;
-  ApiKeyCacheService._internal();
-
-  /// Create a new instance for testing
-  ApiKeyCacheService.test();
+  /// Create a new instance
+  ApiKeyCacheService();
 
   // Private fields
   String? _cachedApiKey;

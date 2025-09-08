@@ -36,7 +36,7 @@ void main() {
       });
 
       test('should throw exception when not initialized', () {
-        final uninitializedService = ApiKeyCacheService.test();
+        final uninitializedService = ApiKeyCacheService();
         expect(
           () => uninitializedService.getCachedApiKey(),
           throwsA(isA<ApiKeyCacheException>()),
@@ -226,13 +226,13 @@ void main() {
       });
 
       test('should throw exception after disposal', () {
-        final testService = ApiKeyCacheService.test();
+        final testService = ApiKeyCacheService();
         testService.initialize(
           biometricService: mockBiometricService,
           apiKeyService: mockApiKeyService,
         );
         testService.dispose();
-
+        
         expect(
           () => testService.getCachedApiKey(),
           throwsA(isA<ApiKeyCacheException>()),

@@ -38,19 +38,13 @@ void main() async {
   runApp(MyApp(sharedPreferences: sharedPreferences));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   final SharedPreferences sharedPreferences;
 
   const MyApp({
     super.key,
     required this.sharedPreferences,
   });
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -59,7 +53,7 @@ class _MyAppState extends State<MyApp> {
           create: (context) => auth_provider.AuthProvider(
             firebaseAuth: FirebaseAuth.instance,
             firestore: FirebaseFirestore.instance,
-            sharedPreferences: widget.sharedPreferences,
+            sharedPreferences: sharedPreferences,
           ),
         ),
         ChangeNotifierProvider(

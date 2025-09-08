@@ -55,7 +55,7 @@ void main() {
       DigitalOceanApiService.setClient(mockHttpClient);
 
       // Create a fresh cache service for each test
-      final cacheService = ApiKeyCacheService.test();
+      final cacheService = ApiKeyCacheService();
 
       service = IOSSecureApiKeyService(
         firestore: mockFirestore,
