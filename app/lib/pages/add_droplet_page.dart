@@ -404,7 +404,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
   Future<String> _generateUserData() async {
     final minecraftVersion = _selectedMinecraftVersion!.id;
     final serverJarUrl = await _getServerJarUrl(minecraftVersion);
-    
+
     // Calculate memory allocation based on droplet RAM
     final totalRamMB = _selectedDropletSize!.memory;
     final osRamMB = _calculateOSRamUsage(totalRamMB);
@@ -429,7 +429,7 @@ runcmd:
     
     # Server settings
     server-port=25565
-    enable-query=false
+    enable-query=true
     enable-rcon=true
     rcon.port=25575
     rcon.password=minecraft123
@@ -488,7 +488,7 @@ runcmd:
     broadcast-rcon-to-ops=true
     sync-chunk-writes=true
     enable-jmx-monitoring=false
-    enable-query=false
+    enable-query=true
     query.port=25565
     EOF
   - chown -R minecraft:minecraft /opt/minecraft
