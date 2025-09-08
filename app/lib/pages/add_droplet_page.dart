@@ -422,74 +422,75 @@ runcmd:
   - cd /opt/minecraft
   - wget -O server.jar $serverJarUrl
   - echo "eula=true" > eula.txt
-  - cat > server.properties << 'SERVER_EOF'
-# Minecraft server properties
-# Generated for ${jvmRamMB}MB JVM allocation
-
-# Server settings
-server-port=25565
-enable-query=false
-enable-rcon=true
-rcon.port=25575
-rcon.password=minecraft123
-enable-command-block=false
-gamemode=survival
-force-gamemode=false
-hardcore=false
-difficulty=easy
-allow-flight=false
-allow-nether=true
-enable-command-block=false
-spawn-protection=16
-max-world-size=29999984
-
-# Performance settings (optimized for ${jvmRamMB}MB RAM)
-view-distance=${_calculateViewDistance(jvmRamMB)}
-simulation-distance=${_calculateSimulationDistance(jvmRamMB)}
-max-tick-time=60000
-max-players=20
-network-compression-threshold=256
-max-chunk-loads-per-tick=8
-max-chunk-sends-per-tick=4
-
-# World settings
-level-name=world
-level-seed=
-level-type=minecraft\\:normal
-generate-structures=true
-generator-settings={}
-level-name=world
-level-seed=
-level-type=minecraft\\:normal
-generate-structures=true
-generator-settings={}
-
-# Player settings
-online-mode=true
-prevent-proxy-connections=false
-pvp=true
-player-idle-timeout=0
-require-resource-pack=false
-resource-pack=
-resource-pack-prompt=
-resource-pack-sha1=
-
-# Chat settings
-enable-status=true
-motd=A Minecraft Server
-enforce-whitelist=false
-white-list=false
-
-# Other settings
-function-permission-level=2
-op-permission-level=4
-broadcast-console-to-ops=true
-broadcast-rcon-to-ops=true
-sync-chunk-writes=true
-enable-jmx-monitoring=false
-enable-query=false
-query.port=25565
-SERVER_EOF
+  - |
+    cat > server.properties << 'EOF'
+    # Minecraft server properties
+    # Generated for ${jvmRamMB}MB JVM allocation
+    
+    # Server settings
+    server-port=25565
+    enable-query=false
+    enable-rcon=true
+    rcon.port=25575
+    rcon.password=minecraft123
+    enable-command-block=false
+    gamemode=survival
+    force-gamemode=false
+    hardcore=false
+    difficulty=easy
+    allow-flight=false
+    allow-nether=true
+    enable-command-block=false
+    spawn-protection=16
+    max-world-size=29999984
+    
+    # Performance settings (optimized for ${jvmRamMB}MB RAM)
+    view-distance=${_calculateViewDistance(jvmRamMB)}
+    simulation-distance=${_calculateSimulationDistance(jvmRamMB)}
+    max-tick-time=60000
+    max-players=20
+    network-compression-threshold=256
+    max-chunk-loads-per-tick=8
+    max-chunk-sends-per-tick=4
+    
+    # World settings
+    level-name=world
+    level-seed=
+    level-type=minecraft\\:normal
+    generate-structures=true
+    generator-settings={}
+    level-name=world
+    level-seed=
+    level-type=minecraft\\:normal
+    generate-structures=true
+    generator-settings={}
+    
+    # Player settings
+    online-mode=true
+    prevent-proxy-connections=false
+    pvp=true
+    player-idle-timeout=0
+    require-resource-pack=false
+    resource-pack=
+    resource-pack-prompt=
+    resource-pack-sha1=
+    
+    # Chat settings
+    enable-status=true
+    motd=A Minecraft Server
+    enforce-whitelist=false
+    white-list=false
+    
+    # Other settings
+    function-permission-level=2
+    op-permission-level=4
+    broadcast-console-to-ops=true
+    broadcast-rcon-to-ops=true
+    sync-chunk-writes=true
+    enable-jmx-monitoring=false
+    enable-query=false
+    query.port=25565
+    EOF
   - chown -R minecraft:minecraft /opt/minecraft
   - systemctl enable minecraft-server
   - systemctl start minecraft-server
