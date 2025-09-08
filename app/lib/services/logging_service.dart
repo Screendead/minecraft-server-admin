@@ -287,8 +287,7 @@ class LoggingService {
   List<LogEntry> getRecentLogs(int count) {
     final sortedLogs = List<LogEntry>.from(_logs);
     sortedLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    final startIndex = max(0, sortedLogs.length - count);
-    return sortedLogs.sublist(startIndex);
+    return sortedLogs.take(count).toList();
   }
 
   /// Clear all logs
