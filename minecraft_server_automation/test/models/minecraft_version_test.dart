@@ -6,7 +6,7 @@ void main() {
     test('should create instance with all parameters', () {
       final time = DateTime.now();
       final releaseTime = DateTime.now().add(Duration(days: 1));
-      
+
       final minecraftVersion = MinecraftVersion(
         id: '1.20.1',
         type: 'release',
@@ -19,7 +19,10 @@ void main() {
 
       expect(minecraftVersion.id, equals('1.20.1'));
       expect(minecraftVersion.type, equals('release'));
-      expect(minecraftVersion.url, equals('https://launchermeta.mojang.com/mc/game/version_manifest.json'));
+      expect(
+          minecraftVersion.url,
+          equals(
+              'https://launchermeta.mojang.com/mc/game/version_manifest.json'));
       expect(minecraftVersion.time, equals(time));
       expect(minecraftVersion.releaseTime, equals(releaseTime));
       expect(minecraftVersion.sha1, equals('abc123def456'));
@@ -33,7 +36,8 @@ void main() {
         final json = {
           'id': '1.20.1',
           'type': 'release',
-          'url': 'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+          'url':
+              'https://launchermeta.mojang.com/mc/game/version_manifest.json',
           'time': time.toIso8601String(),
           'releaseTime': releaseTime.toIso8601String(),
           'sha1': 'abc123def456',
@@ -44,7 +48,10 @@ void main() {
 
         expect(version.id, equals('1.20.1'));
         expect(version.type, equals('release'));
-        expect(version.url, equals('https://launchermeta.mojang.com/mc/game/version_manifest.json'));
+        expect(
+            version.url,
+            equals(
+                'https://launchermeta.mojang.com/mc/game/version_manifest.json'));
         expect(version.time, equals(time));
         expect(version.releaseTime, equals(releaseTime));
         expect(version.sha1, equals('abc123def456'));
@@ -92,7 +99,7 @@ void main() {
       test('should return true for release type', () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '1.20.1',
           type: 'release',
@@ -109,7 +116,7 @@ void main() {
       test('should return false for non-release type', () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '1.20.1',
           type: 'snapshot',
@@ -128,7 +135,7 @@ void main() {
       test('should return true for snapshot type', () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '1.20.1',
           type: 'snapshot',
@@ -145,7 +152,7 @@ void main() {
       test('should return false for non-snapshot type', () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '1.20.1',
           type: 'release',
@@ -164,7 +171,7 @@ void main() {
       test('should return id for release version', () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '1.20.1',
           type: 'release',
@@ -181,7 +188,7 @@ void main() {
       test('should return id with snapshot suffix for snapshot version', () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '23w45a',
           type: 'snapshot',
@@ -195,10 +202,11 @@ void main() {
         expect(version.displayName, equals('23w45a (Snapshot)'));
       });
 
-      test('should return id with snapshot suffix for other non-release types', () {
+      test('should return id with snapshot suffix for other non-release types',
+          () {
         final time = DateTime.now();
         final releaseTime = DateTime.now().add(Duration(days: 1));
-        
+
         final version = MinecraftVersion(
           id: '1.20.1-pre1',
           type: 'old_beta',
