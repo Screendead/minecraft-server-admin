@@ -5,7 +5,7 @@ class MockSecureStorageService implements SecureStorageService {
   final Map<String, String> _storage = {};
   bool _shouldThrow = false;
   String? _throwMessage;
-  List<StorageOperation> _operations = [];
+  final List<StorageOperation> _operations = [];
 
   @override
   Future<void> write(String key, String value) async {

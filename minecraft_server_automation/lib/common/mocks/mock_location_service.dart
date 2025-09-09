@@ -8,7 +8,7 @@ class MockLocationService implements LocationService {
   bool _isLocationServiceEnabled = true;
   bool _shouldThrow = false;
   String? _throwMessage;
-  List<LocationOperation> _operations = [];
+  final List<LocationOperation> _operations = [];
 
   @override
   Future<LocationPermission> checkPermission() async {

@@ -6,7 +6,7 @@ class MockBiometricAuthService implements BiometricAuthService {
   bool _isAvailable = true;
   bool _shouldSucceed = true;
   List<BiometricType> _availableBiometrics = [BiometricType.fingerprint];
-  List<BiometricAuthCall> _calls = [];
+  final List<BiometricAuthCall> _calls = [];
 
   @override
   Future<bool> isAvailable() async {

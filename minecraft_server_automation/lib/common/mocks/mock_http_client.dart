@@ -5,8 +5,8 @@ class MockHttpClient implements HttpClientInterface {
   // Test control properties
   bool shouldThrowOnRequest = false;
   String? throwMessage;
-  Map<String, HttpResponse> _responses = {};
-  List<HttpRequest> _requests = [];
+  final Map<String, HttpResponse> _responses = {};
+  final List<HttpRequest> _requests = [];
 
   @override
   Future<HttpResponse> get(String url, {Map<String, String>? headers}) async {
