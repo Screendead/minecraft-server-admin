@@ -1,3 +1,5 @@
+import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +13,10 @@ import '../models/cpu_architecture.dart';
 import '../models/cpu_category.dart';
 import '../models/cpu_option.dart';
 import '../models/storage_multiplier.dart';
+import '../models/droplet_creation_request.dart';
 import '../widgets/recommended_config_widget.dart';
 import '../widgets/custom_config_widget.dart';
+import '../utils/memory_calculator.dart';
 
 class AddDropletPage extends StatefulWidget {
   const AddDropletPage({super.key});
@@ -41,6 +45,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
 
   // UI state
   bool _isLoadingData = true;
+  bool _isCreatingDroplet = false;
   String? _errorMessage;
 
   @override
@@ -245,84 +250,292 @@ class _AddDropletPageState extends State<AddDropletPage> {
     });
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedRegion == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a region')),
-        );
-        return;
-      }
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      if (_isRecommendedMode == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a configuration mode')),
-        );
-        return;
-      }
-
-      if (_isRecommendedMode == true) {
-        // For recommended mode, validate that we have the basic required selections
-        if (_selectedDropletSize == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Please wait for configuration to load')),
-          );
-          return;
-        }
-      } else {
-        // For custom mode, validate all selections
-        if (_selectedCpuArchitecture == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a CPU architecture')),
-          );
-          return;
-        }
-
-        if (_selectedCpuCategory == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a CPU category')),
-          );
-          return;
-        }
-
-        if (_selectedCpuOption == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a CPU option')),
-          );
-          return;
-        }
-
-        if (_selectedStorageMultiplier == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a storage option')),
-          );
-          return;
-        }
-
-        if (_selectedDropletSize == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select a droplet size')),
-          );
-          return;
-        }
-      }
-
-      if (_selectedMinecraftVersion == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a Minecraft version')),
-        );
-        return;
-      }
-
-      // TODO: Implement actual droplet creation
+    if (_selectedRegion == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Droplet configuration saved! (Creation not implemented yet)'),
-        ),
+        const SnackBar(content: Text('Please select a region')),
       );
-      Navigator.of(context).pop();
+      return;
+    }
+
+    if (_isRecommendedMode == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a configuration mode')),
+      );
+      return;
+    }
+
+    if (_isRecommendedMode == true) {
+      // For recommended mode, validate that we have the basic required selections
+      if (_selectedDropletSize == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Please wait for configuration to load')),
+        );
+        return;
+      }
+    } else {
+      // For custom mode, validate all selections
+      if (_selectedCpuArchitecture == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a CPU architecture')),
+        );
+        return;
+      }
+
+      if (_selectedCpuCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a CPU category')),
+        );
+        return;
+      }
+
+      if (_selectedCpuOption == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a CPU option')),
+        );
+        return;
+      }
+
+      if (_selectedStorageMultiplier == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a storage option')),
+        );
+        return;
+      }
+
+      if (_selectedDropletSize == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a droplet size')),
+        );
+        return;
+      }
+    }
+
+    if (_selectedMinecraftVersion == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a Minecraft version')),
+      );
+      return;
+    }
+
+    // Start droplet creation
+    setState(() {
+      _isCreatingDroplet = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Get API key
+      final authProvider = context.read<AuthProvider>();
+      final apiKeyService = IOSSecureApiKeyService(
+        firestore: authProvider.firestore,
+        auth: authProvider.firebaseAuth,
+        biometricService: IOSBiometricEncryptionService(),
+      );
+      final apiKey = await apiKeyService.getApiKey();
+
+      if (apiKey == null) {
+        throw Exception(
+            'No API key found. Please configure your DigitalOcean API key first.');
+      }
+
+      // Fetch available images and select latest Ubuntu LTS image
+      final images = await DigitalOceanApiService.fetchImages(apiKey);
+      final ubuntuImages = images
+          .where((img) =>
+              img['distribution'] == 'Ubuntu' &&
+              img['slug'] != null &&
+              img['slug'].toString().contains('x64'))
+          .toList();
+      ubuntuImages
+          .sort((a, b) => b['name'].toString().compareTo(a['name'].toString()));
+      final selectedImageSlug = ubuntuImages.isNotEmpty
+          ? ubuntuImages.first['slug'].toString()
+          : 'ubuntu-22-04-x64'; // fallback if no images found
+
+      // Create droplet creation request
+      final request = DropletCreationRequest.fromFormData(
+        name: _nameController.text.trim(),
+        region: _selectedRegion!.slug,
+        size: _selectedDropletSize!.slug,
+        image: selectedImageSlug,
+        tags: [
+          'minecraft-server',
+          'minecraft-${_selectedMinecraftVersion!.id}'
+        ],
+        userData: await _generateUserData(),
+      );
+
+      // Create the droplet
+      final droplet =
+          await DigitalOceanApiService.createDroplet(apiKey, request);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Droplet "${droplet['name']}" created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to create droplet: $e';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create droplet: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreatingDroplet = false;
+        });
+      }
+    }
+  }
+
+  /// Generates a random RCON password
+  String _generateRconPassword() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (i) => random.nextInt(256));
+    return base64Encode(bytes).substring(0, 16);
+  }
+
+  /// Generates user data script for initial server setup
+  Future<String> _generateUserData() async {
+    final minecraftVersion = _selectedMinecraftVersion!.id;
+    final serverJarUrl = await _getServerJarUrl(minecraftVersion);
+
+    // Calculate memory allocation based on droplet RAM
+    final totalRamMB = _selectedDropletSize!.memory;
+    final osRamMB = MemoryCalculator.calculateOSRamUsage(totalRamMB);
+    final availableRamMB = totalRamMB - osRamMB;
+    final jvmRamMB = MemoryCalculator.calculateJvmRamAllocation(availableRamMB);
+    final rconPassword = _generateRconPassword();
+
+    return '''
+#cloud-config
+runcmd:
+  - apt-get update
+  - apt-get install -y openjdk-21-jdk
+  - useradd -m -s /bin/bash minecraft
+  - mkdir -p /opt/minecraft
+  - chown minecraft:minecraft /opt/minecraft
+  - cd /opt/minecraft
+  - wget -O server.jar "$serverJarUrl"
+  - echo "eula=true" > eula.txt
+  - |
+    cat > server.properties << 'EOF'
+    # Minecraft server properties
+    # Generated for ${jvmRamMB}MB JVM allocation
+    
+    # Server settings
+    server-port=25565
+    enable-query=true
+    enable-rcon=true
+    rcon.port=25575
+    rcon.password=$rconPassword
+    enable-command-block=false
+    gamemode=survival
+    force-gamemode=false
+    hardcore=false
+    difficulty=easy
+    allow-flight=false
+    allow-nether=true
+    enable-command-block=false
+    spawn-protection=16
+    max-world-size=29999984
+    
+    # Performance settings (optimized for ${jvmRamMB}MB RAM)
+    view-distance=${MemoryCalculator.calculateViewDistance(jvmRamMB)}
+    simulation-distance=${MemoryCalculator.calculateSimulationDistance(jvmRamMB)}
+    max-tick-time=60000
+    max-players=20
+    network-compression-threshold=256
+    max-chunk-loads-per-tick=8
+    max-chunk-sends-per-tick=4
+    
+    # World settings
+    level-name=world
+    level-seed=
+    level-type=minecraft\\:normal
+    generate-structures=true
+    generator-settings={}
+    
+    # Player settings
+    online-mode=true
+    prevent-proxy-connections=false
+    pvp=true
+    player-idle-timeout=0
+    require-resource-pack=false
+    resource-pack=
+    resource-pack-prompt=
+    resource-pack-sha1=
+    
+    # Chat settings
+    enable-status=true
+    motd=A Minecraft Server
+    enforce-whitelist=false
+    white-list=false
+    
+    # Other settings
+    function-permission-level=2
+    op-permission-level=4
+    broadcast-console-to-ops=true
+    broadcast-rcon-to-ops=true
+    sync-chunk-writes=true
+    enable-jmx-monitoring=false
+    EOF
+  - chown -R minecraft:minecraft /opt/minecraft
+  - systemctl enable minecraft-server
+  - systemctl start minecraft-server
+  - ufw allow ssh
+  - ufw allow 25565
+  - ufw allow 25575
+  - ufw --force enable
+
+write_files:
+  - path: /etc/systemd/system/minecraft-server.service
+    content: |
+      [Unit]
+      Description=Minecraft Server
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=minecraft
+      WorkingDirectory=/opt/minecraft
+      ExecStart=java -Xmx${jvmRamMB}M -Xms${jvmRamMB}M -jar server.jar nogui
+      Restart=always
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root:root
+    permissions: '0644'
+''';
+  }
+
+  /// Gets the server JAR URL for the specified Minecraft version
+  Future<String> _getServerJarUrl(String version) async {
+    try {
+      // Use the MinecraftVersionsService to fetch the actual download URL from the Minecraft version manifest
+      return await MinecraftVersionsService.getServerJarUrlForVersion(version);
+    } catch (e) {
+      // Fallback to a generic URL if version-specific fetching fails
+      // This ensures the droplet creation doesn't fail due to version manifest issues
+      // TODO: Consider implementing a more robust fallback strategy that fetches
+      // the latest stable version or uses a configurable fallback URL
+      return 'https://launcher.mojang.com/v1/objects/1b557e7b033b583cd9f66746b7a9ab1ec60ec15b/server.jar';
     }
   }
 
@@ -368,13 +581,18 @@ class _AddDropletPageState extends State<AddDropletPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _DropletNameField(controller: _nameController),
+                            _DropletNameField(
+                              controller: _nameController,
+                              enabled: !_isCreatingDroplet,
+                            ),
                             const SizedBox(height: 16),
 
                             // Configuration mode selection
                             _ConfigurationModeSelector(
                               isRecommended: _isRecommendedMode,
-                              onChanged: _onConfigurationModeChanged,
+                              onChanged: _isCreatingDroplet
+                                  ? (_) {}
+                                  : _onConfigurationModeChanged,
                             ),
                             const SizedBox(height: 16),
 
@@ -386,7 +604,9 @@ class _AddDropletPageState extends State<AddDropletPage> {
                                 selectedRegion: _selectedRegion,
                                 availableRegions:
                                     configProvider.availableRegions,
-                                onRegionChanged: _onRegionChanged,
+                                onRegionChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onRegionChanged,
                                 isLoading: _isLoadingData,
                               ),
                             ] else ...[
@@ -402,15 +622,25 @@ class _AddDropletPageState extends State<AddDropletPage> {
                                 availableRegions:
                                     configProvider.availableRegions,
                                 configProvider: configProvider,
-                                onRegionChanged: _onRegionChanged,
-                                onCpuArchitectureChanged:
-                                    _onCpuArchitectureChanged,
-                                onCpuCategoryChanged: _onCpuCategoryChanged,
-                                onCpuOptionChanged: _onCpuOptionChanged,
-                                onStorageMultiplierChanged:
-                                    _onStorageMultiplierChanged,
-                                onDropletSizeChanged: (size) =>
-                                    setState(() => _selectedDropletSize = size),
+                                onRegionChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onRegionChanged,
+                                onCpuArchitectureChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onCpuArchitectureChanged,
+                                onCpuCategoryChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onCpuCategoryChanged,
+                                onCpuOptionChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onCpuOptionChanged,
+                                onStorageMultiplierChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : _onStorageMultiplierChanged,
+                                onDropletSizeChanged: _isCreatingDroplet
+                                    ? (_) {}
+                                    : (size) => setState(
+                                        () => _selectedDropletSize = size),
                               ),
                             ],
                             const SizedBox(height: 16),
@@ -419,21 +649,29 @@ class _AddDropletPageState extends State<AddDropletPage> {
                             _MinecraftVersionDropdown(
                               selectedVersion: _selectedMinecraftVersion,
                               versions: configProvider.releaseVersions,
-                              onChanged: (version) => setState(
-                                  () => _selectedMinecraftVersion = version),
+                              onChanged: _isCreatingDroplet
+                                  ? (_) {}
+                                  : (version) => setState(() =>
+                                      _selectedMinecraftVersion = version),
                             ),
                             const SizedBox(height: 16),
 
                             // World save upload (always shown)
                             _WorldSaveUpload(
                               selectedPath: _selectedWorldSavePath,
-                              onPickFile: _pickWorldSave,
-                              onRemoveFile: _removeWorldSave,
+                              onPickFile:
+                                  _isCreatingDroplet ? null : _pickWorldSave,
+                              onRemoveFile:
+                                  _isCreatingDroplet ? null : _removeWorldSave,
                             ),
                             const SizedBox(height: 32),
 
                             // Submit button
-                            _SubmitButton(onPressed: _submitForm),
+                            _SubmitButton(
+                              onPressed:
+                                  _isCreatingDroplet ? null : _submitForm,
+                              isLoading: _isCreatingDroplet,
+                            ),
                           ],
                         ),
                       ),
@@ -446,13 +684,18 @@ class _AddDropletPageState extends State<AddDropletPage> {
 
 class _DropletNameField extends StatelessWidget {
   final TextEditingController controller;
+  final bool enabled;
 
-  const _DropletNameField({required this.controller});
+  const _DropletNameField({
+    required this.controller,
+    this.enabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      enabled: enabled,
       decoration: const InputDecoration(
         labelText: 'Droplet Name',
         hintText: 'Enter a name for your Minecraft server',
@@ -505,8 +748,8 @@ class _MinecraftVersionDropdown extends StatelessWidget {
 
 class _WorldSaveUpload extends StatelessWidget {
   final String? selectedPath;
-  final VoidCallback onPickFile;
-  final VoidCallback onRemoveFile;
+  final VoidCallback? onPickFile;
+  final VoidCallback? onRemoveFile;
 
   const _WorldSaveUpload({
     required this.selectedPath,
@@ -742,21 +985,38 @@ class _ModeOption extends StatelessWidget {
 }
 
 class _SubmitButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
-  const _SubmitButton({required this.onPressed});
+  const _SubmitButton({
+    required this.onPressed,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      child: const Text(
-        'Configure Droplet',
-        style: TextStyle(fontSize: 16),
-      ),
+      child: isLoading
+          ? const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 12),
+                Text('Creating Droplet...'),
+              ],
+            )
+          : const Text(
+              'Create Droplet',
+              style: TextStyle(fontSize: 16),
+            ),
     );
   }
 }

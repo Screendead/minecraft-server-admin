@@ -5,6 +5,7 @@ import '../models/cpu_architecture.dart';
 import '../models/cpu_category.dart';
 import '../models/cpu_option.dart';
 import '../models/storage_multiplier.dart';
+import '../models/droplet_creation_request.dart';
 import 'logging_service.dart';
 import '../models/log_entry.dart';
 
@@ -261,6 +262,203 @@ class DigitalOceanApiService {
     final data = json.decode(response.body);
     final regions = data['regions'] as List<dynamic>;
     return regions.map((region) => Region.fromJson(region)).toList();
+  }
+
+  /// Gets all available images
+  /// Throws an exception if the API key is invalid or request fails
+  static Future<List<Map<String, dynamic>>> fetchImages(String apiKey) async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      await _loggingService.logApiCall(
+        '/images',
+        'GET',
+        metadata: {'operation': 'fetch_images'},
+      );
+
+      final response = await _httpClient.get(
+        Uri.parse('$_baseUrl/images?per_page=200'),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      stopwatch.stop();
+
+      if (response.statusCode != 200) {
+        await _loggingService.logError(
+          'Failed to fetch images',
+          category: LogCategory.apiCall,
+          details: 'Status: ${response.statusCode}, Response: ${response.body}',
+          metadata: {
+            'endpoint': '/images',
+            'method': 'GET',
+            'operation': 'fetch_images',
+            'statusCode': response.statusCode,
+          },
+        );
+
+        throw Exception('Failed to fetch images: ${response.statusCode}');
+      }
+
+      final data = json.decode(response.body);
+      final images = data['images'] as List<dynamic>?;
+      
+      if (images == null) {
+        await _loggingService.logError(
+          'Images response missing images array',
+          category: LogCategory.apiCall,
+          details: 'Response: ${response.body}',
+          metadata: {
+            'endpoint': '/images',
+            'method': 'GET',
+            'operation': 'fetch_images',
+            'statusCode': response.statusCode,
+          },
+        );
+        throw Exception('Invalid response: missing images array');
+      }
+      
+      final imageList = images.cast<Map<String, dynamic>>();
+
+      await _loggingService.logApiCall(
+        '/images',
+        'GET',
+        statusCode: response.statusCode,
+        duration: stopwatch.elapsed,
+        metadata: {
+          'operation': 'fetch_images',
+          'imageCount': imageList.length,
+        },
+      );
+
+      return imageList;
+    } catch (e) {
+      stopwatch.stop();
+
+      await _loggingService.logError(
+        'Images request failed',
+        category: LogCategory.apiCall,
+        details: 'Endpoint: /images, Error: $e',
+        metadata: {
+          'endpoint': '/images',
+          'method': 'GET',
+          'operation': 'fetch_images',
+        },
+        error: e,
+      );
+
+      rethrow;
+    }
+  }
+
+  /// Creates a new droplet using the DigitalOcean API
+  /// Throws an exception if the API key is invalid or request fails
+  static Future<Map<String, dynamic>> createDroplet(
+    String apiKey,
+    DropletCreationRequest request,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      await _loggingService.logApiCall(
+        '/droplets',
+        'POST',
+        metadata: {
+          'operation': 'create_droplet',
+          'droplet_name': request.name,
+          'region': request.region,
+          'size': request.size,
+        },
+      );
+
+      final response = await _httpClient
+          .post(
+            Uri.parse('$_baseUrl/droplets'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      stopwatch.stop();
+
+      if (response.statusCode != 202) {
+        await _loggingService.logError(
+          'Failed to create droplet',
+          category: LogCategory.apiCall,
+          details: 'Status: ${response.statusCode}, Response: ${response.body}',
+          metadata: {
+            'endpoint': '/droplets',
+            'method': 'POST',
+            'operation': 'create_droplet',
+            'statusCode': response.statusCode,
+            'droplet_name': request.name,
+            'region': request.region,
+            'size': request.size,
+          },
+        );
+
+        throw Exception(
+            'Failed to create droplet: ${response.statusCode} - ${response.body}');
+      }
+
+      final data = json.decode(response.body);
+      final droplet = data['droplet'] as Map<String, dynamic>?;
+
+      if (droplet == null) {
+        await _loggingService.logError(
+          'Droplet creation response missing droplet data',
+          category: LogCategory.apiCall,
+          details: 'Response: ${response.body}',
+          metadata: {
+            'endpoint': '/droplets',
+            'method': 'POST',
+            'operation': 'create_droplet',
+            'statusCode': response.statusCode,
+          },
+        );
+        throw Exception('Invalid response: missing droplet data');
+      }
+
+      await _loggingService.logApiCall(
+        '/droplets',
+        'POST',
+        statusCode: response.statusCode,
+        duration: stopwatch.elapsed,
+        metadata: {
+          'operation': 'create_droplet',
+          'droplet_id': droplet['id']?.toString(),
+          'droplet_name': request.name,
+          'region': request.region,
+          'size': request.size,
+        },
+      );
+
+      return droplet;
+    } catch (e) {
+      stopwatch.stop();
+
+      await _loggingService.logError(
+        'Droplet creation request failed',
+        category: LogCategory.apiCall,
+        details: 'Endpoint: /droplets, Error: $e',
+        metadata: {
+          'endpoint': '/droplets',
+          'method': 'POST',
+          'operation': 'create_droplet',
+          'droplet_name': request.name,
+          'region': request.region,
+          'size': request.size,
+        },
+        error: e,
+      );
+
+      rethrow;
+    }
   }
 }
 

@@ -78,9 +78,17 @@ class EncryptionService {
       }
     }
 
-    // If more than 80% of characters are valid, consider it valid text
-    // This allows for some Unicode characters while rejecting garbage data
-    return (validCharCount / totalCharCount) > 0.8;
+    // If more than 90% of characters are valid, consider it valid text
+    // This is more strict than before to better reject garbage data from wrong passwords
+    final isValidText = (validCharCount / totalCharCount) > 0.9;
+    
+    // Additional check: ensure the data has reasonable content
+    // For very short strings (1-2 chars), just check they're valid characters
+    // For longer strings, require at least one letter to reject pure garbage
+    final hasReasonableContent = data.length == 1 || 
+        (data.length >= 2 && RegExp(r'[a-zA-Z]').hasMatch(data));
+    
+    return isValidText && hasReasonableContent;
   }
 
   /// Derives a key from password using SHA256 hash
