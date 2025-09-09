@@ -136,11 +136,12 @@ class LogStatisticsCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _getCategoryColor(category).withOpacity(0.1),
+                            color: _getCategoryColor(category)
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color:
-                                  _getCategoryColor(category).withOpacity(0.3),
+                              color: _getCategoryColor(category)
+                                  .withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -161,7 +162,7 @@ class LogStatisticsCard extends StatelessWidget {
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: _getCategoryColor(category)
-                                      .withOpacity(0.2),
+                                      .withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
