@@ -70,9 +70,8 @@ class ServiceLocator {
           DropletConfigProviderAdapter(dropletConfigProvider));
     }
 
-    // Register region selection service - create adapter if needed
-    register<RegionSelectionServiceInterface>(
-        RegionSelectionService() as RegionSelectionServiceInterface);
+    // Register region selection service
+    register<RegionSelectionServiceInterface>(RegionSelectionService());
 
     // Register platform services
     register<BiometricAuthService>(IOSBiometricAuthAdapter());
