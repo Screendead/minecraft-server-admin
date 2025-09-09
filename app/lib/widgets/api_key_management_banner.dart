@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
@@ -15,12 +14,10 @@ class ApiKeyManagementBanner extends StatefulWidget {
 }
 
 class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
-  String? _decryptedApiKey;
   bool _isLoading = false;
   String? _error;
   bool _hasBiometricKey = false;
   bool _hasPasswordKey = false;
-  bool _showDecryptedKey = false;
 
   @override
   void initState() {
@@ -59,142 +56,6 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       if (mounted) {
         setState(() {
           _error = 'Error checking API key status: $e';
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _showDecryptDialog() async {
-    if (!mounted) return;
-
-    if (Platform.isIOS && _hasBiometricKey) {
-      // Use biometric decryption
-      await _loadBiometricApiKey();
-    } else if (_hasPasswordKey) {
-      // Use password decryption
-      await _showPasswordDialog();
-    } else {
-      setState(() {
-        _error = 'No API key found';
-      });
-    }
-  }
-
-  Future<void> _showPasswordDialog() async {
-    if (!mounted) return;
-
-    final passwordController = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Debug: Enter Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Enter the password to decrypt the API key:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-            ),
-          ],
-        ),
-        actions: [
-          if (kDebugMode) ...[
-            TextButton(
-              onPressed: () {
-                passwordController.text = 'password123';
-              },
-              child: const Text('Debug Fill'),
-            ),
-          ],
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop(passwordController.text);
-            },
-            child: const Text('Decrypt'),
-          ),
-        ],
-      ),
-    );
-
-    if (result != null && result.isNotEmpty) {
-      await _loadPasswordApiKey(result);
-    }
-  }
-
-  Future<void> _loadPasswordApiKey(String password) async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final authProvider = context.read<AuthProvider>();
-      final apiKey = await authProvider.getDecryptedApiKey(password);
-
-      if (mounted) {
-        setState(() {
-          _decryptedApiKey = apiKey;
-          _showDecryptedKey = true;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _loadBiometricApiKey() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final authProvider = context.read<AuthProvider>();
-      final biometricService = IOSBiometricEncryptionService();
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: authProvider.firestore,
-        auth: authProvider.firebaseAuth,
-        biometricService: biometricService,
-      );
-
-      final apiKey = await apiKeyService.getApiKey();
-
-      if (mounted) {
-        setState(() {
-          _decryptedApiKey = apiKey;
-          _showDecryptedKey = true;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
           _isLoading = false;
         });
       }
@@ -311,8 +172,6 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
       if (mounted) {
         setState(() {
-          _showDecryptedKey = false;
-          _decryptedApiKey = null;
           _isLoading = false;
         });
         // Show success feedback
@@ -471,12 +330,6 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       statusText = 'API key encrypted with password';
     }
 
-    // If decrypted, show different status
-    if (_showDecryptedKey && _decryptedApiKey != null) {
-      statusText =
-          'API key decrypted (${_decryptedApiKey!.substring(0, 4)}••••)';
-    }
-
     return Text(
       statusText,
       style: const TextStyle(fontSize: 12),
@@ -495,40 +348,20 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     }
 
     if (_error != null) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _error = null;
-              });
-              _showDecryptDialog();
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Retry', style: TextStyle(fontSize: 11)),
-          ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _error = null;
-                _isLoading = true;
-              });
-              _checkApiKeyStatus();
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Refresh', style: TextStyle(fontSize: 11)),
-          ),
-        ],
+      return TextButton(
+        onPressed: () {
+          setState(() {
+            _error = null;
+            _isLoading = true;
+          });
+          _checkApiKeyStatus();
+        },
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: const Text('Refresh', style: TextStyle(fontSize: 11)),
       );
     }
 
@@ -549,74 +382,26 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!_showDecryptedKey) ...[
-          TextButton(
-            onPressed: _showDecryptDialog,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              _hasBiometricKey ? 'Decrypt (Face ID)' : 'Decrypt',
-              style: const TextStyle(fontSize: 11),
-            ),
+        TextButton(
+          onPressed: () => _showApiKeyInputDialog(isUpdate: true),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-          TextButton(
-            onPressed: () => _showApiKeyInputDialog(isUpdate: true),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Edit', style: TextStyle(fontSize: 11)),
+          child: const Text('Replace', style: TextStyle(fontSize: 11)),
+        ),
+        const SizedBox(width: 8),
+        TextButton(
+          onPressed: _showClearConfirmationDialog,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: Colors.red,
           ),
-        ],
-        if (_showDecryptedKey) ...[
-          TextButton(
-            onPressed: () => _showApiKeyInputDialog(isUpdate: true),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Update', style: TextStyle(fontSize: 11)),
-          ),
-          TextButton(
-            onPressed: _showClearConfirmationDialog,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              foregroundColor: Colors.red,
-            ),
-            child: const Text('Clear', style: TextStyle(fontSize: 11)),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _showDecryptedKey = false;
-                _decryptedApiKey = null;
-              });
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Hide', style: TextStyle(fontSize: 11)),
-          ),
-        ],
-        if (!_hasBiometricKey && _hasPasswordKey)
-          TextButton(
-            onPressed: () => _showApiKeyInputDialog(),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Add Biometric', style: TextStyle(fontSize: 11)),
-          ),
+          child: const Text('Delete', style: TextStyle(fontSize: 11)),
+        ),
       ],
     );
   }
