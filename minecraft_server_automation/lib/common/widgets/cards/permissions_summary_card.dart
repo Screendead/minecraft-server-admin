@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minecraft_server_automation/common/widgets/forms/permission_chips_selector.dart';
 
 class PermissionsSummaryCard extends StatelessWidget {
   final List<String> selectedScopes;
@@ -58,22 +59,10 @@ class PermissionsSummaryCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: requiredScopes.map((scope) {
-                  final isSelected = selectedScopes.contains(scope);
-                  return Chip(
-                    label: Text(scope),
-                    backgroundColor: isSelected 
-                        ? Colors.green.withValues(alpha: 0.2)
-                        : Colors.red.withValues(alpha: 0.2),
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.green : Colors.red,
-                      fontSize: 12,
-                    ),
-                  );
-                }).toList(),
+              PermissionChipsSelector(
+                requiredScopes: requiredScopes,
+                selectedScopes: selectedScopes.toSet(),
+                onToggleScope: (_) {}, // Read-only display
               ),
             ],
           ],

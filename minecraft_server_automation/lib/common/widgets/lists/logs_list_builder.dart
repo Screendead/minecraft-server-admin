@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:minecraft_server_automation/providers/logs_provider.dart';
 import 'package:minecraft_server_automation/models/log_entry.dart';
 import 'package:minecraft_server_automation/widgets/log_entry_card.dart';
+import 'package:minecraft_server_automation/common/widgets/feedback/loading_overlay.dart';
 
 class LogsListBuilder extends StatelessWidget {
   final String searchQuery;
@@ -20,10 +21,6 @@ class LogsListBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LogsProvider>(
       builder: (context, logsProvider, child) {
-        if (logsProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         if (logsProvider.error != null) {
           return _buildErrorState(context, logsProvider.error!, onRefresh);
         }
@@ -32,19 +29,23 @@ class LogsListBuilder extends StatelessWidget {
             ? logsProvider.logs
             : logsProvider.searchLogs(searchQuery);
 
-        if (logs.isEmpty) {
+        if (logs.isEmpty && !logsProvider.isLoading) {
           return _buildEmptyState(context, searchQuery);
         }
 
-        return ListView.builder(
-          itemCount: logs.length,
-          itemBuilder: (context, index) {
-            final log = logs[index];
-            return LogEntryCard(
-              log: log,
-              onTap: () => onLogTap(log),
-            );
-          },
+        return LoadingOverlay(
+          isLoading: logsProvider.isLoading,
+          loadingMessage: 'Loading logs...',
+          child: ListView.builder(
+            itemCount: logs.length,
+            itemBuilder: (context, index) {
+              final log = logs[index];
+              return LogEntryCard(
+                log: log,
+                onTap: () => onLogTap(log),
+              );
+            },
+          ),
         );
       },
     );

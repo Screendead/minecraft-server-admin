@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:minecraft_server_automation/providers/droplets_provider.dart';
 import 'package:minecraft_server_automation/services/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/common/widgets/forms/spec_chip.dart';
 
 /// Widget displaying a single droplet card
 class DropletCard extends StatelessWidget {
@@ -77,9 +78,19 @@ class DropletCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                _buildInfoChip('Region', droplet.region),
+                SpecChip(
+                  icon: Icons.location_on,
+                  label: 'Region',
+                  value: droplet.region,
+                  isSelected: false,
+                ),
                 const SizedBox(width: 8),
-                _buildInfoChip('Size', droplet.size),
+                SpecChip(
+                  icon: Icons.memory,
+                  label: 'Size',
+                  value: droplet.size,
+                  isSelected: false,
+                ),
               ],
             ),
           ],
@@ -135,19 +146,6 @@ class DropletCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoChip(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        '$label: $value',
-        style: const TextStyle(fontSize: 12),
-      ),
-    );
-  }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {

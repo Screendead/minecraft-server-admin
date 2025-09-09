@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/utils/unit_formatter.dart';
+import 'package:minecraft_server_automation/common/widgets/forms/spec_chip.dart';
 
 class DropletSizeCard extends StatelessWidget {
   final DropletSize size;
@@ -68,22 +69,25 @@ class DropletSizeCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildSpecChip(
-                    context,
-                    Icons.memory,
-                    '${UnitFormatter.formatMemory(size.memory)} RAM',
+                  SpecChip(
+                    icon: Icons.memory,
+                    label: 'RAM',
+                    value: UnitFormatter.formatMemory(size.memory),
+                    isSelected: isSelected,
                   ),
                   const SizedBox(width: 8),
-                  _buildSpecChip(
-                    context,
-                    Icons.speed,
-                    '${UnitFormatter.formatCpuCount(size.vcpus)} CPU',
+                  SpecChip(
+                    icon: Icons.speed,
+                    label: 'CPU',
+                    value: UnitFormatter.formatCpuCount(size.vcpus),
+                    isSelected: isSelected,
                   ),
                   const SizedBox(width: 8),
-                  _buildSpecChip(
-                    context,
-                    Icons.storage,
-                    '${UnitFormatter.formatStorage(size.disk)} SSD',
+                  SpecChip(
+                    icon: Icons.storage,
+                    label: 'SSD',
+                    value: UnitFormatter.formatStorage(size.disk),
+                    isSelected: isSelected,
                   ),
                 ],
               ),
@@ -117,36 +121,4 @@ class DropletSizeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSpecChip(BuildContext context, IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 14,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
 }

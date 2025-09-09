@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minecraft_server_automation/common/widgets/forms/permission_chips_selector.dart';
 
 /// Permission selector component that manages its own state
 /// This makes it easier to test without complex state management
@@ -65,19 +66,10 @@ class _PermissionSelectorState extends State<PermissionSelector> {
               ),
         ),
         const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: widget.requiredScopes.map((scope) {
-            final isSelected = _selectedScopes.contains(scope);
-            return FilterChip(
-              label: Text(scope),
-              selected: isSelected,
-              onSelected: (_) => _toggleScope(scope),
-              selectedColor: Theme.of(context).colorScheme.primaryContainer,
-              checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
-            );
-          }).toList(),
+        PermissionChipsSelector(
+          requiredScopes: widget.requiredScopes,
+          selectedScopes: _selectedScopes,
+          onToggleScope: _toggleScope,
         ),
         const SizedBox(height: 16),
         Text(
