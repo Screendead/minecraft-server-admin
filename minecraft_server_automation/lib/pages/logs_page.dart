@@ -133,7 +133,7 @@ class _LogsPageState extends State<LogsPage> with TickerProviderStateMixin {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
-          child: Container(
+          child: SizedBox(
             height: 48,
             child: TabBar(
               controller: _tabController,
@@ -202,7 +202,6 @@ class _LogsPageState extends State<LogsPage> with TickerProviderStateMixin {
       ),
     );
   }
-
 
   Widget _buildErrorLogsList() {
     return Consumer<LogsProvider>(
