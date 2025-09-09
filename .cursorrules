@@ -1,2 +1,3 @@
 Ensure code you write has tests covering all branches.
 Create a branch for new functionality if you're currently on `master`.
+When writing tests, review minecraft_server_automation/TESTING_MOCKING_GUIDE.md first.
