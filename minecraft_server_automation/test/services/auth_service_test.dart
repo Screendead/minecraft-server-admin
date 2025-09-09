@@ -59,15 +59,20 @@ void main() {
           email: anyNamed('email'),
           password: anyNamed('password'),
         )).thenAnswer((_) async => mockUserCredential);
-        
+
         // Mock Firestore collection and document operations
-        final mockCollectionReference = MockCollectionReference<Map<String, dynamic>>();
-        final mockDocumentReference = MockDocumentReference<Map<String, dynamic>>();
-        when(mockFirestore.collection('users')).thenReturn(mockCollectionReference);
-        when(mockCollectionReference.doc(any)).thenReturn(mockDocumentReference);
+        final mockCollectionReference =
+            MockCollectionReference<Map<String, dynamic>>();
+        final mockDocumentReference =
+            MockDocumentReference<Map<String, dynamic>>();
+        when(mockFirestore.collection('users'))
+            .thenReturn(mockCollectionReference);
+        when(mockCollectionReference.doc(any))
+            .thenReturn(mockDocumentReference);
         when(mockDocumentReference.set(any, any)).thenAnswer((_) async {});
 
-        final result = await authService.signUp('test@example.com', 'password123');
+        final result =
+            await authService.signUp('test@example.com', 'password123');
 
         expect(result, isTrue);
         verify(mockFirebaseAuth.createUserWithEmailAndPassword(
@@ -86,19 +91,22 @@ void main() {
           message: 'Email already in use',
         ));
 
-        final result = await authService.signUp('test@example.com', 'password123');
+        final result =
+            await authService.signUp('test@example.com', 'password123');
 
         expect(result, isFalse);
       });
 
-      test('should return false when user creation returns null user', () async {
+      test('should return false when user creation returns null user',
+          () async {
         when(mockUserCredential.user).thenReturn(null);
         when(mockFirebaseAuth.createUserWithEmailAndPassword(
           email: anyNamed('email'),
           password: anyNamed('password'),
         )).thenAnswer((_) async => mockUserCredential);
 
-        final result = await authService.signUp('test@example.com', 'password123');
+        final result =
+            await authService.signUp('test@example.com', 'password123');
 
         expect(result, isFalse);
       });
@@ -112,15 +120,21 @@ void main() {
           email: anyNamed('email'),
           password: anyNamed('password'),
         )).thenAnswer((_) async => mockUserCredential);
-        
-        // Setup Firestore to throw
-        final mockCollectionReference = MockCollectionReference<Map<String, dynamic>>();
-        final mockDocumentReference = MockDocumentReference<Map<String, dynamic>>();
-        when(mockFirestore.collection('users')).thenReturn(mockCollectionReference);
-        when(mockCollectionReference.doc(any)).thenReturn(mockDocumentReference);
-        when(mockDocumentReference.set(any, any)).thenThrow(Exception('Firestore error'));
 
-        final result = await authService.signUp('test@example.com', 'password123');
+        // Setup Firestore to throw
+        final mockCollectionReference =
+            MockCollectionReference<Map<String, dynamic>>();
+        final mockDocumentReference =
+            MockDocumentReference<Map<String, dynamic>>();
+        when(mockFirestore.collection('users'))
+            .thenReturn(mockCollectionReference);
+        when(mockCollectionReference.doc(any))
+            .thenReturn(mockDocumentReference);
+        when(mockDocumentReference.set(any, any))
+            .thenThrow(Exception('Firestore error'));
+
+        final result =
+            await authService.signUp('test@example.com', 'password123');
 
         expect(result, isFalse);
       });
@@ -137,15 +151,20 @@ void main() {
           password: anyNamed('password'),
         )).thenAnswer((_) async => mockUserCredential);
         when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
-        
+
         // Mock Firestore update
-        final mockCollectionReference = MockCollectionReference<Map<String, dynamic>>();
-        final mockDocumentReference = MockDocumentReference<Map<String, dynamic>>();
-        when(mockFirestore.collection('users')).thenReturn(mockCollectionReference);
-        when(mockCollectionReference.doc(any)).thenReturn(mockDocumentReference);
+        final mockCollectionReference =
+            MockCollectionReference<Map<String, dynamic>>();
+        final mockDocumentReference =
+            MockDocumentReference<Map<String, dynamic>>();
+        when(mockFirestore.collection('users'))
+            .thenReturn(mockCollectionReference);
+        when(mockCollectionReference.doc(any))
+            .thenReturn(mockDocumentReference);
         when(mockDocumentReference.update(any)).thenAnswer((_) async {});
 
-        final result = await authService.signIn('test@example.com', 'password123');
+        final result =
+            await authService.signIn('test@example.com', 'password123');
 
         expect(result, isTrue);
         verify(mockFirebaseAuth.signInWithEmailAndPassword(
@@ -164,7 +183,8 @@ void main() {
           message: 'User not found',
         ));
 
-        final result = await authService.signIn('test@example.com', 'password123');
+        final result =
+            await authService.signIn('test@example.com', 'password123');
 
         expect(result, isFalse);
       });
@@ -179,15 +199,21 @@ void main() {
           password: anyNamed('password'),
         )).thenAnswer((_) async => mockUserCredential);
         when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
-        
-        // Setup Firestore to throw
-        final mockCollectionReference = MockCollectionReference<Map<String, dynamic>>();
-        final mockDocumentReference = MockDocumentReference<Map<String, dynamic>>();
-        when(mockFirestore.collection('users')).thenReturn(mockCollectionReference);
-        when(mockCollectionReference.doc(any)).thenReturn(mockDocumentReference);
-        when(mockDocumentReference.update(any)).thenThrow(Exception('Firestore update error'));
 
-        final result = await authService.signIn('test@example.com', 'password123');
+        // Setup Firestore to throw
+        final mockCollectionReference =
+            MockCollectionReference<Map<String, dynamic>>();
+        final mockDocumentReference =
+            MockDocumentReference<Map<String, dynamic>>();
+        when(mockFirestore.collection('users'))
+            .thenReturn(mockCollectionReference);
+        when(mockCollectionReference.doc(any))
+            .thenReturn(mockDocumentReference);
+        when(mockDocumentReference.update(any))
+            .thenThrow(Exception('Firestore update error'));
+
+        final result =
+            await authService.signIn('test@example.com', 'password123');
 
         expect(result, isFalse);
       });
@@ -199,7 +225,8 @@ void main() {
         when(mockUser.uid).thenReturn('test-uid-123');
         when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
         when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
-        when(mockSharedPreferences.remove('encrypted_api_key')).thenAnswer((_) async => true);
+        when(mockSharedPreferences.remove('encrypted_api_key'))
+            .thenAnswer((_) async => true);
 
         await authService.signOut();
 
@@ -210,7 +237,8 @@ void main() {
       test('should handle sign out when no user is signed in', () async {
         when(mockFirebaseAuth.currentUser).thenReturn(null);
         when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
-        when(mockSharedPreferences.remove('encrypted_api_key')).thenAnswer((_) async => true);
+        when(mockSharedPreferences.remove('encrypted_api_key'))
+            .thenAnswer((_) async => true);
 
         await authService.signOut();
 
@@ -259,19 +287,23 @@ void main() {
         const testPassword = 'test-password';
         const encryptedKey = 'encrypted_test-api-key-123';
 
-        when(mockSharedPreferences.getString('encrypted_api_key')).thenReturn(encryptedKey);
-        when(mockEncryptionService.decrypt(encryptedKey, testPassword)).thenReturn(testApiKey);
+        when(mockSharedPreferences.getString('encrypted_api_key'))
+            .thenReturn(encryptedKey);
+        when(mockEncryptionService.decrypt(encryptedKey, testPassword))
+            .thenReturn(testApiKey);
 
         final decryptedKey = await authService.getDecryptedApiKey(testPassword);
 
         expect(decryptedKey, equals(testApiKey));
-        verify(mockEncryptionService.decrypt(encryptedKey, testPassword)).called(1);
+        verify(mockEncryptionService.decrypt(encryptedKey, testPassword))
+            .called(1);
       });
 
       test('should return null when no encrypted key exists', () async {
         const testPassword = 'test-password';
 
-        when(mockSharedPreferences.getString('encrypted_api_key')).thenReturn(null);
+        when(mockSharedPreferences.getString('encrypted_api_key'))
+            .thenReturn(null);
 
         final decryptedKey = await authService.getDecryptedApiKey(testPassword);
 
@@ -283,7 +315,8 @@ void main() {
         const testPassword = 'test-password';
         const encryptedKey = 'encrypted_test-api-key-123';
 
-        when(mockSharedPreferences.getString('encrypted_api_key')).thenReturn(encryptedKey);
+        when(mockSharedPreferences.getString('encrypted_api_key'))
+            .thenReturn(encryptedKey);
         when(mockEncryptionService.decrypt(encryptedKey, testPassword))
             .thenThrow(Exception('Decryption failed'));
 
@@ -297,7 +330,8 @@ void main() {
         const password = 'test-password';
         const encryptedKey = 'encrypted_new-api-key-456';
 
-        when(mockEncryptionService.encrypt(newApiKey, password)).thenReturn(encryptedKey);
+        when(mockEncryptionService.encrypt(newApiKey, password))
+            .thenReturn(encryptedKey);
         when(mockSharedPreferences.setString('encrypted_api_key', encryptedKey))
             .thenAnswer((_) async => true);
 
@@ -305,7 +339,9 @@ void main() {
 
         expect(result, isTrue);
         verify(mockEncryptionService.encrypt(newApiKey, password)).called(1);
-        verify(mockSharedPreferences.setString('encrypted_api_key', encryptedKey)).called(1);
+        verify(mockSharedPreferences.setString(
+                'encrypted_api_key', encryptedKey))
+            .called(1);
       });
 
       test('should return false when encryption fails during update', () async {
@@ -334,12 +370,17 @@ void main() {
       test('should return null when Firestore get fails', () async {
         when(mockUser.uid).thenReturn('test-uid-123');
         when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
-        
-        final mockCollectionReference = MockCollectionReference<Map<String, dynamic>>();
-        final mockDocumentReference = MockDocumentReference<Map<String, dynamic>>();
-        when(mockFirestore.collection('users')).thenReturn(mockCollectionReference);
-        when(mockCollectionReference.doc(any)).thenReturn(mockDocumentReference);
-        when(mockDocumentReference.get()).thenThrow(Exception('Firestore get failed'));
+
+        final mockCollectionReference =
+            MockCollectionReference<Map<String, dynamic>>();
+        final mockDocumentReference =
+            MockDocumentReference<Map<String, dynamic>>();
+        when(mockFirestore.collection('users'))
+            .thenReturn(mockCollectionReference);
+        when(mockCollectionReference.doc(any))
+            .thenReturn(mockDocumentReference);
+        when(mockDocumentReference.get())
+            .thenThrow(Exception('Firestore get failed'));
 
         final userData = await authService.getUserData();
 
