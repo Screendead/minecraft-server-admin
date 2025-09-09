@@ -109,7 +109,7 @@ class DropletSizeSelector extends StatelessWidget {
                   onTap: () => onChanged(size),
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
