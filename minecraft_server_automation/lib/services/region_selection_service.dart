@@ -1,11 +1,12 @@
 import 'dart:math';
 import 'package:geolocator/geolocator.dart';
 import 'package:minecraft_server_automation/models/region.dart';
+import 'package:minecraft_server_automation/common/interfaces/region_selection_service.dart';
 
 /// Service for determining the closest DigitalOcean region to the user
-class RegionSelectionService {
+class RegionSelectionService implements RegionSelectionServiceInterface {
   /// Get the user's current location
-  static Future<Position?> getCurrentLocation() async {
+  Future<Position?> getCurrentLocation() async {
     try {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -38,7 +39,8 @@ class RegionSelectionService {
   }
 
   /// Find the closest DigitalOcean region to the user's location
-  static Future<Region?> findClosestRegion(List<Region> regions) async {
+  @override
+  Future<Region?> findClosestRegion(List<Region> regions) async {
     final position = await getCurrentLocation();
     if (position == null) {
       // If we can't get location, try to find a reasonable default
@@ -50,7 +52,7 @@ class RegionSelectionService {
   }
 
   /// Get a reasonable default region when location detection fails
-  static Region? _getDefaultRegion(List<Region> regions) {
+  Region? _getDefaultRegion(List<Region> regions) {
     if (regions.isEmpty) return null;
 
     // Try to find London first (good default for UK users)
@@ -63,7 +65,7 @@ class RegionSelectionService {
   }
 
   /// Find the closest region to a specific latitude and longitude
-  static Region? findClosestRegionToPosition(
+  Region? findClosestRegionToPosition(
       List<Region> regions, double lat, double lng) {
     if (regions.isEmpty) return null;
 
@@ -93,7 +95,7 @@ class RegionSelectionService {
   }
 
   /// Get approximate coordinates for DigitalOcean regions
-  static Map<String, double>? getRegionCoordinates(String regionSlug) {
+  Map<String, double>? getRegionCoordinates(String regionSlug) {
     // DigitalOcean region coordinates (approximate)
     const regionCoordinates = {
       'nyc1': {'lat': 40.7128, 'lng': -74.0060}, // New York
@@ -118,8 +120,7 @@ class RegionSelectionService {
   }
 
   /// Calculate distance between two points using Haversine formula
-  static double calculateDistance(
-      double lat1, double lng1, double lat2, double lng2) {
+  double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
     const double earthRadius = 6371; // Earth's radius in kilometers
 
     final dLat = degreesToRadians(lat2 - lat1);
@@ -136,7 +137,7 @@ class RegionSelectionService {
     return earthRadius * c;
   }
 
-  static double degreesToRadians(double degrees) {
+  double degreesToRadians(double degrees) {
     return degrees * (pi / 180);
   }
 }
