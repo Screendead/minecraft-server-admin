@@ -1,0 +1,128 @@
+import 'cpu_architecture.dart';
+import 'cpu_category.dart';
+import 'cpu_option.dart';
+import 'storage_multiplier.dart';
+import 'package:minecraft_server_automation/utils/unit_formatter.dart';
+
+class DropletSize {
+  final String slug;
+  final int memory;
+  final int vcpus;
+  final int disk;
+  final double transfer;
+  final double priceMonthly;
+  final double priceHourly;
+  final List<String> regions;
+  final bool available;
+  final String description;
+
+  const DropletSize({
+    required this.slug,
+    required this.memory,
+    required this.vcpus,
+    required this.disk,
+    required this.transfer,
+    required this.priceMonthly,
+    required this.priceHourly,
+    required this.regions,
+    required this.available,
+    required this.description,
+  });
+
+  factory DropletSize.fromJson(Map<String, dynamic> json) {
+    return DropletSize(
+      slug: json['slug'] ?? '',
+      memory: (json['memory'] ?? 0).toInt(),
+      vcpus: (json['vcpus'] ?? 0).toInt(),
+      disk: (json['disk'] ?? 0).toInt(),
+      transfer: (json['transfer'] ?? 0).toDouble(),
+      priceMonthly: (json['price_monthly'] ?? 0).toDouble(),
+      priceHourly: (json['price_hourly'] ?? 0).toDouble(),
+      regions: (json['regions'] as List<dynamic>?)?.cast<String>() ?? [],
+      available: json['available'] ?? false,
+      description: json['description'] ?? '',
+    );
+  }
+
+  /// Returns true if this is a shared CPU droplet
+  bool get isSharedCpu => slug.startsWith('s-');
+
+  /// Returns true if this is a dedicated CPU droplet
+  bool get isDedicatedCpu =>
+      slug.startsWith('c-') ||
+      slug.startsWith('g-') ||
+      slug.startsWith('m-') ||
+      slug.startsWith('so-') ||
+      slug.startsWith('gpu-');
+
+  /// Returns the CPU architecture for this droplet
+  CpuArchitecture get cpuArchitecture {
+    if (isSharedCpu) return CpuArchitecture.shared;
+    return CpuArchitecture.dedicated;
+  }
+
+  /// Returns the CPU category for this droplet
+  CpuCategory get cpuCategory {
+    if (isSharedCpu) return CpuCategory.basic;
+
+    if (slug.startsWith('g-') || slug.startsWith('gd-')) {
+      return CpuCategory.generalPurpose;
+    } else if (slug.startsWith('c-') || slug.startsWith('c2-')) {
+      return CpuCategory.cpuOptimized;
+    } else if (slug.startsWith('m-') ||
+        slug.startsWith('m3-') ||
+        slug.startsWith('m6-')) {
+      return CpuCategory.memoryOptimized;
+    } else if (slug.startsWith('so-')) {
+      return CpuCategory.storageOptimized;
+    } else if (slug.startsWith('gpu-')) {
+      return CpuCategory.gpu;
+    }
+
+    return CpuCategory.generalPurpose; // Default fallback
+  }
+
+  /// Returns the CPU option for this droplet
+  CpuOption get cpuOption {
+    if (isSharedCpu) {
+      if (slug.contains('-intel')) return CpuOption.premiumIntel;
+      if (slug.contains('-amd')) return CpuOption.premiumAmd;
+      return CpuOption.regular;
+    }
+
+    // Handle dedicated CPU Intel variants
+    if (slug.contains('-intel')) return CpuOption.premiumIntel;
+    return CpuOption.regular;
+  }
+
+  /// Returns the storage multiplier for this droplet
+  StorageMultiplier get storageMultiplier {
+    if (slug.startsWith('gd-') || slug.startsWith('c2-')) {
+      return StorageMultiplier.x2;
+    } else if (slug.startsWith('m3-')) {
+      return StorageMultiplier.x3;
+    } else if (slug.startsWith('m6-')) {
+      return StorageMultiplier.x6;
+    }
+    return StorageMultiplier.x1; // Default to 1x
+  }
+
+  /// Returns the dedicated CPU category (legacy method for backward compatibility)
+  String? get dedicatedCpuCategory {
+    if (!isDedicatedCpu) return null;
+    return cpuCategory.value;
+  }
+
+  /// Returns true if this droplet is available in the given region
+  bool isAvailableInRegion(String regionSlug) {
+    return regions.contains(regionSlug);
+  }
+
+  /// Returns a formatted string for display
+  String get displayName {
+    final memoryDisplay = UnitFormatter.formatMemory(memory);
+    final cpuDisplay = UnitFormatter.formatCpuCount(vcpus);
+    final storageDisplay = UnitFormatter.formatStorage(disk);
+    return '$slug - $memoryDisplay RAM, $cpuDisplay, $storageDisplay SSD';
+  }
+}
