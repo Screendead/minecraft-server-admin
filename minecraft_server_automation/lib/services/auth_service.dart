@@ -213,7 +213,11 @@ class AuthService {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       return doc.data();
     } catch (e) {
-      print('Error getting user data: $e');
+      await _loggingService.logError(
+        'Error getting user data',
+        category: LogCategory.authentication,
+        error: e,
+      );
       return null;
     }
   }

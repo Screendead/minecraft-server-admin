@@ -26,13 +26,13 @@ void main() async {
       await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
       FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
       await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
-      print('Connected to Firebase emulators');
+      // Connected to Firebase emulators - no logging needed for debug mode
     } catch (e) {
       // Emulators might not be running, that's okay for now
-      print('Firebase emulators not available: $e');
+      // Firebase emulators not available - no logging needed for debug mode
     }
   } else {
-    print('Running in production mode - using Firebase production services');
+    // Running in production mode - using Firebase production services
   }
 
   // Initialize shared preferences
