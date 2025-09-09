@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minecraft_server_automation/services/region_selection_service.dart';
+import 'package:minecraft_server_automation/common/di/service_locator.dart';
 import 'package:minecraft_server_automation/models/region.dart';
 import 'package:minecraft_server_automation/common/widgets/forms/location_section.dart';
 import 'package:minecraft_server_automation/common/widgets/cards/configuration_details.dart';
@@ -42,8 +42,9 @@ class RecommendedConfigWidgetState extends State<RecommendedConfigWidget> {
     });
 
     try {
-      final closestRegion = await RegionSelectionService.findClosestRegion(
-          widget.availableRegions);
+      final regionService = ServiceLocator().regionSelectionService;
+      final closestRegion =
+          await regionService.findClosestRegion(widget.availableRegions);
       if (closestRegion != null && mounted) {
         widget.onRegionChanged(closestRegion);
       }
