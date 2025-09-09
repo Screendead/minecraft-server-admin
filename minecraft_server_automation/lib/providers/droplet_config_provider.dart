@@ -196,6 +196,38 @@ class DropletConfigProvider extends ChangeNotifier {
     }
   }
 
+  /// Load all configuration data with API key (avoids BuildContext across async gaps)
+  Future<void> loadConfigurationDataWithApiKey(String apiKey) async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      // Load data in parallel
+      final results = await Future.wait([
+        DigitalOceanApiService.getDropletSizes(apiKey),
+        DigitalOceanApiService.getRegions(apiKey),
+        MinecraftVersionsService.getReleaseVersions(),
+      ]);
+
+      _dropletSizes = results[0] as List<DropletSize>;
+      _regions = results[1] as List<Region>;
+      _minecraftVersions = results[2] as List<MinecraftVersion>;
+
+      // Sort droplet sizes by price (cheapest first)
+      _dropletSizes.sort((a, b) => a.priceMonthly.compareTo(b.priceMonthly));
+
+      // Sort regions by name
+      _regions.sort((a, b) => a.name.compareTo(b.name));
+
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   /// Load only Minecraft versions (doesn't require API key)
   Future<void> loadMinecraftVersions() async {
     _setLoading(true);

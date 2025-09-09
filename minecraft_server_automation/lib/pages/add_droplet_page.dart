@@ -66,7 +66,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
 
   Future<void> _loadConfigurationData() async {
     try {
-      // Get API key
+      // Get providers and API key before any async operations
       final authProvider = context.read<AuthProvider>();
       final configProvider = context.read<DropletConfigProvider>();
 
@@ -88,8 +88,8 @@ class _AddDropletPageState extends State<AddDropletPage> {
         return;
       }
 
-      // Load configuration data using the provider
-      await configProvider.loadConfigurationData(context);
+      // Load configuration data using the provider with API key
+      await configProvider.loadConfigurationDataWithApiKey(apiKey);
 
       if (!mounted) return;
 
