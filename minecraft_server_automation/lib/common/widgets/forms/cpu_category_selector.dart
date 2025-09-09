@@ -30,13 +30,16 @@ class CpuCategorySelector extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final allCategories = configService.getAvailableCategoriesForArchitecture(architecture);
+    final allCategories =
+        configService.getAvailableCategoriesForArchitecture(architecture);
 
     // Filter categories that have available configurations
     final availableCategories = allCategories.where((category) {
-      final availableOptions = configService.getAvailableOptionsForCategory(category);
+      final availableOptions =
+          configService.getAvailableOptionsForCategory(category);
       return availableOptions.any((option) {
-        final availableMultipliers = configService.getAvailableStorageMultipliersFor(category, option);
+        final availableMultipliers =
+            configService.getAvailableStorageMultipliersFor(category, option);
         return availableMultipliers.any((multiplier) {
           final sizes = configService.getSizesForStorage(
             selectedRegion!.slug,
@@ -76,7 +79,7 @@ class CpuCategorySelector extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<CpuCategory>(
-              value: selectedCategory,
+              initialValue: selectedCategory,
               decoration: const InputDecoration(
                 labelText: 'Select CPU Category',
                 border: OutlineInputBorder(),

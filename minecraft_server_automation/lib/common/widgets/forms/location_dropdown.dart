@@ -16,7 +16,7 @@ class LocationDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<Region>(
-      value: selectedRegion,
+      initialValue: selectedRegion,
       decoration: const InputDecoration(
         labelText: 'Location',
         border: OutlineInputBorder(),

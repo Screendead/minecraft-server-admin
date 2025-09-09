@@ -16,7 +16,7 @@ class CpuArchitectureSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<CpuArchitecture>(
-      value: selectedArchitecture,
+      initialValue: selectedArchitecture,
       decoration: const InputDecoration(
         labelText: 'CPU Architecture',
         border: OutlineInputBorder(),

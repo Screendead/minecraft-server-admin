@@ -147,7 +147,7 @@ class DropletSizeDropdown extends StatelessWidget {
           )
         else
           DropdownButtonFormField<DropletSize>(
-            value: selectedSize,
+            initialValue: selectedSize,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.memory),

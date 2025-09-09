@@ -79,7 +79,7 @@ class CpuCategorySelector extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<CpuCategory>(
-              value: selectedCategory,
+              initialValue: selectedCategory,
               decoration: const InputDecoration(
                 labelText: 'Select CPU Category',
                 border: OutlineInputBorder(),

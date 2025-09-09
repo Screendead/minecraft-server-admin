@@ -56,7 +56,7 @@ class LocationSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<Region>(
-          value: selectedRegion,
+          initialValue: selectedRegion,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             prefixIcon: Icon(Icons.location_on),
