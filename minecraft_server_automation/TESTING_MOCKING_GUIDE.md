@@ -14,13 +14,13 @@ The project uses **two complementary mocking approaches**:
 2. **Custom Mock Classes** - For simple services or when you need fine-grained control
 
 ### When to Use Mockito
-- Services with complex dependencies (e.g., `AuthService`, `ApiKeyCacheService`)
+- Services with complex dependencies (e.g., `AuthServiceInterface`, `ApiKeyCacheServiceInterface`)
 - When you need powerful verification capabilities
 - For services that interact with external APIs or databases
 - When you want type-safe mocking with generated code
 
 ### When to Use Custom Mocks
-- Simple utility services (e.g., `EncryptionService`, `RegionSelectionService`)
+- Simple utility services (e.g., `EncryptionServiceInterface`, `RegionSelectionServiceInterface`)
 - When you need custom behavior that's hard to achieve with Mockito
 - For services that are pure functions or stateless utilities
 - When you want explicit control over mock state
@@ -36,9 +36,9 @@ The project uses **two complementary mocking approaches**:
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   UI Widgets    │───▶│   Interfaces     │◀───│   Mock Services │
 │                 │    │                  │    │                 │
-│ - AuthForm      │    │ - AuthService    │    │ - Mockito Mocks │
-│ - DropletForm   │    │ - HttpClient     │    │ - Custom Mocks  │
-│ - LocationUI    │    │ - LocationService│    │ - Real Instances│
+│ - AuthForm      │    │ - AuthServiceInterface    │ - Mockito Mocks │
+│ - DropletForm   │    │ - HttpClientInterface     │ - Custom Mocks  │
+│ - LocationUI    │    │ - LocationServiceInterface│ - Real Instances│
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                 │
                                 ▼
@@ -58,11 +58,11 @@ The app uses a **ServiceLocator** for dependency injection:
 
 ```dart
 // Register services
-ServiceLocator().register<AuthService>(authService);
+ServiceLocator().register<AuthServiceInterface>(authService);
 ServiceLocator().register<HttpClientInterface>(httpClient);
 
 // Get services
-final authService = ServiceLocator().get<AuthService>();
+final authService = ServiceLocator().get<AuthServiceInterface>();
 final httpClient = ServiceLocator().get<HttpClientInterface>();
 
 // Clear for testing
@@ -79,38 +79,68 @@ ServiceLocator().clear();
 
 ### Mockito-Based Mocks (Recommended)
 
-#### 1. **AuthService** - Authentication
-- **Interface**: `AuthService`
+#### 1. **AuthServiceInterface** - Authentication
+- **Interface**: `AuthServiceInterface`
+- **Implementation**: `AuthService`
 - **Mock Generation**: `@GenerateMocks([FirebaseAuth, User, UserCredential, FirebaseFirestore, SharedPreferences, EncryptionService])`
 - **Location**: `test/services/auth_service_test.dart`
 - **Controls**: Firebase auth, user management, API key encryption
 
-#### 2. **ApiKeyCacheService** - API Key Caching
-- **Interface**: `ApiKeyCacheService`
+#### 2. **ApiKeyCacheServiceInterface** - API Key Caching
+- **Interface**: `ApiKeyCacheServiceInterface`
+- **Implementation**: `ApiKeyCacheService`
 - **Mock Generation**: `@GenerateMocks([IOSBiometricEncryptionService, IOSSecureApiKeyService])`
 - **Location**: `test/services/api_key_cache_service_test.dart`
 - **Controls**: Biometric decryption, key caching, app lifecycle
 
+#### 3. **DigitalOceanApiServiceInterface** - DigitalOcean API
+- **Interface**: `DigitalOceanApiServiceInterface`
+- **Implementation**: `DigitalOceanApiService`
+- **Mock Generation**: `@GenerateMocks([http.Client, LoggingServiceInterface])`
+- **Location**: `test/services/digitalocean_api_service_test.dart`
+- **Controls**: DigitalOcean API calls, droplet management, logging
+
 ### Custom Mock Classes
 
-#### 3. **MockSecureStorageService** - Secure Storage (Keychain)
-- **Interface**: `SecureStorageService`
+#### 4. **MockSecureStorageService** - Secure Storage (Keychain)
+- **Interface**: `SecureStorageServiceInterface`
+- **Implementation**: `IOSSecureApiKeyService`
 - **Location**: `lib/common/mocks/mock_secure_storage_service.dart`
 - **Controls**: Key-value storage simulation, operation tracking
 
+#### 5. **MockBiometricAuthService** - Biometric Authentication
+- **Interface**: `BiometricAuthServiceInterface`
+- **Implementation**: `IOSBiometricEncryptionService`
+- **Location**: `lib/common/mocks/mock_biometric_auth_service.dart`
+- **Controls**: Face ID/Touch ID simulation, authentication flow
+
+#### 6. **MockLocationService** - Location Services
+- **Interface**: `LocationServiceInterface`
+- **Implementation**: `LocationServiceAdapter`
+- **Location**: `lib/common/mocks/mock_location_service.dart`
+- **Controls**: GPS location simulation, permission handling
+
+#### 7. **MockDropletConfigService** - Droplet Configuration
+- **Interface**: `DropletConfigServiceInterface`
+- **Implementation**: `DropletConfigProviderAdapter`
+- **Location**: `lib/common/mocks/mock_droplet_config_service.dart`
+- **Controls**: Droplet sizes, regions, Minecraft versions
+
 ### Real Instances (No Mocking Needed)
 
-#### 4. **EncryptionService** - Data Encryption
-- **Type**: Pure utility service
+#### 8. **EncryptionServiceInterface** - Data Encryption
+- **Interface**: `EncryptionServiceInterface`
+- **Implementation**: `EncryptionService`
 - **Location**: `test/services/encryption_service_test.dart`
 - **Reason**: No external dependencies, stateless
 
-#### 5. **RegionSelectionService** - Location Services
-- **Type**: Pure utility service
+#### 9. **RegionSelectionServiceInterface** - Location Services
+- **Interface**: `RegionSelectionServiceInterface`
+- **Implementation**: `RegionSelectionService`
 - **Location**: `test/services/region_selection_service_test.dart`
 - **Reason**: No external dependencies, mathematical calculations only
 
-#### 6. **Data Models** - Business Objects
+#### 10. **Data Models** - Business Objects
 - **Types**: `Region`, `DropletSize`, `LogEntry`, etc.
 - **Location**: `test/models/`
 - **Reason**: Pure data classes with business logic
@@ -124,6 +154,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:minecraft_server_automation/services/auth_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 
 // Generate mocks for external dependencies
 @GenerateMocks([
@@ -136,7 +167,7 @@ import 'package:minecraft_server_automation/services/auth_service.dart';
 ])
 void main() {
   group('AuthService Tests', () {
-    late AuthService authService;
+    late AuthServiceInterface authService;
     late MockFirebaseAuth mockFirebaseAuth;
     late MockEncryptionService mockEncryptionService;
 
@@ -179,12 +210,13 @@ void main() {
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minecraft_server_automation/common/mocks/mock_secure_storage_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart';
 import 'package:minecraft_server_automation/services/some_service.dart';
 
 void main() {
   group('SomeService Tests', () {
     late SomeService service;
-    late MockSecureStorageService mockStorage;
+    late SecureStorageServiceInterface mockStorage;
 
     setUp(() {
       mockStorage = MockSecureStorageService();
@@ -211,10 +243,11 @@ void main() {
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minecraft_server_automation/services/encryption_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 
 void main() {
   group('EncryptionService Tests', () {
-    late EncryptionService service;
+    late EncryptionServiceInterface service;
 
     setUp(() {
       service = EncryptionService(); // Use real instance
@@ -244,6 +277,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:minecraft_server_automation/services/auth_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 
 @GenerateMocks([
   FirebaseAuth,
@@ -255,7 +289,7 @@ import 'package:minecraft_server_automation/services/auth_service.dart';
 ])
 void main() {
   group('AuthService Tests', () {
-    late AuthService authService;
+    late AuthServiceInterface authService;
     late MockFirebaseAuth mockFirebaseAuth;
     late MockUser mockUser;
     late MockUserCredential mockUserCredential;
@@ -319,6 +353,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:minecraft_server_automation/services/api_key_cache_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/api_key_cache_service.dart';
 import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
 import 'package:minecraft_server_automation/services/ios_secure_api_key_service.dart';
 
@@ -328,7 +363,7 @@ import 'package:minecraft_server_automation/services/ios_secure_api_key_service.
 ])
 void main() {
   group('ApiKeyCacheService Tests', () {
-    late ApiKeyCacheService service;
+    late ApiKeyCacheServiceInterface service;
     late MockIOSBiometricEncryptionService mockBiometricService;
     late MockIOSSecureApiKeyService mockApiKeyService;
 
@@ -374,11 +409,13 @@ void main() {
 ```dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minecraft_server_automation/services/encryption_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 import 'package:minecraft_server_automation/services/region_selection_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/region_selection_service.dart';
 
 void main() {
   group('EncryptionService Tests', () {
-    late EncryptionService service;
+    late EncryptionServiceInterface service;
 
     setUp(() {
       service = EncryptionService(); // Use real instance
@@ -408,7 +445,7 @@ void main() {
   });
 
   group('RegionSelectionService Tests', () {
-    late RegionSelectionService service;
+    late RegionSelectionServiceInterface service;
 
     setUp(() {
       service = RegionSelectionService(); // Use real instance
@@ -435,6 +472,34 @@ void main() {
   });
 }
 ```
+
+## Interface Naming Convention
+
+The project follows a **standardized naming pattern** to avoid conflicts and improve clarity:
+
+### **Interface Naming**
+- **All interfaces** use the `*Interface` suffix
+- **Examples**: `AuthServiceInterface`, `HttpClientInterface`, `LoggingServiceInterface`
+
+### **Implementation Naming**
+- **All implementations** use the same name without the `Interface` suffix
+- **Examples**: `AuthService`, `HttpClient`, `LoggingService`
+
+### **Adapter Naming**
+- **All adapters** use the `*Adapter` suffix
+- **Examples**: `AuthProviderAdapter`, `HttpClientAdapter`, `LoggingServiceAdapter`
+
+### **Mock Naming**
+- **Mockito mocks** use `Mock*` prefix
+- **Custom mocks** use `Mock*` prefix
+- **Examples**: `MockAuthService`, `MockHttpClient`, `MockLoggingService`
+
+### **Benefits of This Pattern**
+- ✅ **No name collisions** between interfaces and implementations
+- ✅ **Clear separation** between contracts and implementations
+- ✅ **Easy to identify** what type of class you're working with
+- ✅ **Consistent across** the entire codebase
+- ✅ **IDE autocomplete** works better with distinct names
 
 ## Best Practices
 
@@ -584,7 +649,7 @@ group('API Service', () {
 setUp(() {
   ServiceLocator().clear();
   // Register test mocks
-  ServiceLocator().register<AuthService>(mockAuthService);
+  ServiceLocator().register<AuthServiceInterface>(mockAuthService);
 });
 
 tearDown(() {
@@ -596,9 +661,9 @@ tearDown(() {
 ```dart
 test('should use registered service', () async {
   final mockService = MockSomeService();
-  ServiceLocator().register<SomeService>(mockService);
+  ServiceLocator().register<SomeServiceInterface>(mockService);
   
-  // Your test code that uses ServiceLocator().get<SomeService>()
+  // Your test code that uses ServiceLocator().get<SomeServiceInterface>()
 });
 ```
 
@@ -699,5 +764,23 @@ This comprehensive mocking system provides:
 - **Real instances** for pure utilities and data models
 - **Service Locator** for clean dependency injection
 - **Interface-based design** for easy testing and swapping implementations
+- **Standardized naming** with `*Interface` suffix for all interfaces
+- **No name collisions** between interfaces and implementations
+- **Consistent patterns** across the entire codebase
+
+### **Available Interfaces**
+- `AuthServiceInterface` - Authentication
+- `ApiKeyCacheServiceInterface` - API Key Caching
+- `DigitalOceanApiServiceInterface` - DigitalOcean API
+- `EncryptionServiceInterface` - Data Encryption
+- `MinecraftServerServiceInterface` - Minecraft Server Detection
+- `MinecraftVersionsServiceInterface` - Minecraft Version Management
+- `BiometricAuthServiceInterface` - Biometric Authentication
+- `SecureStorageServiceInterface` - Secure Storage
+- `LocationServiceInterface` - Location Services
+- `DropletConfigServiceInterface` - Droplet Configuration
+- `LoggingServiceInterface` - Logging
+- `HttpClientInterface` - HTTP Client
+- `RegionSelectionServiceInterface` - Region Selection
 
 The combination of these approaches makes it easy to write comprehensive, reliable tests for the Minecraft Server Automation app while maintaining clean, maintainable code.
