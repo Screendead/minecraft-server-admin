@@ -1,6 +1,6 @@
 /// Abstract interface for authentication services
 /// This allows for easy mocking in tests
-abstract class AuthService {
+abstract class AuthServiceInterface {
   bool get isSignedIn;
   bool get isLoading;
   String? get errorMessage;

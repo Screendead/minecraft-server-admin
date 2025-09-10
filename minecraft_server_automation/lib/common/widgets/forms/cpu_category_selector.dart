@@ -9,7 +9,7 @@ import 'package:minecraft_server_automation/models/region.dart';
 class CpuCategorySelector extends StatelessWidget {
   final CpuCategory? selectedCategory;
   final CpuArchitecture architecture;
-  final DropletConfigService configService;
+  final DropletConfigServiceInterface configService;
   final Region? selectedRegion;
   final ValueChanged<CpuCategory?> onChanged;
   final bool isEnabled;

@@ -8,9 +8,9 @@ import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/models/region.dart';
 import 'package:minecraft_server_automation/models/minecraft_version.dart';
 
-/// Adapter that wraps DropletConfigProvider to implement DropletConfigService interface
+/// Adapter that wraps DropletConfigProvider to implement DropletConfigServiceInterface interface
 /// This allows components to depend on the interface rather than the concrete provider
-class DropletConfigProviderAdapter implements DropletConfigService {
+class DropletConfigProviderAdapter implements DropletConfigServiceInterface {
   final DropletConfigProvider _provider;
 
   DropletConfigProviderAdapter(this._provider);

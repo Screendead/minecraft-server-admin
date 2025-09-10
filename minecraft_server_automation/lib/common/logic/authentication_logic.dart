@@ -3,7 +3,7 @@ import 'package:minecraft_server_automation/common/interfaces/auth_service.dart'
 /// Business logic for authentication
 /// This class can be easily unit tested without UI dependencies
 class AuthenticationLogic {
-  final AuthService _authService;
+  final AuthServiceInterface _authService;
 
   AuthenticationLogic(this._authService);
 
@@ -57,7 +57,8 @@ class AuthenticationLogic {
       if (_authService.isSignedIn) {
         return AuthResult.success();
       } else {
-        return AuthResult.failure({'general': _authService.errorMessage ?? 'Sign in failed'});
+        return AuthResult.failure(
+            {'general': _authService.errorMessage ?? 'Sign in failed'});
       }
     } catch (e) {
       return AuthResult.failure({'general': e.toString()});
@@ -65,7 +66,8 @@ class AuthenticationLogic {
   }
 
   /// Sign up with validation
-  Future<AuthResult> signUpWithValidation(String email, String password, String confirmPassword) async {
+  Future<AuthResult> signUpWithValidation(
+      String email, String password, String confirmPassword) async {
     final errors = validateFormData(
       email: email,
       password: password,
@@ -80,7 +82,8 @@ class AuthenticationLogic {
       if (_authService.isSignedIn) {
         return AuthResult.success();
       } else {
-        return AuthResult.failure({'general': _authService.errorMessage ?? 'Sign up failed'});
+        return AuthResult.failure(
+            {'general': _authService.errorMessage ?? 'Sign up failed'});
       }
     } catch (e) {
       return AuthResult.failure({'general': e.toString()});
@@ -106,7 +109,8 @@ class AuthResult {
   AuthResult._(this.isSuccess, this.errors);
 
   factory AuthResult.success() => AuthResult._(true, {});
-  factory AuthResult.failure(Map<String, String?> errors) => AuthResult._(false, errors);
+  factory AuthResult.failure(Map<String, String?> errors) =>
+      AuthResult._(false, errors);
 }
 
 /// Current authentication state

@@ -4,7 +4,7 @@ class MemoryCalculator {
   static int calculateOSRamUsage(int totalRamMB) {
     // Ubuntu 22.04 LTS typically uses:
     // - 512MB: ~200MB for OS
-    // - 1GB: ~300MB for OS  
+    // - 1GB: ~300MB for OS
     // - 2GB+: ~400MB for OS
     if (totalRamMB <= 512) {
       return 200; // Conservative for small droplets

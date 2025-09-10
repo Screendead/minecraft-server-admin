@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
-import 'package:minecraft_server_automation/services/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/models/minecraft_server_info.dart';
+import 'package:minecraft_server_automation/common/di/service_locator.dart';
 import 'auth_provider.dart' as auth_provider;
 
 /// Provider for managing DigitalOcean droplets and their Minecraft server status
@@ -30,13 +30,15 @@ class DropletsProvider with ChangeNotifier {
 
     try {
       // Load droplets using the provided API key
-      final dropletsData = await DigitalOceanApiService.getDroplets(apiKey);
-      _droplets = dropletsData.map((data) => DropletInfo.fromJson(data)).toList();
+      final dropletsData = await ServiceLocator().digitalOceanApiService.getDroplets(apiKey);
+      _droplets =
+          dropletsData.map((data) => DropletInfo.fromJson(data)).toList();
 
       // Check Minecraft server status for each droplet
       for (final droplet in _droplets) {
         if (droplet.publicIp != null) {
-          final minecraftInfo = await MinecraftServerService.checkMinecraftServer(
+          final minecraftInfo =
+              await ServiceLocator().minecraftServerService.checkMinecraftServer(
             droplet.publicIp!,
           );
           if (minecraftInfo != null) {
@@ -81,7 +83,7 @@ class DropletsProvider with ChangeNotifier {
       }
 
       // Fetch droplets from DigitalOcean API
-      final dropletsData = await DigitalOceanApiService.getDroplets(apiKey);
+      final dropletsData = await ServiceLocator().digitalOceanApiService.getDroplets(apiKey);
 
       // Convert to DropletInfo objects and check for Minecraft servers
       final List<DropletInfo> droplets = [];
@@ -92,7 +94,7 @@ class DropletsProvider with ChangeNotifier {
         // Check if this droplet is running a Minecraft server
         if (droplet.publicIp != null) {
           final minecraftInfo =
-              await MinecraftServerService.checkMinecraftServer(
+              await ServiceLocator().minecraftServerService.checkMinecraftServer(
                   droplet.publicIp!);
           droplet.setMinecraftInfo(minecraftInfo);
         }

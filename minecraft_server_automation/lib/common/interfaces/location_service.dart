@@ -1,6 +1,6 @@
 /// Abstract interface for location services
 /// This allows for easy mocking in tests
-abstract class LocationService {
+abstract class LocationServiceInterface {
   Future<LocationPermission> checkPermission();
   Future<LocationPermission> requestPermission();
   Future<LocationData?> getCurrentLocation();

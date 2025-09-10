@@ -51,7 +51,8 @@ class LogsListBuilder extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String error, VoidCallback onRefresh) {
+  Widget _buildErrorState(
+      BuildContext context, String error, VoidCallback onRefresh) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

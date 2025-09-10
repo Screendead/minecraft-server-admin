@@ -17,8 +17,9 @@ class PermissionsSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allRequiredSelected = requiredScopes.every((scope) => selectedScopes.contains(scope));
-    
+    final allRequiredSelected =
+        requiredScopes.every((scope) => selectedScopes.contains(scope));
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -29,26 +30,27 @@ class PermissionsSummaryCard extends StatelessWidget {
               children: [
                 Icon(
                   allRequiredSelected ? Icons.check_circle : Icons.warning,
-                  color: allRequiredSelected 
-                      ? Colors.green 
+                  color: allRequiredSelected
+                      ? Colors.green
                       : Theme.of(context).colorScheme.error,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    allRequiredSelected 
+                    allRequiredSelected
                         ? 'All required permissions selected'
                         : 'Some required permissions are missing',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: allRequiredSelected 
-                              ? Colors.green 
+                          color: allRequiredSelected
+                              ? Colors.green
                               : Theme.of(context).colorScheme.error,
                         ),
                   ),
                 ),
                 TextButton(
                   onPressed: onTogglePermissions,
-                  child: Text(showPermissions ? 'Hide Details' : 'Show Details'),
+                  child:
+                      Text(showPermissions ? 'Hide Details' : 'Show Details'),
                 ),
               ],
             ),

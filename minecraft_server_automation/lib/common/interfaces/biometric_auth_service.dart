@@ -1,9 +1,14 @@
 /// Abstract interface for biometric authentication
 /// This allows for easy mocking in tests
-abstract class BiometricAuthService {
-  Future<bool> isAvailable();
-  Future<bool> authenticate({String? reason});
+abstract class BiometricAuthServiceInterface {
+  Future<bool> isBiometricAvailable();
   Future<List<BiometricType>> getAvailableBiometrics();
+  Future<String> encryptWithBiometrics(String data);
+  Future<String> decryptWithBiometrics();
+  Future<bool> hasEncryptedData();
+  Future<Map<String, dynamic>?> getKeyMetadata();
+  Future<void> clearEncryptedData();
+  Future<void> rotateEncryptionKey();
 }
 
 /// Types of biometric authentication available

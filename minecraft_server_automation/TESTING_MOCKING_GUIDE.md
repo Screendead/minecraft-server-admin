@@ -1,510 +1,381 @@
 # Testing & Mocking Guide
 
-This guide explains how to use the comprehensive mocking system in the Minecraft Server Automation app for writing effective tests.
+This guide covers the testing approach for the Minecraft Server Automation app. The app uses dependency injection with interface-based abstractions to make all external dependencies mockable.
 
-## Overview
+## Quick Start
 
-The app uses a **dependency injection pattern** with **interface-based abstractions** to make all external dependencies mockable. This allows you to test components in isolation without making real network calls, accessing real device features, or depending on external services.
+### 1. Mocking Strategy
 
-## Architecture
+**Use Mockito** for all services:
+- All services use Mockito-generated mocks for consistency
+- Provides verification capabilities and flexible behavior setup
+- Examples: `AuthServiceInterface`, `DigitalOceanApiServiceInterface`, `BiometricAuthServiceInterface`
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   UI Widgets    │───▶│   Interfaces     │◀───│   Mock Services │
-│                 │    │                  │    │                 │
-│ - AuthForm      │    │ - AuthService    │    │ - MockAuth      │
-│ - DropletForm   │    │ - HttpClient     │    │ - MockHttp      │
-│ - LocationUI    │    │ - LocationService│    │ - MockLocation  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌──────────────────┐
-                       │  Service Locator │
-                       │  (DI Container)  │
-                       └──────────────────┘
+**Use Real Instances** for:
+- Data models and pure business logic
+- Services with no external dependencies
+
+### 2. Service Locator Pattern
+
+The app uses `ServiceLocator` for dependency injection:
+
+```dart
+// Register services
+ServiceLocator().register<AuthServiceInterface>(authService);
+
+// Get services
+final authService = ServiceLocator().get<AuthServiceInterface>();
+
+// Clear for testing
+ServiceLocator().clear();
 ```
 
 ## Available Mock Services
 
-### 1. **MockAuthService** - Authentication
-- **Interface**: `AuthService`
-- **Location**: `lib/common/mocks/mock_auth_service.dart`
-- **Controls**: Sign in/up success/failure, loading states, error messages
+### Mockito-Based Mocks
+- `AuthServiceInterface` - Firebase authentication
+- `BiometricAuthServiceInterface` - Face ID/Touch ID simulation
+- `SecureStorageServiceInterface` - Keychain storage simulation
+- `LocationServiceInterface` - GPS location simulation
+- `DropletConfigServiceInterface` - Droplet configuration data
+- `LoggingServiceInterface` - Logging functionality
+- `RegionSelectionServiceInterface` - Region selection logic
+- `ApiKeyCacheServiceInterface` - API key caching with biometric encryption
+- `DigitalOceanApiServiceInterface` - DigitalOcean API calls
+- `MinecraftVersionsServiceInterface` - Minecraft version management
+- `EncryptionServiceInterface` - Data encryption
+- `MinecraftServerServiceInterface` - Minecraft server detection
+- `PathProviderServiceInterface` - File system path operations
+- `http.Client` - HTTP client for network requests (used by various services)
+- `LocalAuthentication` - iOS biometric authentication (for direct service testing)
+- `FlutterSecureStorage` - iOS secure storage (for direct service testing)
 
-### 2. **MockHttpClient** - HTTP Requests
-- **Interface**: `HttpClientInterface`
-- **Location**: `lib/common/mocks/mock_http_client.dart`
-- **Controls**: Response mocking, request verification, error simulation
+### Real Instances (No Mocking)
+- Data models (`Region`, `DropletSize`, `LogEntry`, `MinecraftServerInfo`)
 
-### 3. **MockDropletConfigService** - Droplet Configuration
-- **Interface**: `DropletConfigService`
-- **Location**: `lib/common/mocks/mock_droplet_config_service.dart`
-- **Controls**: Mock data for regions, CPU options, droplet sizes
+## Interface Naming Convention
 
-### 4. **MockBiometricAuthService** - Biometric Authentication
-- **Interface**: `BiometricAuthService`
-- **Location**: `lib/common/mocks/mock_biometric_auth_service.dart`
-- **Controls**: Biometric availability, authentication success/failure
+All interfaces use the `*Interface` suffix to avoid naming conflicts:
+- `AuthServiceInterface` → `AuthService` (implementation)
+- `MockAuthServiceInterface` (Mockito-generated mock)
+- `AuthProviderAdapter` (adapter)
 
-### 5. **MockSecureStorageService** - Secure Storage (Keychain)
-- **Interface**: `SecureStorageService`
-- **Location**: `lib/common/mocks/mock_secure_storage_service.dart`
-- **Controls**: Key-value storage simulation
+## TestUtils Helper
 
-### 6. **MockLocationService** - Location Services
-- **Interface**: `LocationService`
-- **Location**: `lib/common/mocks/mock_location_service.dart`
-- **Controls**: Location permissions, mock GPS coordinates
-
-## Quick Start
-
-### Basic Test Setup
+The `TestUtils` class provides convenient methods for setting up mocks in tests:
 
 ```dart
-import 'package:flutter_test/flutter_test.dart';
-import 'package:minecraft_server_automation/common/testing/test_helpers.dart';
+import 'package:minecraft_server_automation/test/test_utils.dart';
+
+// Setup all mocks
+TestUtils.setupMockServices();
+
+// Access individual mocks
+TestUtils.mockAuthService
+TestUtils.mockBiometricAuthService
+TestUtils.mockSecureStorageService
+// ... etc
+
+// Reset all mocks
+TestUtils.resetAllMocks();
+
+// Setup common scenarios
+TestUtils.setupSuccessfulAuth();
+TestUtils.setupFailedAuth();
+TestUtils.setupSuccessfulLocation();
+TestUtils.setupBiometricAvailable();
+TestUtils.setupBiometricUnavailable();
+```
+
+## Essential Commands
+
+```bash
+# Run all tests
+flutter test
+
+# Run specific test file
+flutter test test/services/auth_service_test.dart
+
+# Run tests with coverage
+flutter test --coverage
+
+# Generate Mockito mocks
+dart run build_runner build
+
+# Clean and regenerate mocks
+dart run build_runner build --delete-conflicting-outputs
+```
+
+## Basic Test Structure
+
+### Using TestUtils (Recommended)
+```dart
+import 'package:minecraft_server_automation/test/test_utils.dart';
 
 void main() {
-  group('Authentication Tests', () {
+  group('AuthService Tests', () {
     setUp(() {
-      // Set up all mock services
-      TestHelpers.setupMockServices();
+      TestUtils.setupMockServices();
     });
 
     tearDown(() {
-      // Reset all mocks after each test
-      TestHelpers.resetAllMocks();
+      TestUtils.resetAllMocks();
     });
 
     test('should sign in successfully', () async {
-      // Configure mock behavior
-      TestHelpers.setupSuccessfulAuth();
+      // Setup mock behavior
+      when(TestUtils.mockAuthService.signIn(any, any)).thenAnswer((_) async {});
       
-      // Your test code here
-      // The UI will use the mock services automatically
-    });
-  });
-}
-```
-
-## Detailed Examples
-
-### 1. Testing Authentication
-
-```dart
-import 'package:flutter_test/flutter_test.dart';
-import 'package:minecraft_server_automation/common/testing/test_helpers.dart';
-import 'package:minecraft_server_automation/common/widgets/forms/auth_form.dart';
-
-void main() {
-  group('AuthForm Tests', () {
-    setUp(() {
-      TestHelpers.setupMockServices();
-    });
-
-    tearDown(() {
-      TestHelpers.resetAllMocks();
-    });
-
-    testWidgets('should show loading state during sign in', (tester) async {
-      // Configure mock to simulate loading
-      final mockAuth = TestHelpers.mockAuthService;
-      mockAuth.shouldSucceedOnSignIn = true;
+      // Test your service
+      final result = await authService.signIn('test@example.com', 'password');
       
-      await tester.pumpWidget(
-        MaterialApp(
-          home: AuthForm(
-            authService: mockAuth,
-            onAuthSuccess: () {},
-          ),
-        ),
-      );
-
-      // Trigger sign in
-      await tester.enterText(find.byType(TextFormField).first, 'test@example.com');
-      await tester.enterText(find.byType(TextFormField).last, 'password123');
-      await tester.tap(find.text('Sign In'));
-      await tester.pump();
-
-      // Verify loading state
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('should show error message on failed sign in', (tester) async {
-      // Configure mock to fail
-      final mockAuth = TestHelpers.mockAuthService;
-      mockAuth.shouldSucceedOnSignIn = false;
-      mockAuth.setError('Invalid credentials');
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: AuthForm(
-            authService: mockAuth,
-            onAuthSuccess: () {},
-          ),
-        ),
-      );
-
-      // Trigger sign in
-      await tester.enterText(find.byType(TextFormField).first, 'test@example.com');
-      await tester.enterText(find.byType(TextFormField).last, 'wrongpassword');
-      await tester.tap(find.text('Sign In'));
-      await tester.pump();
-
-      // Verify error message
-      expect(find.text('Invalid credentials'), findsOneWidget);
-    });
-  });
-}
-```
-
-### 2. Testing HTTP Requests
-
-```dart
-import 'package:flutter_test/flutter_test.dart';
-import 'package:minecraft_server_automation/common/testing/test_helpers.dart';
-import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
-
-void main() {
-  group('DigitalOcean API Service Tests', () {
-    setUp(() {
-      TestHelpers.setupMockServices();
-    });
-
-    tearDown(() {
-      TestHelpers.resetAllMocks();
-    });
-
-    test('should fetch regions successfully', () async {
-      final mockHttp = TestHelpers.mockHttpClient;
-      
-      // Mock successful response
-      mockHttp.setResponse('GET', 'https://api.digitalocean.com/v2/regions', 
-        HttpResponse(200, '{"regions": [{"name": "NYC1", "slug": "nyc1"}]}'));
-      
-      final service = DigitalOceanApiService();
-      final regions = await service.getRegions();
-      
-      expect(regions, isNotEmpty);
-      expect(regions.first.name, equals('NYC1'));
-      
-      // Verify the request was made
-      expect(mockHttp.requests.length, equals(1));
-      expect(mockHttp.requests.first.method, equals('GET'));
-    });
-
-    test('should handle HTTP errors gracefully', () async {
-      final mockHttp = TestHelpers.mockHttpClient;
-      
-      // Mock error response
-      mockHttp.setResponse('GET', 'https://api.digitalocean.com/v2/regions',
-        HttpResponse(500, 'Internal Server Error'));
-      
-      final service = DigitalOceanApiService();
-      
-      expect(() => service.getRegions(), throwsException);
-    });
-  });
-}
-```
-
-### 3. Testing Location Services
-
-```dart
-import 'package:flutter_test/flutter_test.dart';
-import 'package:minecraft_server_automation/common/testing/test_helpers.dart';
-import 'package:minecraft_server_automation/common/widgets/forms/location_dropdown.dart';
-
-void main() {
-  group('Location Dropdown Tests', () {
-    setUp(() {
-      TestHelpers.setupMockServices();
-    });
-
-    tearDown(() {
-      TestHelpers.resetAllMocks();
-    });
-
-    testWidgets('should show location permission dialog when needed', (tester) async {
-      // Configure mock to require permission
-      final mockLocation = TestHelpers.mockLocationService;
-      mockLocation.setPermission(LocationPermission.denied);
-      
-      await tester.pumpWidget(
-        MaterialApp(
-          home: LocationDropdown(
-            selectedRegion: null,
-            onRegionChanged: (region) {},
-          ),
-        ),
-      );
-
-      // Trigger location request
-      await tester.tap(find.byIcon(Icons.location_on));
-      await tester.pump();
-
-      // Verify permission dialog appears
-      expect(find.text('Location Permission Required'), findsOneWidget);
-    });
-
-    testWidgets('should use current location when available', (tester) async {
-      // Configure mock with location data
-      TestHelpers.setupSuccessfulLocation();
-      
-      await tester.pumpWidget(
-        MaterialApp(
-          home: LocationDropdown(
-            selectedRegion: null,
-            onRegionChanged: (region) {},
-          ),
-        ),
-      );
-
-      // The widget should automatically use the mock location
-      // and suggest the nearest region
-    });
-  });
-}
-```
-
-### 4. Testing Biometric Authentication
-
-```dart
-import 'package:flutter_test/flutter_test.dart';
-import 'package:minecraft_server_automation/common/testing/test_helpers.dart';
-
-void main() {
-  group('Biometric Auth Tests', () {
-    setUp(() {
-      TestHelpers.setupMockServices();
-    });
-
-    tearDown(() {
-      TestHelpers.resetAllMocks();
-    });
-
-    test('should authenticate successfully when biometrics available', () async {
-      // Configure mock for successful biometric auth
-      TestHelpers.setupBiometricAvailable();
-      
-      final mockBiometric = TestHelpers.mockBiometricAuthService;
-      final result = await mockBiometric.authenticate(reason: 'Test authentication');
-      
+      // Verify behavior
       expect(result, isTrue);
-    });
-
-    test('should fail when biometrics unavailable', () async {
-      // Configure mock for unavailable biometrics
-      TestHelpers.setupBiometricUnavailable();
-      
-      final mockBiometric = TestHelpers.mockBiometricAuthService;
-      final result = await mockBiometric.authenticate(reason: 'Test authentication');
-      
-      expect(result, isFalse);
+      verify(TestUtils.mockAuthService.signIn('test@example.com', 'password')).called(1);
     });
   });
 }
 ```
 
-## Advanced Mock Configuration
+### Direct Mockito Example
+```dart
+import 'package:minecraft_server_automation/test/mocks/mock_generation.mocks.dart';
 
-### Custom Mock Responses
+void main() {
+  group('SomeService Tests', () {
+    late SomeService service;
+    late MockSecureStorageServiceInterface mockStorage;
+
+    setUp(() {
+      mockStorage = MockSecureStorageServiceInterface();
+      service = SomeService(storage: mockStorage);
+    });
+
+    test('should store data successfully', () async {
+      when(mockStorage.write(any, any)).thenAnswer((_) async {});
+      
+      await service.storeData('key', 'value');
+      
+      verify(mockStorage.write('key', 'value')).called(1);
+    });
+  });
+}
+```
+
+### Real Instance Example
+```dart
+void main() {
+  group('EncryptionService Tests', () {
+    late EncryptionServiceInterface service;
+
+    setUp(() {
+      service = EncryptionService(); // Use real instance
+    });
+
+    test('should encrypt and decrypt data', () {
+      const text = 'Hello, World!';
+      const password = 'test-password';
+      
+      final encrypted = service.encrypt(text, password);
+      final decrypted = service.decrypt(encrypted, password);
+      
+      expect(decrypted, equals(text));
+    });
+  });
+}
+```
+
+### Testing Concrete Services with External Dependencies
+When testing concrete services that directly use external dependencies (like `IOSBiometricEncryptionService`), mock the external dependencies directly:
 
 ```dart
-test('should handle custom API responses', () async {
-  final mockHttp = TestHelpers.mockHttpClient;
-  
-  // Set up custom response
-  mockHttp.setResponse('POST', 'https://api.digitalocean.com/v2/droplets', 
-    HttpResponse(201, '''
-    {
-      "droplet": {
-        "id": 12345,
-        "name": "test-droplet",
-        "status": "new"
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+@GenerateMocks([LocalAuthentication, FlutterSecureStorage])
+void main() {
+  group('IOSBiometricEncryptionService', () {
+    late IOSBiometricEncryptionService service;
+    late MockLocalAuthentication mockLocalAuth;
+    late MockFlutterSecureStorage mockSecureStorage;
+
+    setUp(() {
+      mockLocalAuth = MockLocalAuthentication();
+      mockSecureStorage = MockFlutterSecureStorage();
+      service = IOSBiometricEncryptionService(
+        localAuth: mockLocalAuth,
+        secureStorage: mockSecureStorage,
+      );
+    });
+
+    test('should check biometric availability', () async {
+      // Arrange
+      when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
+      when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
+
+      // Act
+      final result = await service.isBiometricAvailable();
+
+      // Assert
+      expect(result, isTrue);
+      verify(mockLocalAuth.canCheckBiometrics).called(1);
+    });
+  });
+}
+```
+
+### HTTP Client Mocking Example
+```dart
+@GenerateMocks([http.Client])
+void main() {
+  group('MinecraftServerService Tests', () {
+    late MockClient mockClient;
+
+    setUp(() {
+      mockClient = MockClient();
+      MinecraftServerService.setClient(mockClient);
+    });
+
+    tearDown(() {
+      MinecraftServerService.setClient(http.Client());
+    });
+
+    test('should return server info when server is online', () async {
+      // Arrange
+      const responseBody = '''
+      {
+        "online": true,
+        "ip": "192.168.1.100",
+        "port": 25565,
+        "hostname": "Test Server",
+        "version": "1.20.1",
+        "players": {"online": 5, "max": 20}
       }
-    }
-    '''));
-  
-  // Your test code here
-});
-```
+      ''';
 
-### Verifying Mock Interactions
+      when(mockClient.get(
+        any,
+        headers: anyNamed('headers'),
+      )).thenAnswer((_) async => http.Response(responseBody, 200));
 
-```dart
-test('should make correct API calls', () async {
-  final mockHttp = TestHelpers.mockHttpClient;
-  
-  // Perform actions that trigger HTTP calls
-  await someService.createDroplet('test-droplet');
-  
-  // Verify the calls were made
-  expect(mockHttp.requests.length, equals(1));
-  expect(mockHttp.requests.first.method, equals('POST'));
-  expect(mockHttp.requests.first.url, contains('/droplets'));
-});
-```
+      // Act
+      final result = await MinecraftServerService.checkMinecraftServer('192.168.1.100');
 
-### Simulating Network Delays
+      // Assert
+      expect(result, isNotNull);
+      expect(result!.hostname, equals('Test Server'));
+      expect(result.playersOnline, equals(5));
+      
+      // Verify the correct URL was called
+      verify(mockClient.get(
+        Uri.parse('https://api.mcsrvstat.us/2/192.168.1.100'),
+        headers: {'Content-Type': 'application/json'},
+      )).called(1);
+    });
 
-```dart
-test('should handle slow network responses', () async {
-  final mockHttp = TestHelpers.mockHttpClient;
-  
-  // Configure mock to simulate delay
-  mockHttp.setDelay(Duration(seconds: 2));
-  mockHttp.setResponse('GET', 'https://api.example.com/data',
-    HttpResponse(200, '{"data": "slow response"}'));
-  
-  // Test loading states and timeouts
-});
-```
+    test('should return null when server is offline', () async {
+      // Arrange
+      when(mockClient.get(any, headers: anyNamed('headers')))
+          .thenAnswer((_) async => http.Response('{"online": false}', 200));
 
-## Test Helper Methods
+      // Act
+      final result = await MinecraftServerService.checkMinecraftServer('192.168.1.100');
 
-The `TestHelpers` class provides convenient methods for common test scenarios:
+      // Assert
+      expect(result, isNull);
+    });
 
-```dart
-// Set up successful authentication
-TestHelpers.setupSuccessfulAuth();
+    test('should handle network errors gracefully', () async {
+      // Arrange
+      when(mockClient.get(any, headers: anyNamed('headers')))
+          .thenThrow(Exception('Network error'));
 
-// Set up failed authentication
-TestHelpers.setupFailedAuth();
+      // Act
+      final result = await MinecraftServerService.checkMinecraftServer('192.168.1.100');
 
-// Set up location services
-TestHelpers.setupSuccessfulLocation();
-
-// Set up biometric authentication
-TestHelpers.setupBiometricAvailable();
-TestHelpers.setupBiometricUnavailable();
-
-// Reset all mocks to default state
-TestHelpers.resetAllMocks();
+      // Assert
+      expect(result, isNull);
+    });
+  });
+}
 ```
 
 ## Best Practices
 
-### 1. **Always Reset Mocks**
-```dart
-tearDown(() {
-  TestHelpers.resetAllMocks();
-});
-```
+1. **Clear Service Locator between tests:**
+   ```dart
+   setUp(() {
+     ServiceLocator().clear();
+     // Register test mocks
+   });
+   ```
 
-### 2. **Use Descriptive Test Names**
-```dart
-test('should show error message when authentication fails with invalid credentials', () async {
-  // Test implementation
-});
-```
+2. **Use descriptive test names:**
+   ```dart
+   test('should return false when Firebase sign up fails with email already in use', () async {
+   ```
 
-### 3. **Test Both Success and Failure Cases**
-```dart
-group('API Service Tests', () {
-  test('should handle successful response', () async {
-    // Success case
-  });
-  
-  test('should handle error response', () async {
-    // Error case
-  });
-});
-```
+3. **Test both success and failure cases:**
+   ```dart
+   test('should handle network error', () async {
+     when(mockService.call()).thenThrow(Exception('Network error'));
+     expect(() => service.method(), throwsA(isA<Exception>()));
+   });
+   ```
 
-### 4. **Verify Mock Interactions**
-```dart
-test('should call correct API endpoint', () async {
-  // Perform action
-  await service.doSomething();
-  
-  // Verify mock was called correctly
-  expect(mockHttp.requests.length, equals(1));
-  expect(mockHttp.requests.first.url, contains('/expected-endpoint'));
-});
-```
+4. **Use `anyNamed()` for named parameters:**
+   ```dart
+   when(mockService.method(param: anyNamed('param'))).thenReturn('result');
+   ```
 
-### 5. **Use Widget Tests for UI Components**
-```dart
-testWidgets('should display loading indicator during API call', (tester) async {
-  // Configure mock to simulate loading
-  mockHttp.setDelay(Duration(seconds: 1));
-  
-  await tester.pumpWidget(MyWidget());
-  await tester.tap(find.text('Load Data'));
-  await tester.pump();
-  
-  expect(find.byType(CircularProgressIndicator), findsOneWidget);
-});
-```
+5. **Test encryption services with valid data:**
+   ```dart
+   test('should encrypt and decrypt data correctly', () async {
+     // Create valid test data
+     const testData = 'sensitive information';
+     final keyBytes = Uint8List(32); // 256-bit key
+     for (int i = 0; i < 32; i++) {
+       keyBytes[i] = i;
+     }
+     final validKey = base64.encode(keyBytes);
+     
+     // Test encryption/decryption flow
+     when(mockStorage.read(key: 'encryption_key')).thenAnswer((_) async => validKey);
+     // ... rest of test
+   });
+   ```
 
-## Common Patterns
-
-### Testing Loading States
-```dart
-testWidgets('should show loading state', (tester) async {
-  // Configure mock to simulate async operation
-  mockService.setDelay(Duration(milliseconds: 100));
-  
-  await tester.pumpWidget(MyWidget());
-  await tester.tap(find.text('Load'));
-  await tester.pump(); // Don't wait for completion
-  
-  expect(find.byType(CircularProgressIndicator), findsOneWidget);
-});
-```
-
-### Testing Error States
-```dart
-testWidgets('should show error message', (tester) async {
-  // Configure mock to fail
-  mockService.shouldThrowOnRequest = true;
-  mockService.throwMessage = 'Network error';
-  
-  await tester.pumpWidget(MyWidget());
-  await tester.tap(find.text('Load'));
-  await tester.pump();
-  
-  expect(find.text('Network error'), findsOneWidget);
-});
-```
-
-### Testing Success States
-```dart
-testWidgets('should display data on success', (tester) async {
-  // Configure mock to return data
-  mockService.setMockData(['item1', 'item2']);
-  
-  await tester.pumpWidget(MyWidget());
-  await tester.tap(find.text('Load'));
-  await tester.pump();
-  
-  expect(find.text('item1'), findsOneWidget);
-  expect(find.text('item2'), findsOneWidget);
-});
-```
+6. **Mock external dependencies for concrete services:**
+   ```dart
+   // For services that directly use external packages
+   @GenerateMocks([ExternalPackageClass])
+   void main() {
+     // Mock the external dependency directly
+     // rather than creating an interface wrapper
+   }
+   ```
 
 ## Troubleshooting
 
-### Common Issues
+- **Mock not working**: Ensure mocks are registered in `setUp()`
+- **State not resetting**: Call `ServiceLocator().clear()` in `tearDown()`
+- **Mock generation errors**: Run `dart run build_runner build` after adding `@GenerateMocks`
+- **Async operations**: Use `await tester.pump()` for widget tests
 
-1. **Mock not being used**: Ensure `TestHelpers.setupMockServices()` is called in `setUp()`
-2. **State not resetting**: Ensure `TestHelpers.resetAllMocks()` is called in `tearDown()`
-3. **Async operations**: Use `await tester.pump()` or `await tester.pumpAndSettle()` for async operations
-4. **Widget not found**: Use `find.byType()` or `find.byKey()` with proper keys
+## Available Interfaces
 
-### Debug Tips
+- `AuthServiceInterface` - Authentication
+- `ApiKeyCacheServiceInterface` - API Key Caching
+- `DigitalOceanApiServiceInterface` - DigitalOcean API
+- `EncryptionServiceInterface` - Data Encryption
+- `BiometricAuthServiceInterface` - Biometric Authentication
+- `SecureStorageServiceInterface` - Secure Storage
+- `LocationServiceInterface` - Location Services
+- `DropletConfigServiceInterface` - Droplet Configuration
+- `LoggingServiceInterface` - Logging
+- `RegionSelectionServiceInterface` - Region Selection
+- `PathProviderServiceInterface` - File System Path Operations
 
-```dart
-// Print mock state for debugging
-print('Mock requests: ${mockHttp.requests}');
-print('Mock responses: ${mockHttp.responses}');
-
-// Verify widget tree
-debugDumpApp();
-
-// Check mock configuration
-print('Auth mock state: ${mockAuth.isSignedIn}');
-```
-
-This mocking system provides complete control over all external dependencies, making it easy to write comprehensive, reliable tests for the Minecraft Server Automation app.
+This mocking system allows you to test components in isolation without external dependencies while maintaining clean, maintainable code.

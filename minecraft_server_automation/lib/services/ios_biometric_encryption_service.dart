@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart'
+    as interfaces;
 
 /// Custom exceptions for biometric encryption service
 class BiometricAuthenticationException implements Exception {
@@ -31,7 +33,8 @@ class NoEncryptedDataException implements Exception {
 }
 
 /// iOS Biometric Encryption Service using Secure Enclave and Face ID/Touch ID
-class IOSBiometricEncryptionService {
+class IOSBiometricEncryptionService
+    implements interfaces.BiometricAuthServiceInterface {
   static const String _encryptedDataKey = 'ios_encrypted_api_key';
   static const String _keyMetadataKey = 'ios_key_metadata';
 
@@ -53,6 +56,7 @@ class IOSBiometricEncryptionService {
             );
 
   /// Checks if biometric authentication is available on the device
+  @override
   Future<bool> isBiometricAvailable() async {
     try {
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;
@@ -64,15 +68,29 @@ class IOSBiometricEncryptionService {
   }
 
   /// Gets available biometric types
-  Future<List<BiometricType>> getAvailableBiometrics() async {
+  @override
+  Future<List<interfaces.BiometricType>> getAvailableBiometrics() async {
     try {
-      return await _localAuth.getAvailableBiometrics();
+      final availableBiometrics = await _localAuth.getAvailableBiometrics();
+      return availableBiometrics.map((biometric) {
+        switch (biometric) {
+          case BiometricType.fingerprint:
+            return interfaces.BiometricType.fingerprint;
+          case BiometricType.face:
+            return interfaces.BiometricType.face;
+          case BiometricType.iris:
+            return interfaces.BiometricType.iris;
+          default:
+            return interfaces.BiometricType.fingerprint;
+        }
+      }).toList();
     } catch (e) {
       return [];
     }
   }
 
   /// Encrypts data using iOS Secure Enclave and biometric authentication
+  @override
   Future<String> encryptWithBiometrics(String data) async {
     if (data.isEmpty) {
       throw ArgumentError('Data cannot be empty');
@@ -166,6 +184,7 @@ class IOSBiometricEncryptionService {
   }
 
   /// Decrypts data using iOS Secure Enclave and biometric authentication
+  @override
   Future<String> decryptWithBiometrics() async {
     // Check if biometrics are available
     if (!await isBiometricAvailable()) {
@@ -215,27 +234,47 @@ class IOSBiometricEncryptionService {
   }
 
   /// Checks if encrypted data exists
+  @override
   Future<bool> hasEncryptedData() async {
     final encryptedData = await _secureStorage.read(key: _encryptedDataKey);
     return encryptedData != null;
   }
 
   /// Gets key metadata
+  @override
   Future<Map<String, dynamic>?> getKeyMetadata() async {
     try {
       final metadataJson = await _secureStorage.read(key: _keyMetadataKey);
       if (metadataJson == null) return null;
       return jsonDecode(metadataJson) as Map<String, dynamic>;
     } catch (e) {
+      // Log the error for debugging while maintaining security
+      // Note: In production, this should use a proper logging service
+      // ignore: avoid_print
+      print('IOSBiometricEncryptionService: Failed to parse key metadata: $e');
       return null;
     }
   }
 
   /// Clears all encrypted data and metadata
+  @override
   Future<void> clearEncryptedData() async {
     await _secureStorage.delete(key: _encryptedDataKey);
     await _secureStorage.delete(key: _keyMetadataKey);
     await _secureStorage.delete(key: 'ios_encryption_key');
+  }
+
+  /// Rotates the encryption key by clearing all data and forcing re-encryption
+  /// This should be called when key rotation is needed for security reasons
+  @override
+  Future<void> rotateEncryptionKey() async {
+    // Note: In production, this should use a proper logging service
+    // ignore: avoid_print
+    print('IOSBiometricEncryptionService: Rotating encryption key');
+    await clearEncryptedData();
+    // ignore: avoid_print
+    print(
+        'IOSBiometricEncryptionService: Key rotation completed - all data cleared');
   }
 
   /// Gets or creates a persistent encryption key

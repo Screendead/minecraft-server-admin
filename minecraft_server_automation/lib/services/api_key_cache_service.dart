@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'ios_biometric_encryption_service.dart';
 import 'ios_secure_api_key_service.dart';
+import '../common/interfaces/api_key_cache_service.dart' as interfaces;
 
 /// Exception thrown when API key cache operations fail
 class ApiKeyCacheException implements Exception {
@@ -12,21 +13,21 @@ class ApiKeyCacheException implements Exception {
 }
 
 /// Secure in-memory API key cache service
-/// 
+///
 /// This service provides a secure way to cache decrypted API keys in memory
 /// to avoid repeated Face ID/Touch ID prompts. The cache is automatically
 /// cleared when the app goes to background or when the user signs out.
-/// 
+///
 /// Security features:
 /// - Keys are stored in memory only (not persisted)
 /// - Automatic cache invalidation on app backgrounding
 /// - Cache is cleared on user sign out
 /// - Thread-safe operations
-class ApiKeyCacheService {
+class ApiKeyCacheService implements interfaces.ApiKeyCacheServiceInterface {
   static ApiKeyCacheService? _instance;
   factory ApiKeyCacheService() => _instance ??= ApiKeyCacheService._internal();
   ApiKeyCacheService._internal();
-  
+
   /// Reset the singleton instance (for testing only)
   static void resetInstance() {
     _instance?.dispose();
@@ -43,13 +44,12 @@ class ApiKeyCacheService {
 
   // Services
   IOSSecureApiKeyService? _apiKeyService;
-  
+
   // Synchronization for concurrent access
   Future<String?>? _pendingDecryption;
 
   /// Initialize the cache service with required dependencies
   void initialize({
-    required IOSBiometricEncryptionService biometricService,
     required IOSSecureApiKeyService apiKeyService,
   }) {
     _apiKeyService = apiKeyService;
@@ -60,6 +60,7 @@ class ApiKeyCacheService {
   bool get isInitialized => _isInitialized;
 
   /// Get the cached API key if available and not expired
+  @override
   String? getCachedApiKey() {
     if (!_isInitialized) {
       throw ApiKeyCacheException('Service not initialized');
@@ -80,6 +81,7 @@ class ApiKeyCacheService {
   }
 
   /// Cache an API key with timestamp
+  @override
   void cacheApiKey(String apiKey) {
     if (!_isInitialized) {
       throw ApiKeyCacheException('Service not initialized');
@@ -106,8 +108,9 @@ class ApiKeyCacheService {
     }
 
     // If there's already a decryption in progress, wait for it
-    if (_pendingDecryption != null) {
-      return await _pendingDecryption!;
+    final pendingDecryption = _pendingDecryption;
+    if (pendingDecryption != null) {
+      return await pendingDecryption;
     }
 
     // If not in cache, decrypt from secure storage using biometrics
@@ -117,7 +120,7 @@ class ApiKeyCacheService {
 
     // Create a new decryption future and store it
     _pendingDecryption = _performDecryption();
-    
+
     try {
       final result = await _pendingDecryption!;
       return result;
@@ -149,16 +152,19 @@ class ApiKeyCacheService {
   }
 
   /// Clear the cached API key
+  @override
   void clearCache() {
     _clearCache();
   }
 
   /// Check if there's a valid cached API key
+  @override
   bool hasCachedApiKey() {
     return getCachedApiKey() != null;
   }
 
   /// Get cache status information
+  @override
   Map<String, dynamic> getCacheStatus() {
     return {
       'hasCachedKey': _cachedApiKey != null,
@@ -188,18 +194,21 @@ class ApiKeyCacheService {
   }
 
   /// Handle app lifecycle changes
+  @override
   void onAppPaused() {
     // Clear cache when app goes to background for security
     _clearCache();
   }
 
   /// Handle app resume (optional - could be used for re-authentication)
+  @override
   void onAppResumed() {
     // Cache is cleared on pause, so nothing to do here
     // The next API call will trigger biometric authentication
   }
 
   /// Dispose of resources
+  @override
   void dispose() {
     _clearCache();
     _isInitialized = false;

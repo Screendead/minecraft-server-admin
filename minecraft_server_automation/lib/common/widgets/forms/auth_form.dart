@@ -4,7 +4,7 @@ import 'package:minecraft_server_automation/common/interfaces/auth_service.dart'
 /// Auth form component that accepts an AuthService interface
 /// This makes it easy to inject mock services for testing
 class AuthForm extends StatefulWidget {
-  final AuthService authService;
+  final AuthServiceInterface authService;
   final VoidCallback? onAuthSuccess;
   final bool showDebugOptions;
 
@@ -118,7 +118,8 @@ class _AuthFormState extends State<AuthForm> {
               if (value == null || value.isEmpty) {
                 return 'Please enter your email';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value)) {
                 return 'Please enter a valid email';
               }
               return null;
@@ -219,7 +220,8 @@ class _AuthFormState extends State<AuthForm> {
             ),
             const SizedBox(height: 8),
             OutlinedButton(
-              onPressed: widget.authService.isLoading ? null : _debugCreateAccount,
+              onPressed:
+                  widget.authService.isLoading ? null : _debugCreateAccount,
               child: const Text('Debug Create Account'),
             ),
           ],

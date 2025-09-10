@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 
-class EncryptionService {
+class EncryptionService implements EncryptionServiceInterface {
   static const String _salt = 'minecraft-server-admin-salt';
 
   /// Encrypts the given text using AES-256-CBC with a password-derived key
+  @override
   String encrypt(String text, String password) {
     if (text.isEmpty) return '';
 
@@ -30,6 +32,7 @@ class EncryptionService {
   }
 
   /// Decrypts the given encrypted text using AES-256-CBC
+  @override
   String decrypt(String encryptedText, String password) {
     if (encryptedText.isEmpty) return '';
 
@@ -81,13 +84,13 @@ class EncryptionService {
     // If more than 90% of characters are valid, consider it valid text
     // This is more strict than before to better reject garbage data from wrong passwords
     final isValidText = (validCharCount / totalCharCount) > 0.9;
-    
+
     // Additional check: ensure the data has reasonable content
     // For very short strings (1-2 chars), just check they're valid characters
     // For longer strings, require at least one letter to reject pure garbage
-    final hasReasonableContent = data.length == 1 || 
+    final hasReasonableContent = data.length == 1 ||
         (data.length >= 2 && RegExp(r'[a-zA-Z]').hasMatch(data));
-    
+
     return isValidText && hasReasonableContent;
   }
 

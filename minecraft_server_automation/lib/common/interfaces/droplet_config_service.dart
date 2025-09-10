@@ -8,7 +8,7 @@ import 'package:minecraft_server_automation/models/minecraft_version.dart';
 
 /// Abstract interface for droplet configuration services
 /// This allows for easy mocking in tests
-abstract class DropletConfigService {
+abstract class DropletConfigServiceInterface {
   List<DropletSize> get dropletSizes;
   List<Region> get regions;
   List<MinecraftVersion> get minecraftVersions;
@@ -18,9 +18,11 @@ abstract class DropletConfigService {
 
   Future<void> loadConfigurationData();
 
-  List<CpuCategory> getAvailableCategoriesForArchitecture(CpuArchitecture architecture);
+  List<CpuCategory> getAvailableCategoriesForArchitecture(
+      CpuArchitecture architecture);
   List<CpuOption> getAvailableOptionsForCategory(CpuCategory category);
-  List<StorageMultiplier> getAvailableStorageMultipliersFor(CpuCategory category, CpuOption option);
+  List<StorageMultiplier> getAvailableStorageMultipliersFor(
+      CpuCategory category, CpuOption option);
   List<DropletSize> getSizesForStorage(
     String regionSlug,
     CpuArchitecture architecture,

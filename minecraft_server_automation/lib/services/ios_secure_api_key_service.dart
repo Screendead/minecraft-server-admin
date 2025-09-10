@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:local_auth/local_auth.dart';
 import 'ios_biometric_encryption_service.dart';
-import 'digitalocean_api_service.dart';
 import 'api_key_cache_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart'
+    as interfaces;
+import 'package:minecraft_server_automation/common/di/service_locator.dart';
 
 /// iOS Secure API Key Service for storing encrypted API keys in Firestore
 /// Now includes in-memory caching to reduce Face ID/Touch ID prompts
@@ -24,7 +26,6 @@ class IOSSecureApiKeyService {
         _cacheService = cacheService ?? ApiKeyCacheService() {
     // Initialize the cache service with our dependencies
     _cacheService.initialize(
-      biometricService: _biometricService,
       apiKeyService: this,
     );
   }
@@ -38,7 +39,8 @@ class IOSSecureApiKeyService {
 
     try {
       // Validate the API key before storing
-      final isValid = await DigitalOceanApiService.validateApiKey(apiKey);
+      final isValid =
+          await ServiceLocator().digitalOceanApiService.validateApiKey(apiKey);
       if (!isValid) {
         throw Exception(
             'Invalid DigitalOcean API key. Please check your key and try again.');
@@ -125,7 +127,9 @@ class IOSSecureApiKeyService {
 
     try {
       // Validate the new API key before updating
-      final isValid = await DigitalOceanApiService.validateApiKey(newApiKey);
+      final isValid = await ServiceLocator()
+          .digitalOceanApiService
+          .validateApiKey(newApiKey);
       if (!isValid) {
         throw Exception(
             'Invalid DigitalOcean API key. Please check your key and try again.');
@@ -236,7 +240,22 @@ class IOSSecureApiKeyService {
 
   /// Gets available biometric types
   Future<List<BiometricType>> getAvailableBiometrics() async {
-    return await _biometricService.getAvailableBiometrics();
+    final biometricTypes = await _biometricService.getAvailableBiometrics();
+    return biometricTypes.map((type) {
+      switch (type) {
+        case interfaces.BiometricType.fingerprint:
+          return BiometricType.fingerprint;
+        case interfaces.BiometricType.face:
+          return BiometricType.face;
+        case interfaces.BiometricType.iris:
+          return BiometricType.iris;
+        // Note: voice is not available in local_auth package
+        // case interfaces.BiometricType.voice:
+        //   return BiometricType.voice;
+        default:
+          return BiometricType.fingerprint;
+      }
+    }).toList();
   }
 
   /// Handle app lifecycle changes - clear cache when app goes to background
