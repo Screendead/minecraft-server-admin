@@ -67,6 +67,12 @@ jobs:
         cd minecraft_server_automation
         flutter test --coverage
         
+    - name: Disable man-db triggers
+      run: |
+        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
+        echo 'DPkg::Post-Invoke {"rm -f /var/cache/apt/archives/*.deb || true";};' | sudo tee /etc/apt/apt.conf.d/02no-clean
+        echo 'DPkg::Post-Invoke {"rm -f /var/lib/dpkg/info/man-db.* || true";};' | sudo tee /etc/apt/apt.conf.d/03no-man-db
+        
     - name: Setup LCOV
       uses: hrishikesh-kadam/setup-lcov@v1
         
