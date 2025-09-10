@@ -140,11 +140,7 @@ void main() {
 
         expect(
           () => service.getMinecraftVersions(),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Error fetching Minecraft versions'),
-          )),
+          throwsA(isA<FormatException>()),
         );
       });
 

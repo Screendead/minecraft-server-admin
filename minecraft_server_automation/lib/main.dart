@@ -11,6 +11,7 @@ import 'providers/droplets_provider.dart';
 import 'providers/droplet_config_provider.dart';
 import 'providers/logs_provider.dart';
 import 'services/logging_service.dart';
+import 'models/log_entry.dart';
 import 'common/components/layout/app_lifecycle_handler.dart';
 import 'common/di/service_locator.dart';
 
@@ -29,7 +30,11 @@ void main() async {
       // Connected to Firebase emulators - no logging needed for debug mode
     } catch (e) {
       // Emulators might not be running, that's okay for now
-      // Firebase emulators not available - no logging needed for debug mode
+      // Log this as a warning since it's not critical for development
+      LoggingService().logWarning(
+        'Firebase emulators not available: $e',
+        category: LogCategory.system,
+      );
     }
   } else {
     // Running in production mode - using Firebase production services

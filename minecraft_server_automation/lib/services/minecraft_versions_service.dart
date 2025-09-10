@@ -22,31 +22,27 @@ class MinecraftVersionsService implements MinecraftVersionsServiceInterface {
   /// Returns a list of MinecraftVersion objects sorted by release date (newest first)
   @override
   Future<List<MinecraftVersion>> getMinecraftVersions() async {
-    try {
-      final response = await _httpClient.get(
-        Uri.parse(_manifestUrl),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+    final response = await _httpClient.get(
+      Uri.parse(_manifestUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    ).timeout(const Duration(seconds: 10));
 
-      if (response.statusCode != 200) {
-        throw Exception(
-            'Failed to fetch Minecraft versions: ${response.statusCode}');
-      }
-
-      final data = json.decode(response.body);
-      final versions = data['versions'] as List<dynamic>;
-
-      return versions
-          .map((version) => MinecraftVersion.fromJson(version))
-          .where((version) =>
-              version.type == 'release' || version.type == 'snapshot')
-          .toList()
-        ..sort((a, b) => b.releaseTime.compareTo(a.releaseTime));
-    } catch (e) {
-      throw Exception('Error fetching Minecraft versions: $e');
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Failed to fetch Minecraft versions: ${response.statusCode}');
     }
+
+    final data = json.decode(response.body);
+    final versions = data['versions'] as List<dynamic>;
+
+    return versions
+        .map((version) => MinecraftVersion.fromJson(version))
+        .where((version) =>
+            version.type == 'release' || version.type == 'snapshot')
+        .toList()
+      ..sort((a, b) => b.releaseTime.compareTo(a.releaseTime));
   }
 
   /// Fetches only release versions (stable releases)
@@ -67,49 +63,44 @@ class MinecraftVersionsService implements MinecraftVersionsServiceInterface {
   /// Throws an exception if the version is not found or the URL cannot be fetched
   @override
   Future<String> getServerJarUrlForVersion(String versionId) async {
-    try {
-      // First get all versions to find the specific one
-      final versions = await getMinecraftVersions();
-      final version = versions.firstWhere(
-        (v) => v.id == versionId,
-        orElse: () => throw Exception('Version $versionId not found'),
-      );
+    // First get all versions to find the specific one
+    final versions = await getMinecraftVersions();
+    final version = versions.firstWhere(
+      (v) => v.id == versionId,
+      orElse: () => throw Exception('Version $versionId not found'),
+    );
 
-      // Fetch the version manifest
-      final response = await _httpClient.get(
-        Uri.parse(version.url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+    // Fetch the version manifest
+    final response = await _httpClient.get(
+      Uri.parse(version.url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    ).timeout(const Duration(seconds: 10));
 
-      if (response.statusCode != 200) {
-        throw Exception(
-            'Failed to fetch version manifest: ${response.statusCode}');
-      }
-
-      final data = json.decode(response.body);
-      final downloads = data['downloads'] as Map<String, dynamic>?;
-
-      if (downloads == null) {
-        throw Exception('No downloads section found in version manifest');
-      }
-
-      final server = downloads['server'] as Map<String, dynamic>?;
-      if (server == null) {
-        throw Exception('No server download found for version $versionId');
-      }
-
-      final url = server['url'] as String?;
-      if (url == null || url.isEmpty) {
-        throw Exception('Server JAR URL is empty for version $versionId');
-      }
-
-      return url;
-    } catch (e) {
+    if (response.statusCode != 200) {
       throw Exception(
-          'Error fetching server JAR URL for version $versionId: $e');
+          'Failed to fetch version manifest: ${response.statusCode}');
     }
+
+    final data = json.decode(response.body);
+    final downloads = data['downloads'] as Map<String, dynamic>?;
+
+    if (downloads == null) {
+      throw Exception('No downloads section found in version manifest');
+    }
+
+    final server = downloads['server'] as Map<String, dynamic>?;
+    if (server == null) {
+      throw Exception('No server download found for version $versionId');
+    }
+
+    final url = server['url'] as String?;
+    if (url == null || url.isEmpty) {
+      throw Exception('Server JAR URL is empty for version $versionId');
+    }
+
+    return url;
   }
 }
 
