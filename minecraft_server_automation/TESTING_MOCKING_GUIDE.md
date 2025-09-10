@@ -38,7 +38,7 @@ The project uses **two complementary mocking approaches**:
 │                 │    │                  │    │                 │
 │ - AuthForm      │    │ - AuthService*   │    │ - Mockito Mocks │
 │ - DropletForm   │    │ - HttpClient*    │    │ - Custom Mocks  │
-│ - LocationUI    │    │ - LocationService*│    │ - Real Instances│
+│ - LocationUI    │    │ - LocationSvc*   │    │ - Real Instances│
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                 │
                                 ▼
