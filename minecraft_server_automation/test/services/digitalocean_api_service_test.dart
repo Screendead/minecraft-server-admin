@@ -8,7 +8,6 @@ import 'package:minecraft_server_automation/services/logging_service.dart';
 import 'package:minecraft_server_automation/models/droplet_creation_request.dart';
 import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/models/region.dart';
-import 'package:minecraft_server_automation/models/log_entry.dart';
 import 'digitalocean_api_service_test.mocks.dart';
 
 // Generate mocks for external dependencies
@@ -16,18 +15,13 @@ import 'digitalocean_api_service_test.mocks.dart';
 void main() {
   group('DigitalOceanApiService Tests', () {
     late MockClient mockHttpClient;
-    late MockLoggingService mockLoggingService;
     const String testApiKey = 'test-api-key-123';
 
     setUp(() {
       mockHttpClient = MockClient();
-      mockLoggingService = MockLoggingService();
       
       // Set the mock client for testing
       DigitalOceanApiService.setClient(mockHttpClient);
-      
-      // Mock the LoggingService static instance
-      // Note: This is a challenge with static services, but we'll work around it
     });
 
     tearDown(() {
@@ -48,7 +42,7 @@ void main() {
           }),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -74,7 +68,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -133,12 +127,12 @@ void main() {
           'droplet_limit': 10,
           'floating_ip_limit': 3
         };
-        
+
         final mockResponse = http.Response(
           json.encode({'account': accountData}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -164,7 +158,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -213,12 +207,12 @@ void main() {
             'image': {'slug': 'ubuntu-22-04-x64'}
           }
         ];
-        
+
         final mockResponse = http.Response(
           json.encode({'droplets': dropletsData}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -245,7 +239,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -264,7 +258,7 @@ void main() {
           json.encode({'droplets': []}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -307,12 +301,12 @@ void main() {
             'description': 'Standard Droplet'
           }
         ];
-        
+
         final mockResponse = http.Response(
           json.encode({'sizes': sizesData}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -329,7 +323,7 @@ void main() {
         expect(result.first.vcpus, equals(1));
         expect(result.first.priceMonthly, equals(5.0));
         expect(result.first.available, isTrue);
-        
+
         verify(mockHttpClient.get(
           Uri.parse('https://api.digitalocean.com/v2/sizes?per_page=200'),
           headers: {
@@ -345,7 +339,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -366,22 +360,34 @@ void main() {
           {
             'name': 'New York 1',
             'slug': 'nyc1',
-            'features': ['virtio', 'private_networking', 'backups', 'ipv6', 'metadata'],
+            'features': [
+              'virtio',
+              'private_networking',
+              'backups',
+              'ipv6',
+              'metadata'
+            ],
             'available': true
           },
           {
             'name': 'London 1',
             'slug': 'lon1',
-            'features': ['virtio', 'private_networking', 'backups', 'ipv6', 'metadata'],
+            'features': [
+              'virtio',
+              'private_networking',
+              'backups',
+              'ipv6',
+              'metadata'
+            ],
             'available': true
           }
         ];
-        
+
         final mockResponse = http.Response(
           json.encode({'regions': regionsData}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -397,7 +403,7 @@ void main() {
         expect(result.first.slug, equals('nyc1'));
         expect(result.first.available, isTrue);
         expect(result.first.features, contains('virtio'));
-        
+
         verify(mockHttpClient.get(
           Uri.parse('https://api.digitalocean.com/v2/regions'),
           headers: {
@@ -413,7 +419,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -454,12 +460,12 @@ void main() {
             'status': 'available'
           }
         ];
-        
+
         final mockResponse = http.Response(
           json.encode({'images': imagesData}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -474,7 +480,7 @@ void main() {
         expect(result.first['name'], equals('Ubuntu 20.04 (LTS) x64'));
         expect(result.first['slug'], equals('ubuntu-20-04-x64'));
         expect(result.first['status'], equals('available'));
-        
+
         verify(mockHttpClient.get(
           Uri.parse('https://api.digitalocean.com/v2/images?per_page=200'),
           headers: {
@@ -490,7 +496,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -509,7 +515,7 @@ void main() {
           json.encode({'data': 'invalid'}),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -538,7 +544,7 @@ void main() {
           tags: ['test', 'minecraft'],
           userData: '#!/bin/bash\necho "Hello World"',
         );
-        
+
         final dropletData = {
           'id': 12345,
           'name': 'test-droplet',
@@ -548,12 +554,12 @@ void main() {
           'image': {'slug': 'ubuntu-20-04-x64'},
           'created_at': '2023-01-01T00:00:00Z'
         };
-        
+
         final mockResponse = http.Response(
           json.encode({'droplet': dropletData}),
           202,
         );
-        
+
         when(mockHttpClient.post(
           any,
           headers: anyNamed('headers'),
@@ -561,14 +567,15 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.createDroplet(testApiKey, request);
+        final result =
+            await DigitalOceanApiService.createDroplet(testApiKey, request);
 
         // Assert
         expect(result, equals(dropletData));
         expect(result['id'], equals(12345));
         expect(result['name'], equals('test-droplet'));
         expect(result['status'], equals('new'));
-        
+
         verify(mockHttpClient.post(
           Uri.parse('https://api.digitalocean.com/v2/droplets'),
           headers: {
@@ -587,12 +594,12 @@ void main() {
           size: 's-1vcpu-1gb',
           image: 'ubuntu-20-04-x64',
         );
-        
+
         final mockResponse = http.Response(
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.post(
           any,
           headers: anyNamed('headers'),
@@ -606,7 +613,8 @@ void main() {
         );
       });
 
-      test('should throw exception when droplet data is missing from response', () async {
+      test('should throw exception when droplet data is missing from response',
+          () async {
         // Arrange
         final request = DropletCreationRequest(
           name: 'test-droplet',
@@ -614,12 +622,12 @@ void main() {
           size: 's-1vcpu-1gb',
           image: 'ubuntu-20-04-x64',
         );
-        
+
         final mockResponse = http.Response(
           json.encode({'data': 'invalid'}),
           202,
         );
-        
+
         when(mockHttpClient.post(
           any,
           headers: anyNamed('headers'),
@@ -641,7 +649,7 @@ void main() {
           size: 's-1vcpu-1gb',
           image: 'ubuntu-20-04-x64',
         );
-        
+
         final dropletData = {
           'id': 12346,
           'name': 'minimal-droplet',
@@ -650,12 +658,12 @@ void main() {
           'size': {'slug': 's-1vcpu-1gb'},
           'image': {'slug': 'ubuntu-20-04-x64'},
         };
-        
+
         final mockResponse = http.Response(
           json.encode({'droplet': dropletData}),
           202,
         );
-        
+
         when(mockHttpClient.post(
           any,
           headers: anyNamed('headers'),
@@ -663,18 +671,19 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.createDroplet(testApiKey, request);
+        final result =
+            await DigitalOceanApiService.createDroplet(testApiKey, request);
 
         // Assert
         expect(result, equals(dropletData));
-        
+
         // Verify the JSON body contains only required fields
         final capturedBody = verify(mockHttpClient.post(
           any,
           headers: anyNamed('headers'),
           body: captureAnyNamed('body'),
         )).captured.first as String;
-        
+
         final bodyJson = json.decode(capturedBody);
         expect(bodyJson['name'], equals('minimal-droplet'));
         expect(bodyJson['region'], equals('nyc1'));
@@ -695,12 +704,14 @@ void main() {
         // Arrange
         final customClient = MockClient();
         DigitalOceanApiService.setClient(customClient);
-        
+
         final mockResponse = http.Response(
-          json.encode({'account': {'email': 'test@example.com'}}),
+          json.encode({
+            'account': {'email': 'test@example.com'}
+          }),
           200,
         );
-        
+
         when(customClient.get(
           any,
           headers: anyNamed('headers'),
@@ -718,15 +729,17 @@ void main() {
         // Arrange
         final firstClient = MockClient();
         final secondClient = MockClient();
-        
+
         DigitalOceanApiService.setClient(firstClient);
         DigitalOceanApiService.setClient(secondClient);
-        
+
         final mockResponse = http.Response(
-          json.encode({'account': {'email': 'test@example.com'}}),
+          json.encode({
+            'account': {'email': 'test@example.com'}
+          }),
           200,
         );
-        
+
         when(secondClient.get(
           any,
           headers: anyNamed('headers'),
@@ -745,7 +758,7 @@ void main() {
       test('should handle JSON decode errors gracefully', () async {
         // Arrange
         final mockResponse = http.Response('invalid json', 200);
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
