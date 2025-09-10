@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:encrypt/encrypt.dart';
 import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
+import '../test_helpers/ios_biometric_test_helper.dart';
 
 import 'ios_biometric_encryption_service_test.mocks.dart';
 
@@ -201,11 +200,7 @@ void main() {
         // Arrange
         const testData = 'test data';
         // Create a valid 32-byte key and encode it as base64
-        final keyBytes = Uint8List(32);
-        for (int i = 0; i < 32; i++) {
-          keyBytes[i] = i;
-        }
-        final existingKey = base64.encode(keyBytes);
+        final existingKey = IOSBiometricTestHelper.encodeTestKey();
 
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -292,18 +287,11 @@ void main() {
         // Arrange
         const testData = 'test data';
         // Create a valid 32-byte key and encode it as base64
-        final keyBytes = Uint8List(32);
-        for (int i = 0; i < 32; i++) {
-          keyBytes[i] = i;
-        }
-        final existingKey = base64.encode(keyBytes);
+        final existingKey = IOSBiometricTestHelper.encodeTestKey();
 
         // Create a valid encrypted data structure (IV + encrypted data)
-        final key = Key(keyBytes);
-        final encrypter = Encrypter(AES(key));
-        final iv = IV.fromSecureRandom(16);
-        final encrypted = encrypter.encrypt(testData, iv: iv);
-        final combined = base64.encode(iv.bytes + encrypted.bytes);
+        final combined =
+            IOSBiometricTestHelper.createValidEncryptedData(testData);
 
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -360,8 +348,8 @@ void main() {
     group('getKeyMetadata', () {
       test('should return metadata when it exists', () async {
         // Arrange
-        const metadataJson =
-            '{"algorithm": "AES-256-GCM", "createdAt": "2023-01-01T00:00:00.000Z"}';
+        final metadata = IOSBiometricTestHelper.createValidMetadata();
+        final metadataJson = jsonEncode(metadata);
         when(mockSecureStorage.read(key: 'ios_key_metadata'))
             .thenAnswer((_) async => metadataJson);
 
@@ -388,8 +376,8 @@ void main() {
 
       test('should return null when metadata is invalid JSON', () async {
         // Arrange
-        when(mockSecureStorage.read(key: 'ios_key_metadata'))
-            .thenAnswer((_) async => 'invalid json');
+        when(mockSecureStorage.read(key: 'ios_key_metadata')).thenAnswer(
+            (_) async => IOSBiometricTestHelper.createInvalidJsonMetadata());
 
         // Act
         final result = await service.getKeyMetadata();
@@ -413,6 +401,107 @@ void main() {
             .called(1);
         verify(mockSecureStorage.delete(key: 'ios_key_metadata')).called(1);
         verify(mockSecureStorage.delete(key: 'ios_encryption_key')).called(1);
+      });
+    });
+
+    group('rotateEncryptionKey', () {
+      test('should clear all data when rotating encryption key', () async {
+        // Arrange
+        when(mockSecureStorage.delete(key: anyNamed('key')))
+            .thenAnswer((_) async {});
+
+        // Act
+        await service.rotateEncryptionKey();
+
+        // Assert
+        verify(mockSecureStorage.delete(key: 'ios_encrypted_api_key'))
+            .called(1);
+        verify(mockSecureStorage.delete(key: 'ios_key_metadata')).called(1);
+        verify(mockSecureStorage.delete(key: 'ios_encryption_key')).called(1);
+      });
+    });
+
+    group('Edge Cases', () {
+      test('should handle corrupted encrypted data during decryption',
+          () async {
+        // Arrange
+        when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer(
+            (_) async => IOSBiometricTestHelper.createInvalidBase64Data());
+        when(mockSecureStorage.read(key: 'ios_encryption_key'))
+            .thenAnswer((_) async => IOSBiometricTestHelper.encodeTestKey());
+        when(mockLocalAuth.authenticate(
+          localizedReason: anyNamed('localizedReason'),
+          options: anyNamed('options'),
+        )).thenAnswer((_) async => true);
+
+        // Act & Assert
+        expect(
+          () => service.decryptWithBiometrics(),
+          throwsA(isA<BiometricAuthenticationException>()),
+        );
+      });
+
+      test('should handle corrupted key data during decryption', () async {
+        // Arrange
+        when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer(
+            (_) async =>
+                IOSBiometricTestHelper.createValidEncryptedData('test'));
+        when(mockSecureStorage.read(key: 'ios_encryption_key')).thenAnswer(
+            (_) async => IOSBiometricTestHelper.createCorruptedKeyData());
+        when(mockLocalAuth.authenticate(
+          localizedReason: anyNamed('localizedReason'),
+          options: anyNamed('options'),
+        )).thenAnswer((_) async => true);
+
+        // Act & Assert
+        expect(
+          () => service.decryptWithBiometrics(),
+          throwsA(isA<BiometricAuthenticationException>()),
+        );
+      });
+
+      test('should handle corrupted key data during encryption', () async {
+        // Arrange
+        when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(mockLocalAuth.authenticate(
+          localizedReason: anyNamed('localizedReason'),
+          options: anyNamed('options'),
+        )).thenAnswer((_) async => true);
+        when(mockSecureStorage.read(key: 'ios_encryption_key')).thenAnswer(
+            (_) async => IOSBiometricTestHelper.createCorruptedKeyData());
+
+        // Act & Assert
+        expect(
+          () => service.encryptWithBiometrics('test data'),
+          throwsA(isA<BiometricAuthenticationException>()),
+        );
+      });
+
+      test('should handle secure storage read errors during key retrieval',
+          () async {
+        // Arrange
+        when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
+        when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
+        when(mockLocalAuth.authenticate(
+          localizedReason: anyNamed('localizedReason'),
+          options: anyNamed('options'),
+        )).thenAnswer((_) async => true);
+        when(mockSecureStorage.read(key: 'ios_encryption_key'))
+            .thenThrow(Exception('Storage error'));
+        when(mockSecureStorage.write(
+                key: anyNamed('key'), value: anyNamed('value')))
+            .thenAnswer((_) async {});
+
+        // Act
+        final result = await service.encryptWithBiometrics('test data');
+
+        // Assert - should still work by generating a new key
+        expect(result, isNotEmpty);
       });
     });
   });
