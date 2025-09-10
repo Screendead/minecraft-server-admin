@@ -12,20 +12,22 @@ import 'minecraft_versions_service_test.mocks.dart';
 @GenerateMocks([http.Client, http.Response])
 void main() {
   group('MinecraftVersionsService', () {
+    late MinecraftVersionsService service;
     late MockClient mockClient;
     late MockResponse mockResponse;
 
     setUp(() {
+      service = MinecraftVersionsService();
       mockClient = MockClient();
       mockResponse = MockResponse();
 
-      // Reset the static client for each test
-      MinecraftVersionsService.setClient(mockClient);
+      // Set the client for each test
+      service.setClient(mockClient);
     });
 
     tearDown(() {
-      // Reset the static client after each test
-      MinecraftVersionsService.setClient(http.Client());
+      // Reset the client after each test
+      service.setClient(http.Client());
     });
 
     group('getMinecraftVersions', () {
@@ -67,7 +69,7 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        final result = await MinecraftVersionsService.getMinecraftVersions();
+        final result = await service.getMinecraftVersions();
 
         expect(result, isA<List<MinecraftVersion>>());
         expect(result.length, equals(3));
@@ -97,7 +99,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         expect(
-          () => MinecraftVersionsService.getMinecraftVersions(),
+          () => service.getMinecraftVersions(),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -119,7 +121,7 @@ void main() {
         )).thenThrow(Exception('Network error'));
 
         expect(
-          () => MinecraftVersionsService.getMinecraftVersions(),
+          () => service.getMinecraftVersions(),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -137,7 +139,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         expect(
-          () => MinecraftVersionsService.getMinecraftVersions(),
+          () => service.getMinecraftVersions(),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -191,7 +193,7 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        final result = await MinecraftVersionsService.getMinecraftVersions();
+        final result = await service.getMinecraftVersions();
 
         expect(result.length, equals(2));
         expect(result.any((v) => v.id == '1.20.1'), isTrue);
@@ -239,7 +241,7 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        final result = await MinecraftVersionsService.getReleaseVersions();
+        final result = await service.getReleaseVersions();
 
         expect(result, isA<List<MinecraftVersion>>());
         expect(result.length, equals(2));
@@ -256,7 +258,7 @@ void main() {
         )).thenThrow(Exception('Network error'));
 
         expect(
-          () => MinecraftVersionsService.getReleaseVersions(),
+          () => service.getReleaseVersions(),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -304,7 +306,7 @@ void main() {
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
-        final result = await MinecraftVersionsService.getSnapshotVersions();
+        final result = await service.getSnapshotVersions();
 
         expect(result, isA<List<MinecraftVersion>>());
         expect(result.length, equals(2));
@@ -321,7 +323,7 @@ void main() {
         )).thenThrow(Exception('Network error'));
 
         expect(
-          () => MinecraftVersionsService.getSnapshotVersions(),
+          () => service.getSnapshotVersions(),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -381,8 +383,7 @@ void main() {
           return response;
         });
 
-        final result =
-            await MinecraftVersionsService.getServerJarUrlForVersion('1.20.1');
+        final result = await service.getServerJarUrlForVersion('1.20.1');
 
         expect(
             result,
@@ -418,8 +419,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         expect(
-          () =>
-              MinecraftVersionsService.getServerJarUrlForVersion('nonexistent'),
+          () => service.getServerJarUrlForVersion('nonexistent'),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -435,7 +435,7 @@ void main() {
         )).thenThrow(Exception('Network error'));
 
         expect(
-          () => MinecraftVersionsService.getServerJarUrlForVersion('1.20.1'),
+          () => service.getServerJarUrlForVersion('1.20.1'),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -448,7 +448,7 @@ void main() {
     group('setClient', () {
       test('should allow setting custom HTTP client', () {
         final customClient = MockClient();
-        MinecraftVersionsService.setClient(customClient);
+        service.setClient(customClient);
 
         // This test verifies that setClient doesn't throw
         expect(customClient, isNotNull);

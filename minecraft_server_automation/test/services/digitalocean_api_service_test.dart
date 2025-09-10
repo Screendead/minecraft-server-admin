@@ -16,16 +16,18 @@ import 'digitalocean_api_service_test.mocks.dart';
 @GenerateMocks([http.Client, LoggingServiceInterface])
 void main() {
   group('DigitalOceanApiService Tests', () {
+    late DigitalOceanApiService service;
     late MockClient mockHttpClient;
     late MockLoggingServiceInterface mockLoggingService;
     const String testApiKey = 'test-api-key-123';
 
     setUp(() {
+      service = DigitalOceanApiService();
       mockHttpClient = MockClient();
       mockLoggingService = MockLoggingServiceInterface();
 
       // Set the mock client for testing
-      DigitalOceanApiService.setClient(mockHttpClient);
+      service.setClient(mockHttpClient);
 
       // Register mock logging service in ServiceLocator
       ServiceLocator().clear();
@@ -34,7 +36,7 @@ void main() {
 
     tearDown(() {
       // Reset the client after each test
-      DigitalOceanApiService.setClient(http.Client());
+      service.setClient(http.Client());
       // Clear ServiceLocator
       ServiceLocator().clear();
     });
@@ -59,7 +61,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.validateApiKey(testApiKey);
+        final result = await service.validateApiKey(testApiKey);
 
         // Assert
         expect(result, isTrue);
@@ -103,7 +105,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.validateApiKey(testApiKey);
+        final result = await service.validateApiKey(testApiKey);
 
         // Assert
         expect(result, isFalse);
@@ -142,7 +144,7 @@ void main() {
         )).thenThrow(Exception('Timeout'));
 
         // Act
-        final result = await DigitalOceanApiService.validateApiKey(testApiKey);
+        final result = await service.validateApiKey(testApiKey);
 
         // Assert
         expect(result, isFalse);
@@ -175,7 +177,7 @@ void main() {
         )).thenThrow(Exception('Network error'));
 
         // Act
-        final result = await DigitalOceanApiService.validateApiKey(testApiKey);
+        final result = await service.validateApiKey(testApiKey);
 
         // Assert
         expect(result, isFalse);
@@ -204,7 +206,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.getAccountInfo(testApiKey);
+        final result = await service.getAccountInfo(testApiKey);
 
         // Assert
         expect(result, equals(accountData));
@@ -231,7 +233,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getAccountInfo(testApiKey),
+          () => service.getAccountInfo(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -245,7 +247,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getAccountInfo(testApiKey),
+          () => service.getAccountInfo(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -284,7 +286,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.getDroplets(testApiKey);
+        final result = await service.getDroplets(testApiKey);
 
         // Assert
         expect(result, equals(dropletsData));
@@ -312,7 +314,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getDroplets(testApiKey),
+          () => service.getDroplets(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -330,7 +332,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.getDroplets(testApiKey);
+        final result = await service.getDroplets(testApiKey);
 
         // Assert
         expect(result, isEmpty);
@@ -378,7 +380,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.getDropletSizes(testApiKey);
+        final result = await service.getDropletSizes(testApiKey);
 
         // Assert
         expect(result, isA<List<DropletSize>>());
@@ -412,7 +414,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getDropletSizes(testApiKey),
+          () => service.getDropletSizes(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -459,7 +461,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.getRegions(testApiKey);
+        final result = await service.getRegions(testApiKey);
 
         // Assert
         expect(result, isA<List<Region>>());
@@ -492,7 +494,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getRegions(testApiKey),
+          () => service.getRegions(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -537,7 +539,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result = await DigitalOceanApiService.fetchImages(testApiKey);
+        final result = await service.fetchImages(testApiKey);
 
         // Assert
         expect(result, isA<List<Map<String, dynamic>>>());
@@ -569,7 +571,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.fetchImages(testApiKey),
+          () => service.fetchImages(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -588,7 +590,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.fetchImages(testApiKey),
+          () => service.fetchImages(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -632,8 +634,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result =
-            await DigitalOceanApiService.createDroplet(testApiKey, request);
+        final result = await service.createDroplet(testApiKey, request);
 
         // Assert
         expect(result, equals(dropletData));
@@ -673,7 +674,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.createDroplet(testApiKey, request),
+          () => service.createDroplet(testApiKey, request),
           throwsA(isA<Exception>()),
         );
       });
@@ -701,7 +702,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.createDroplet(testApiKey, request),
+          () => service.createDroplet(testApiKey, request),
           throwsA(isA<Exception>()),
         );
       });
@@ -736,8 +737,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        final result =
-            await DigitalOceanApiService.createDroplet(testApiKey, request);
+        final result = await service.createDroplet(testApiKey, request);
 
         // Assert
         expect(result, equals(dropletData));
@@ -768,7 +768,7 @@ void main() {
       test('should use custom client when set', () async {
         // Arrange
         final customClient = MockClient();
-        DigitalOceanApiService.setClient(customClient);
+        service.setClient(customClient);
 
         final mockResponse = http.Response(
           json.encode({
@@ -783,7 +783,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        await DigitalOceanApiService.validateApiKey(testApiKey);
+        await service.validateApiKey(testApiKey);
 
         // Assert
         verify(customClient.get(any, headers: anyNamed('headers'))).called(1);
@@ -795,8 +795,8 @@ void main() {
         final firstClient = MockClient();
         final secondClient = MockClient();
 
-        DigitalOceanApiService.setClient(firstClient);
-        DigitalOceanApiService.setClient(secondClient);
+        service.setClient(firstClient);
+        service.setClient(secondClient);
 
         final mockResponse = http.Response(
           json.encode({
@@ -811,7 +811,7 @@ void main() {
         )).thenAnswer((_) async => mockResponse);
 
         // Act
-        await DigitalOceanApiService.validateApiKey(testApiKey);
+        await service.validateApiKey(testApiKey);
 
         // Assert
         verify(secondClient.get(any, headers: anyNamed('headers'))).called(1);
@@ -831,7 +831,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getAccountInfo(testApiKey),
+          () => service.getAccountInfo(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -845,7 +845,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getAccountInfo(testApiKey),
+          () => service.getAccountInfo(testApiKey),
           throwsA(isA<Exception>()),
         );
       });
@@ -859,7 +859,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => DigitalOceanApiService.getAccountInfo(testApiKey),
+          () => service.getAccountInfo(testApiKey),
           throwsA(isA<Exception>()),
         );
       });

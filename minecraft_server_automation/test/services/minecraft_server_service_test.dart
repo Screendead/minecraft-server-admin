@@ -3,21 +3,24 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:minecraft_server_automation/services/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/models/minecraft_server_info.dart';
 import 'minecraft_server_service_test.mocks.dart';
 
 // Generate mocks for external dependencies
 @GenerateMocks([http.Client])
 void main() {
   group('MinecraftServerService', () {
+    late MinecraftServerService service;
     late MockClient mockClient;
 
     setUp(() {
+      service = MinecraftServerService();
       mockClient = MockClient();
-      MinecraftServerService.setClient(mockClient);
+      service.setClient(mockClient);
     });
 
     tearDown(() {
-      MinecraftServerService.setClient(http.Client());
+      service.setClient(http.Client());
     });
 
     group('checkMinecraftServer', () {
@@ -51,8 +54,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -91,8 +93,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -107,8 +108,7 @@ void main() {
         )).thenAnswer((_) async => http.Response('Not Found', 404));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -123,8 +123,7 @@ void main() {
         )).thenAnswer((_) async => http.Response('Internal Server Error', 500));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -139,8 +138,7 @@ void main() {
         )).thenThrow(Exception('Network error'));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -163,8 +161,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -200,8 +197,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -231,8 +227,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -259,8 +254,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -288,8 +282,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -318,8 +311,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -349,8 +341,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -368,8 +359,7 @@ void main() {
         )).thenAnswer((_) async => http.Response('invalid json', 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -384,8 +374,7 @@ void main() {
         )).thenAnswer((_) async => http.Response('', 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -414,8 +403,7 @@ void main() {
         )).thenAnswer((_) async => http.Response(responseBody, 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNotNull);
@@ -582,8 +570,7 @@ void main() {
         )).thenThrow(Exception('Timeout'));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -598,8 +585,7 @@ void main() {
         )).thenAnswer((_) async => http.Response('{"online": false}', 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);
@@ -614,8 +600,7 @@ void main() {
         )).thenAnswer((_) async => http.Response('{"online": false}', 200));
 
         // Act
-        final result =
-            await MinecraftServerService.checkMinecraftServer(ipAddress);
+        final result = await service.checkMinecraftServer(ipAddress);
 
         // Assert
         expect(result, isNull);

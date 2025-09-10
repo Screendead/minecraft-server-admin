@@ -5,6 +5,8 @@ import 'package:mockito/annotations.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart'
+    as interfaces;
 import '../test_helpers/ios_biometric_test_helper.dart';
 
 import 'ios_biometric_encryption_service_test.mocks.dart';
@@ -82,12 +84,13 @@ void main() {
     group('getAvailableBiometrics', () {
       test('should return available biometric types', () async {
         // Arrange
+        final inputBiometrics = [BiometricType.fingerprint, BiometricType.face];
         final expectedBiometrics = [
-          BiometricType.fingerprint,
-          BiometricType.face
+          interfaces.BiometricType.fingerprint,
+          interfaces.BiometricType.face
         ];
         when(mockLocalAuth.getAvailableBiometrics())
-            .thenAnswer((_) async => expectedBiometrics);
+            .thenAnswer((_) async => inputBiometrics);
 
         // Act
         final result = await service.getAvailableBiometrics();
