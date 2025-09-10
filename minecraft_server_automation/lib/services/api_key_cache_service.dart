@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'ios_biometric_encryption_service.dart';
 import 'ios_secure_api_key_service.dart';
+import '../common/interfaces/api_key_cache_service.dart' as interfaces;
 
 /// Exception thrown when API key cache operations fail
 class ApiKeyCacheException implements Exception {
@@ -22,7 +23,7 @@ class ApiKeyCacheException implements Exception {
 /// - Automatic cache invalidation on app backgrounding
 /// - Cache is cleared on user sign out
 /// - Thread-safe operations
-class ApiKeyCacheService {
+class ApiKeyCacheService implements interfaces.ApiKeyCacheServiceInterface {
   static ApiKeyCacheService? _instance;
   factory ApiKeyCacheService() => _instance ??= ApiKeyCacheService._internal();
   ApiKeyCacheService._internal();
@@ -49,7 +50,6 @@ class ApiKeyCacheService {
 
   /// Initialize the cache service with required dependencies
   void initialize({
-    required IOSBiometricEncryptionService biometricService,
     required IOSSecureApiKeyService apiKeyService,
   }) {
     _apiKeyService = apiKeyService;
@@ -106,8 +106,9 @@ class ApiKeyCacheService {
     }
 
     // If there's already a decryption in progress, wait for it
-    if (_pendingDecryption != null) {
-      return await _pendingDecryption!;
+    final pendingDecryption = _pendingDecryption;
+    if (pendingDecryption != null) {
+      return await pendingDecryption;
     }
 
     // If not in cache, decrypt from secure storage using biometrics

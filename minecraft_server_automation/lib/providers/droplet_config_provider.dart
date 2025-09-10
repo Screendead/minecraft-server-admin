@@ -9,6 +9,7 @@ import 'package:minecraft_server_automation/models/storage_multiplier.dart';
 import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/models/region.dart';
 import 'package:minecraft_server_automation/models/minecraft_version.dart';
+import 'package:minecraft_server_automation/common/di/service_locator.dart';
 import 'auth_provider.dart' as auth_provider;
 
 /// Provider for managing droplet configuration data
@@ -172,9 +173,9 @@ class DropletConfigProvider extends ChangeNotifier {
 
       // Load data in parallel
       final results = await Future.wait([
-        DigitalOceanApiService.getDropletSizes(apiKey),
-        DigitalOceanApiService.getRegions(apiKey),
-        MinecraftVersionsService.getReleaseVersions(),
+        ServiceLocator().digitalOceanApiService.getDropletSizes(apiKey),
+        ServiceLocator().digitalOceanApiService.getRegions(apiKey),
+        ServiceLocator().minecraftVersionsService.getReleaseVersions(),
       ]);
 
       _dropletSizes = results[0] as List<DropletSize>;
@@ -204,9 +205,9 @@ class DropletConfigProvider extends ChangeNotifier {
     try {
       // Load data in parallel
       final results = await Future.wait([
-        DigitalOceanApiService.getDropletSizes(apiKey),
-        DigitalOceanApiService.getRegions(apiKey),
-        MinecraftVersionsService.getReleaseVersions(),
+        ServiceLocator().digitalOceanApiService.getDropletSizes(apiKey),
+        ServiceLocator().digitalOceanApiService.getRegions(apiKey),
+        ServiceLocator().minecraftVersionsService.getReleaseVersions(),
       ]);
 
       _dropletSizes = results[0] as List<DropletSize>;
@@ -234,7 +235,8 @@ class DropletConfigProvider extends ChangeNotifier {
     _error = null;
 
     try {
-      _minecraftVersions = await MinecraftVersionsService.getReleaseVersions();
+      _minecraftVersions =
+          await ServiceLocator().minecraftVersionsService.getReleaseVersions();
       notifyListeners();
     } catch (e) {
       _error = e.toString();
