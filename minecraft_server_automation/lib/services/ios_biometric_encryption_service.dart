@@ -227,6 +227,10 @@ class IOSBiometricEncryptionService {
       if (metadataJson == null) return null;
       return jsonDecode(metadataJson) as Map<String, dynamic>;
     } catch (e) {
+      // Log the error for debugging while maintaining security
+      // Note: In production, this should use a proper logging service
+      // ignore: avoid_print
+      print('IOSBiometricEncryptionService: Failed to parse key metadata: $e');
       return null;
     }
   }
@@ -236,6 +240,18 @@ class IOSBiometricEncryptionService {
     await _secureStorage.delete(key: _encryptedDataKey);
     await _secureStorage.delete(key: _keyMetadataKey);
     await _secureStorage.delete(key: 'ios_encryption_key');
+  }
+
+  /// Rotates the encryption key by clearing all data and forcing re-encryption
+  /// This should be called when key rotation is needed for security reasons
+  Future<void> rotateEncryptionKey() async {
+    // Note: In production, this should use a proper logging service
+    // ignore: avoid_print
+    print('IOSBiometricEncryptionService: Rotating encryption key');
+    await clearEncryptedData();
+    // ignore: avoid_print
+    print(
+        'IOSBiometricEncryptionService: Key rotation completed - all data cleared');
   }
 
   /// Gets or creates a persistent encryption key
