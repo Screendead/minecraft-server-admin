@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
-import 'package:minecraft_server_automation/services/minecraft_versions_service.dart';
 import 'package:minecraft_server_automation/models/cpu_architecture.dart';
 import 'package:minecraft_server_automation/models/cpu_category.dart';
 import 'package:minecraft_server_automation/models/cpu_option.dart';

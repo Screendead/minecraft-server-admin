@@ -8,6 +8,7 @@ class EncryptionService implements EncryptionServiceInterface {
   static const String _salt = 'minecraft-server-admin-salt';
 
   /// Encrypts the given text using AES-256-CBC with a password-derived key
+  @override
   String encrypt(String text, String password) {
     if (text.isEmpty) return '';
 
@@ -31,6 +32,7 @@ class EncryptionService implements EncryptionServiceInterface {
   }
 
   /// Decrypts the given encrypted text using AES-256-CBC
+  @override
   String decrypt(String encryptedText, String password) {
     if (encryptedText.isEmpty) return '';
 

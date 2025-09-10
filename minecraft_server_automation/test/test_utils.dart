@@ -158,11 +158,12 @@ class TestUtils {
   }
 
   static void setupBiometricAvailable() {
-    when(mockBiometricAuthService.isAvailable()).thenAnswer((_) async => true);
-    when(mockBiometricAuthService.authenticate()).thenAnswer((_) async => true);
+    when(mockBiometricAuthService.isBiometricAvailable()).thenAnswer((_) async => true);
+    when(mockBiometricAuthService.encryptWithBiometrics(any)).thenAnswer((_) async => 'encrypted_data');
+    when(mockBiometricAuthService.decryptWithBiometrics()).thenAnswer((_) async => 'decrypted_data');
   }
 
   static void setupBiometricUnavailable() {
-    when(mockBiometricAuthService.isAvailable()).thenAnswer((_) async => false);
+    when(mockBiometricAuthService.isBiometricAvailable()).thenAnswer((_) async => false);
   }
 }

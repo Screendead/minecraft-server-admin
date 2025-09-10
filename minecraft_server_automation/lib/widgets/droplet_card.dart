@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minecraft_server_automation/providers/droplets_provider.dart';
-import 'package:minecraft_server_automation/services/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/models/minecraft_server_info.dart';
 import 'package:minecraft_server_automation/common/widgets/forms/spec_chip.dart';
 
 /// Widget displaying a single droplet card

@@ -7,8 +7,7 @@ import 'package:minecraft_server_automation/providers/droplet_config_provider.da
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/services/ios_secure_api_key_service.dart';
 import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
-import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
-import 'package:minecraft_server_automation/services/minecraft_versions_service.dart';
+import 'package:minecraft_server_automation/common/di/service_locator.dart';
 import 'package:minecraft_server_automation/models/cpu_architecture.dart';
 import 'package:minecraft_server_automation/models/cpu_category.dart';
 import 'package:minecraft_server_automation/models/cpu_option.dart';
@@ -347,7 +346,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
       }
 
       // Fetch available images and select latest Ubuntu LTS image
-      final images = await DigitalOceanApiService.fetchImages(apiKey);
+      final images = await ServiceLocator().digitalOceanApiService.fetchImages(apiKey);
       final ubuntuImages = images
           .where((img) =>
               img['distribution'] == 'Ubuntu' &&
@@ -375,7 +374,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
 
       // Create the droplet
       final droplet =
-          await DigitalOceanApiService.createDroplet(apiKey, request);
+          await ServiceLocator().digitalOceanApiService.createDroplet(apiKey, request);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -533,7 +532,7 @@ write_files:
   Future<String> _getServerJarUrl(String version) async {
     try {
       // Use the MinecraftVersionsService to fetch the actual download URL from the Minecraft version manifest
-      return await MinecraftVersionsService.getServerJarUrlForVersion(version);
+      return await ServiceLocator().minecraftVersionsService.getServerJarUrlForVersion(version);
     } catch (e) {
       // Fallback to a generic URL if version-specific fetching fails
       // This ensures the droplet creation doesn't fail due to version manifest issues

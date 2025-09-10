@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:local_auth/local_auth.dart';
 import 'ios_biometric_encryption_service.dart';
-import 'digitalocean_api_service.dart';
 import 'api_key_cache_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart'
     as interfaces;

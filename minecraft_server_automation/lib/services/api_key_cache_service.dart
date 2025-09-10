@@ -60,6 +60,7 @@ class ApiKeyCacheService implements interfaces.ApiKeyCacheServiceInterface {
   bool get isInitialized => _isInitialized;
 
   /// Get the cached API key if available and not expired
+  @override
   String? getCachedApiKey() {
     if (!_isInitialized) {
       throw ApiKeyCacheException('Service not initialized');
@@ -80,6 +81,7 @@ class ApiKeyCacheService implements interfaces.ApiKeyCacheServiceInterface {
   }
 
   /// Cache an API key with timestamp
+  @override
   void cacheApiKey(String apiKey) {
     if (!_isInitialized) {
       throw ApiKeyCacheException('Service not initialized');
@@ -150,16 +152,19 @@ class ApiKeyCacheService implements interfaces.ApiKeyCacheServiceInterface {
   }
 
   /// Clear the cached API key
+  @override
   void clearCache() {
     _clearCache();
   }
 
   /// Check if there's a valid cached API key
+  @override
   bool hasCachedApiKey() {
     return getCachedApiKey() != null;
   }
 
   /// Get cache status information
+  @override
   Map<String, dynamic> getCacheStatus() {
     return {
       'hasCachedKey': _cachedApiKey != null,
@@ -189,18 +194,21 @@ class ApiKeyCacheService implements interfaces.ApiKeyCacheServiceInterface {
   }
 
   /// Handle app lifecycle changes
+  @override
   void onAppPaused() {
     // Clear cache when app goes to background for security
     _clearCache();
   }
 
   /// Handle app resume (optional - could be used for re-authentication)
+  @override
   void onAppResumed() {
     // Cache is cleared on pause, so nothing to do here
     // The next API call will trigger biometric authentication
   }
 
   /// Dispose of resources
+  @override
   void dispose() {
     _clearCache();
     _isInitialized = false;

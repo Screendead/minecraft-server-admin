@@ -56,6 +56,7 @@ class IOSBiometricEncryptionService
             );
 
   /// Checks if biometric authentication is available on the device
+  @override
   Future<bool> isBiometricAvailable() async {
     try {
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;

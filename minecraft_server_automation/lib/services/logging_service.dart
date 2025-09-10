@@ -43,6 +43,7 @@ class LoggingService implements LoggingServiceInterface {
   bool _isInitialized = false;
 
   /// Initialize the logging service
+  @override
   Future<void> initialize() async {
     // Prevent multiple initializations
     if (_isInitialized) {
@@ -78,25 +79,31 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Set the current user ID for logging context
+  @override
   void setUserId(String? userId) {
     _currentUserId = userId;
   }
 
   /// Get the current session ID
+  @override
   String? get currentSessionId => _currentSessionId;
 
   /// Get the current user ID
+  @override
   String? get currentUserId => _currentUserId;
 
   /// Check if the logging service is initialized
+  @override
   bool get isInitialized => _isInitialized;
 
   /// Add a listener for log updates
+  @override
   void addListener(VoidCallback listener) {
     _listeners.add(listener);
   }
 
   /// Remove a listener
+  @override
   void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
   }
@@ -113,6 +120,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Log a debug message
+  @override
   Future<void> logDebug(
     String message, {
     LogCategory category = LogCategory.system,
@@ -123,6 +131,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Log an info message
+  @override
   Future<void> logInfo(
     String message, {
     LogCategory category = LogCategory.system,
@@ -133,6 +142,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Log a warning message
+  @override
   Future<void> logWarning(
     String message, {
     LogCategory category = LogCategory.system,
@@ -143,6 +153,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Log an error message
+  @override
   Future<void> logError(
     String message, {
     LogCategory category = LogCategory.error,
@@ -162,6 +173,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Log a fatal error message
+  @override
   Future<void> logFatal(
     String message, {
     LogCategory category = LogCategory.error,
@@ -196,6 +208,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Log API call
+  @override
   Future<void> logApiCall(
     String endpoint,
     String method, {
@@ -273,6 +286,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Get all logs (sorted by timestamp, most recent first)
+  @override
   List<LogEntry> getLogs() {
     final sortedLogs = List<LogEntry>.from(_logs);
     sortedLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -280,6 +294,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Get filtered logs (sorted by timestamp, most recent first)
+  @override
   List<LogEntry> getFilteredLogs(LogFilter filter) {
     final filteredLogs = _logs.where(filter.matches).toList();
     filteredLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -287,6 +302,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Get logs by level (sorted by timestamp, most recent first)
+  @override
   List<LogEntry> getLogsByLevel(LogLevel level) {
     final levelLogs = _logs.where((log) => log.level == level).toList();
     levelLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -294,6 +310,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Get logs by category (sorted by timestamp, most recent first)
+  @override
   List<LogEntry> getLogsByCategory(LogCategory category) {
     final categoryLogs =
         _logs.where((log) => log.category == category).toList();
@@ -302,6 +319,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Get recent logs (last N entries, sorted by timestamp, most recent first)
+  @override
   List<LogEntry> getRecentLogs(int count) {
     final sortedLogs = List<LogEntry>.from(_logs);
     sortedLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -309,6 +327,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Clear all logs
+  @override
   Future<void> clearLogs() async {
     _logs.clear();
     await _saveLogs();
@@ -316,6 +335,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Clear logs older than specified days
+  @override
   Future<void> clearOldLogs(int days) async {
     final cutoffDate = DateTime.now().subtract(Duration(days: days));
     _logs.removeWhere((log) => log.timestamp.isBefore(cutoffDate));
@@ -324,6 +344,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Export logs to JSON
+  @override
   Future<String> exportLogsToJson({LogFilter? filter}) async {
     final logsToExport = filter != null ? getFilteredLogs(filter) : _logs;
     final jsonData = {
@@ -335,6 +356,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Export logs to CSV
+  @override
   Future<String> exportLogsToCsv({LogFilter? filter}) async {
     final logsToExport = filter != null ? getFilteredLogs(filter) : _logs;
 
@@ -359,6 +381,7 @@ class LoggingService implements LoggingServiceInterface {
   }
 
   /// Export logs to plain text
+  @override
   Future<String> exportLogsToText({LogFilter? filter}) async {
     final logsToExport = filter != null ? getFilteredLogs(filter) : _logs;
 
