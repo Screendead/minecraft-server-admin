@@ -41,6 +41,7 @@ ServiceLocator().clear();
 - `AuthServiceInterface` - Firebase authentication
 - `ApiKeyCacheServiceInterface` - API key caching with biometric encryption
 - `DigitalOceanApiServiceInterface` - DigitalOcean API calls
+- `http.Client` - HTTP client for network requests (used by various services)
 
 ### Custom Mock Classes
 - `MockSecureStorageService` - Keychain storage simulation
@@ -51,7 +52,8 @@ ServiceLocator().clear();
 ### Real Instances (No Mocking)
 - `EncryptionServiceInterface` - Pure encryption functions
 - `RegionSelectionServiceInterface` - Mathematical calculations
-- Data models (`Region`, `DropletSize`, `LogEntry`)
+- `MinecraftServerService` - Static service for Minecraft server detection
+- Data models (`Region`, `DropletSize`, `LogEntry`, `MinecraftServerInfo`)
 
 ## Interface Naming Convention
 
@@ -152,6 +154,82 @@ void main() {
       final decrypted = service.decrypt(encrypted, password);
       
       expect(decrypted, equals(text));
+    });
+  });
+}
+```
+
+### HTTP Client Mocking Example
+```dart
+@GenerateMocks([http.Client])
+void main() {
+  group('MinecraftServerService Tests', () {
+    late MockClient mockClient;
+
+    setUp(() {
+      mockClient = MockClient();
+      MinecraftServerService.setClient(mockClient);
+    });
+
+    tearDown(() {
+      MinecraftServerService.setClient(http.Client());
+    });
+
+    test('should return server info when server is online', () async {
+      // Arrange
+      const responseBody = '''
+      {
+        "online": true,
+        "ip": "192.168.1.100",
+        "port": 25565,
+        "hostname": "Test Server",
+        "version": "1.20.1",
+        "players": {"online": 5, "max": 20}
+      }
+      ''';
+
+      when(mockClient.get(
+        any,
+        headers: anyNamed('headers'),
+      )).thenAnswer((_) async => http.Response(responseBody, 200));
+
+      // Act
+      final result = await MinecraftServerService.checkMinecraftServer('192.168.1.100');
+
+      // Assert
+      expect(result, isNotNull);
+      expect(result!.hostname, equals('Test Server'));
+      expect(result.playersOnline, equals(5));
+      
+      // Verify the correct URL was called
+      verify(mockClient.get(
+        Uri.parse('https://api.mcsrvstat.us/2/192.168.1.100'),
+        headers: {'Content-Type': 'application/json'},
+      )).called(1);
+    });
+
+    test('should return null when server is offline', () async {
+      // Arrange
+      when(mockClient.get(any, headers: anyNamed('headers')))
+          .thenAnswer((_) async => http.Response('{"online": false}', 200));
+
+      // Act
+      final result = await MinecraftServerService.checkMinecraftServer('192.168.1.100');
+
+      // Assert
+      expect(result, isNull);
+    });
+
+    test('should handle network errors gracefully', () async {
+      // Arrange
+      when(mockClient.get(any, headers: anyNamed('headers')))
+          .thenThrow(Exception('Network error'));
+
+      // Act
+      final result = await MinecraftServerService.checkMinecraftServer('192.168.1.100');
+
+      // Assert
+      expect(result, isNull);
     });
   });
 }
