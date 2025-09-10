@@ -47,6 +47,8 @@ ServiceLocator().clear();
 - `MinecraftServerServiceInterface` - Minecraft server detection
 - `PathProviderServiceInterface` - File system path operations
 - `http.Client` - HTTP client for network requests (used by various services)
+- `LocalAuthentication` - iOS biometric authentication (for direct service testing)
+- `FlutterSecureStorage` - iOS secure storage (for direct service testing)
 
 ### Real Instances (No Mocking)
 - Data models (`Region`, `DropletSize`, `LogEntry`, `MinecraftServerInfo`)
@@ -183,6 +185,47 @@ void main() {
 }
 ```
 
+### Testing Concrete Services with External Dependencies
+When testing concrete services that directly use external dependencies (like `IOSBiometricEncryptionService`), mock the external dependencies directly:
+
+```dart
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+@GenerateMocks([LocalAuthentication, FlutterSecureStorage])
+void main() {
+  group('IOSBiometricEncryptionService', () {
+    late IOSBiometricEncryptionService service;
+    late MockLocalAuthentication mockLocalAuth;
+    late MockFlutterSecureStorage mockSecureStorage;
+
+    setUp(() {
+      mockLocalAuth = MockLocalAuthentication();
+      mockSecureStorage = MockFlutterSecureStorage();
+      service = IOSBiometricEncryptionService(
+        localAuth: mockLocalAuth,
+        secureStorage: mockSecureStorage,
+      );
+    });
+
+    test('should check biometric availability', () async {
+      // Arrange
+      when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
+      when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
+
+      // Act
+      final result = await service.isBiometricAvailable();
+
+      // Assert
+      expect(result, isTrue);
+      verify(mockLocalAuth.canCheckBiometrics).called(1);
+    });
+  });
+}
+```
+
 ### HTTP Client Mocking Example
 ```dart
 @GenerateMocks([http.Client])
@@ -285,6 +328,33 @@ void main() {
 4. **Use `anyNamed()` for named parameters:**
    ```dart
    when(mockService.method(param: anyNamed('param'))).thenReturn('result');
+   ```
+
+5. **Test encryption services with valid data:**
+   ```dart
+   test('should encrypt and decrypt data correctly', () async {
+     // Create valid test data
+     const testData = 'sensitive information';
+     final keyBytes = Uint8List(32); // 256-bit key
+     for (int i = 0; i < 32; i++) {
+       keyBytes[i] = i;
+     }
+     final validKey = base64.encode(keyBytes);
+     
+     // Test encryption/decryption flow
+     when(mockStorage.read(key: 'encryption_key')).thenAnswer((_) async => validKey);
+     // ... rest of test
+   });
+   ```
+
+6. **Mock external dependencies for concrete services:**
+   ```dart
+   // For services that directly use external packages
+   @GenerateMocks([ExternalPackageClass])
+   void main() {
+     // Mock the external dependency directly
+     // rather than creating an interface wrapper
+   }
    ```
 
 ## Troubleshooting
