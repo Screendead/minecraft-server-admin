@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 
-/// Adapter to make AuthProvider conform to AuthService interface
-class AuthProviderAdapter extends ChangeNotifier implements AuthService {
+/// Adapter to make AuthProvider conform to AuthServiceInterface interface
+class AuthProviderAdapter extends ChangeNotifier implements AuthServiceInterface {
   final AuthProvider _provider;
 
   AuthProviderAdapter(this._provider) {

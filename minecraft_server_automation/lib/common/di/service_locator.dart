@@ -62,14 +62,14 @@ class ServiceLocator {
     register<HttpClientInterface>(
         HttpClientAdapter(httpClient ?? http.Client()));
 
-    // Register auth service - use adapter to make AuthProvider conform to AuthService
+    // Register auth service - use adapter to make AuthProvider conform to AuthServiceInterface
     if (authProvider != null) {
-      register<AuthService>(AuthProviderAdapter(authProvider));
+      register<AuthServiceInterface>(AuthProviderAdapter(authProvider));
     }
 
     // Register droplet config service
     if (dropletConfigProvider != null) {
-      register<DropletConfigService>(
+      register<DropletConfigServiceInterface>(
           DropletConfigProviderAdapter(dropletConfigProvider));
     }
 
@@ -77,9 +77,9 @@ class ServiceLocator {
     register<RegionSelectionServiceInterface>(RegionSelectionService());
 
     // Register platform services
-    register<BiometricAuthService>(IOSBiometricAuthAdapter());
-    register<SecureStorageService>(IOSSecureStorageAdapter());
-    register<LocationService>(LocationServiceAdapter());
+    register<BiometricAuthServiceInterface>(IOSBiometricAuthAdapter());
+    register<SecureStorageServiceInterface>(IOSSecureStorageAdapter());
+    register<LocationServiceInterface>(LocationServiceAdapter());
     
     // Register logging service
     register<LoggingServiceInterface>(LoggingServiceAdapter(LoggingService()));
@@ -89,10 +89,10 @@ class ServiceLocator {
 /// Extension to make service locator easier to use
 extension ServiceLocatorExtension on ServiceLocator {
   /// Get auth service
-  AuthService get authService => get<AuthService>();
+  AuthServiceInterface get authService => get<AuthServiceInterface>();
 
   /// Get droplet config service
-  DropletConfigService get dropletConfigService => get<DropletConfigService>();
+  DropletConfigServiceInterface get dropletConfigService => get<DropletConfigServiceInterface>();
 
   /// Get region selection service
   RegionSelectionServiceInterface get regionSelectionService =>
@@ -102,13 +102,13 @@ extension ServiceLocatorExtension on ServiceLocator {
   HttpClientInterface get httpClient => get<HttpClientInterface>();
 
   /// Get biometric auth service
-  BiometricAuthService get biometricAuthService => get<BiometricAuthService>();
+  BiometricAuthServiceInterface get biometricAuthService => get<BiometricAuthServiceInterface>();
 
   /// Get secure storage service
-  SecureStorageService get secureStorageService => get<SecureStorageService>();
+  SecureStorageServiceInterface get secureStorageService => get<SecureStorageServiceInterface>();
 
   /// Get location service
-  LocationService get locationService => get<LocationService>();
+  LocationServiceInterface get locationService => get<LocationServiceInterface>();
 
   /// Get logging service
   LoggingServiceInterface get loggingService => get<LoggingServiceInterface>();

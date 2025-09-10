@@ -4,7 +4,7 @@ import 'package:minecraft_server_automation/common/interfaces/auth_service.dart'
 /// Auth form component that accepts an AuthService interface
 /// This makes it easy to inject mock services for testing
 class AuthForm extends StatefulWidget {
-  final AuthService authService;
+  final AuthServiceInterface authService;
   final VoidCallback? onAuthSuccess;
   final bool showDebugOptions;
 

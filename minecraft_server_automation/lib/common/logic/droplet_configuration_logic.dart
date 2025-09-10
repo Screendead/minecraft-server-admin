@@ -9,7 +9,7 @@ import 'package:minecraft_server_automation/common/interfaces/droplet_config_ser
 /// Business logic for droplet configuration
 /// This class can be easily unit tested without UI dependencies
 class DropletConfigurationLogic {
-  final DropletConfigService _configService;
+  final DropletConfigServiceInterface _configService;
 
   DropletConfigurationLogic(this._configService);
 

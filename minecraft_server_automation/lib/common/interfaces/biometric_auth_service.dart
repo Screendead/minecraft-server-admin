@@ -1,6 +1,6 @@
 /// Abstract interface for biometric authentication
 /// This allows for easy mocking in tests
-abstract class BiometricAuthService {
+abstract class BiometricAuthServiceInterface {
   Future<bool> isAvailable();
   Future<bool> authenticate({String? reason});
   Future<List<BiometricType>> getAvailableBiometrics();

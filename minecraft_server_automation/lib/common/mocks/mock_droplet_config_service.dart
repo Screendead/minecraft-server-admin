@@ -8,7 +8,7 @@ import 'package:minecraft_server_automation/models/region.dart';
 import 'package:minecraft_server_automation/models/minecraft_version.dart';
 
 /// Mock implementation of DropletConfigService for testing
-class MockDropletConfigService implements DropletConfigService {
+class MockDropletConfigService implements DropletConfigServiceInterface {
   final List<DropletSize> _dropletSizes = [];
   final List<Region> _regions = [];
   final List<MinecraftVersion> _minecraftVersions = [];

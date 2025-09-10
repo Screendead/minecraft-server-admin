@@ -1,7 +1,7 @@
 import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart';
 
 /// Mock implementation of BiometricAuthService for testing
-class MockBiometricAuthService implements BiometricAuthService {
+class MockBiometricAuthService implements BiometricAuthServiceInterface {
   // Test control properties
   bool _isAvailable = true;
   bool _shouldSucceed = true;

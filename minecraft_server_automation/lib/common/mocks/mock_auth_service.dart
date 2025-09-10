@@ -1,7 +1,7 @@
 import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 
 /// Mock implementation of AuthService for testing
-class MockAuthService implements AuthService {
+class MockAuthService implements AuthServiceInterface {
   bool _isSignedIn = false;
   bool _isLoading = false;
   String? _errorMessage;

@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart';
 
 /// Implementation of LocationService using geolocator package
-class LocationServiceAdapter implements LocationService {
+class LocationServiceAdapter implements LocationServiceInterface {
   @override
   Future<LocationPermission> checkPermission() async {
     final permission = await Geolocator.checkPermission();

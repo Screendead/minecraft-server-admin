@@ -1,7 +1,7 @@
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart';
 
 /// Mock implementation of LocationService for testing
-class MockLocationService implements LocationService {
+class MockLocationService implements LocationServiceInterface {
   // Test control properties
   LocationPermission _permission = LocationPermission.whileInUse;
   LocationData? _mockLocation;

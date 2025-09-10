@@ -3,7 +3,7 @@ import 'package:minecraft_server_automation/common/interfaces/auth_service.dart'
 /// Business logic for authentication
 /// This class can be easily unit tested without UI dependencies
 class AuthenticationLogic {
-  final AuthService _authService;
+  final AuthServiceInterface _authService;
 
   AuthenticationLogic(this._authService);
 

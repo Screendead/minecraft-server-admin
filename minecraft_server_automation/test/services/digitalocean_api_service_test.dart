@@ -23,10 +23,10 @@ void main() {
     setUp(() {
       mockHttpClient = MockClient();
       mockLoggingService = MockLoggingServiceInterface();
-      
+
       // Set the mock client for testing
       DigitalOceanApiService.setClient(mockHttpClient);
-      
+
       // Register mock logging service in ServiceLocator
       ServiceLocator().clear();
       ServiceLocator().register<LoggingServiceInterface>(mockLoggingService);
@@ -52,7 +52,7 @@ void main() {
           }),
           200,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -70,14 +70,14 @@ void main() {
             'Content-Type': 'application/json',
           },
         )).called(1);
-        
+
         // Verify logging calls
         verify(mockLoggingService.logApiCall(
           '/account',
           'GET',
           metadata: {'operation': 'validate_api_key'},
         )).called(1);
-        
+
         verify(mockLoggingService.logApiCall(
           '/account',
           'GET',
@@ -96,7 +96,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-        
+
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -114,14 +114,14 @@ void main() {
             'Content-Type': 'application/json',
           },
         )).called(1);
-        
+
         // Verify logging calls
         verify(mockLoggingService.logApiCall(
           '/account',
           'GET',
           metadata: {'operation': 'validate_api_key'},
         )).called(1);
-        
+
         verify(mockLoggingService.logApiCall(
           '/account',
           'GET',
@@ -146,14 +146,14 @@ void main() {
 
         // Assert
         expect(result, isFalse);
-        
+
         // Verify logging calls
         verify(mockLoggingService.logApiCall(
           '/account',
           'GET',
           metadata: {'operation': 'validate_api_key'},
         )).called(1);
-        
+
         verify(mockLoggingService.logError(
           'API key validation failed',
           category: LogCategory.apiCall,

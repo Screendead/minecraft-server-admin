@@ -2,7 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart';
 
 /// iOS implementation of SecureStorageService using flutter_secure_storage
-class IOSSecureStorageAdapter implements SecureStorageService {
+class IOSSecureStorageAdapter implements SecureStorageServiceInterface {
   final FlutterSecureStorage _secureStorage;
 
   IOSSecureStorageAdapter({FlutterSecureStorage? secureStorage})

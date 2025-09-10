@@ -1,7 +1,7 @@
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart';
 
 /// Mock implementation of SecureStorageService for testing
-class MockSecureStorageService implements SecureStorageService {
+class MockSecureStorageService implements SecureStorageServiceInterface {
   final Map<String, String> _storage = {};
   bool _shouldThrow = false;
   String? _throwMessage;

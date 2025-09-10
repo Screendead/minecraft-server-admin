@@ -2,7 +2,7 @@ import 'package:local_auth/local_auth.dart' as local_auth;
 import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart';
 
 /// iOS implementation of BiometricAuthService using local_auth package
-class IOSBiometricAuthAdapter implements BiometricAuthService {
+class IOSBiometricAuthAdapter implements BiometricAuthServiceInterface {
   final local_auth.LocalAuthentication _localAuth;
 
   IOSBiometricAuthAdapter({local_auth.LocalAuthentication? localAuth})
