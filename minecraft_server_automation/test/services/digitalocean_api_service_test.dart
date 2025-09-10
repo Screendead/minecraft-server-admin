@@ -4,14 +4,13 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
-import 'package:minecraft_server_automation/services/logging_service.dart';
 import 'package:minecraft_server_automation/models/droplet_creation_request.dart';
 import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/models/region.dart';
 import 'digitalocean_api_service_test.mocks.dart';
 
 // Generate mocks for external dependencies
-@GenerateMocks([http.Client, LoggingService])
+@GenerateMocks([http.Client])
 void main() {
   group('DigitalOceanApiService Tests', () {
     late MockClient mockHttpClient;
@@ -22,6 +21,13 @@ void main() {
       
       // Set the mock client for testing
       DigitalOceanApiService.setClient(mockHttpClient);
+      
+      // Note: LoggingService is used as a static singleton in DigitalOceanApiService
+      // (static final LoggingService _loggingService = LoggingService();)
+      // This makes it difficult to mock directly. The service will use the real
+      // LoggingService instance, but we can still test the core API functionality.
+      // To properly test logging behavior, the service would need to be refactored
+      // to accept LoggingService as a dependency rather than using a static instance.
     });
 
     tearDown(() {
