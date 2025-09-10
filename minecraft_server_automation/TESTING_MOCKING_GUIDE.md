@@ -45,6 +45,7 @@ ServiceLocator().clear();
 - `MinecraftVersionsServiceInterface` - Minecraft version management
 - `EncryptionServiceInterface` - Data encryption
 - `MinecraftServerServiceInterface` - Minecraft server detection
+- `PathProviderServiceInterface` - File system path operations
 - `http.Client` - HTTP client for network requests (used by various services)
 
 ### Real Instances (No Mocking)
@@ -305,5 +306,6 @@ void main() {
 - `DropletConfigServiceInterface` - Droplet Configuration
 - `LoggingServiceInterface` - Logging
 - `RegionSelectionServiceInterface` - Region Selection
+- `PathProviderServiceInterface` - File System Path Operations
 
 This mocking system allows you to test components in isolation without external dependencies while maintaining clean, maintainable code.

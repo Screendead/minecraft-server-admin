@@ -12,6 +12,7 @@ import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_s
 import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart';
 import 'mocks/mock_generation.mocks.dart';
 
 /// Test utility functions for setting up mock services
@@ -46,6 +47,8 @@ class TestUtils {
         .register<EncryptionServiceInterface>(MockEncryptionServiceInterface());
     _serviceLocator.register<MinecraftServerServiceInterface>(
         MockMinecraftServerServiceInterface());
+    _serviceLocator.register<PathProviderServiceInterface>(
+        MockPathProviderServiceInterface());
   }
 
   /// Get mock auth service for test control
@@ -108,6 +111,11 @@ class TestUtils {
       _serviceLocator.get<MinecraftServerServiceInterface>()
           as MockMinecraftServerServiceInterface;
 
+  /// Get mock path provider service for test control
+  static MockPathProviderServiceInterface get mockPathProviderService =>
+      _serviceLocator.get<PathProviderServiceInterface>()
+          as MockPathProviderServiceInterface;
+
   /// Reset all mock services to default state
   static void resetAllMocks() {
     reset(mockAuthService);
@@ -122,6 +130,7 @@ class TestUtils {
     reset(mockMinecraftVersionsService);
     reset(mockEncryptionService);
     reset(mockMinecraftServerService);
+    reset(mockPathProviderService);
   }
 
   /// Set up common test scenarios
