@@ -9,7 +9,6 @@ import 'package:minecraft_server_automation/common/interfaces/region_selection_s
 import 'package:minecraft_server_automation/common/interfaces/api_key_cache_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart';
-import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/minecraft_server_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart';
 
@@ -24,7 +23,6 @@ import 'package:minecraft_server_automation/common/interfaces/path_provider_serv
   ApiKeyCacheServiceInterface,
   DigitalOceanApiServiceInterface,
   MinecraftVersionsServiceInterface,
-  EncryptionServiceInterface,
   MinecraftServerServiceInterface,
   PathProviderServiceInterface,
 ])

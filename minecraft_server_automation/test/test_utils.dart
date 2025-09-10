@@ -43,8 +43,6 @@ class TestUtils {
         MockDigitalOceanApiServiceInterface());
     _serviceLocator.register<MinecraftVersionsServiceInterface>(
         MockMinecraftVersionsServiceInterface());
-    _serviceLocator
-        .register<EncryptionServiceInterface>(MockEncryptionServiceInterface());
     _serviceLocator.register<MinecraftServerServiceInterface>(
         MockMinecraftServerServiceInterface());
     _serviceLocator.register<PathProviderServiceInterface>(
@@ -101,11 +99,6 @@ class TestUtils {
           _serviceLocator.get<MinecraftVersionsServiceInterface>()
               as MockMinecraftVersionsServiceInterface;
 
-  /// Get mock encryption service for test control
-  static MockEncryptionServiceInterface get mockEncryptionService =>
-      _serviceLocator.get<EncryptionServiceInterface>()
-          as MockEncryptionServiceInterface;
-
   /// Get mock Minecraft server service for test control
   static MockMinecraftServerServiceInterface get mockMinecraftServerService =>
       _serviceLocator.get<MinecraftServerServiceInterface>()
@@ -128,7 +121,6 @@ class TestUtils {
     reset(mockApiKeyCacheService);
     reset(mockDigitalOceanApiService);
     reset(mockMinecraftVersionsService);
-    reset(mockEncryptionService);
     reset(mockMinecraftServerService);
     reset(mockPathProviderService);
   }
@@ -158,12 +150,16 @@ class TestUtils {
   }
 
   static void setupBiometricAvailable() {
-    when(mockBiometricAuthService.isBiometricAvailable()).thenAnswer((_) async => true);
-    when(mockBiometricAuthService.encryptWithBiometrics(any)).thenAnswer((_) async => 'encrypted_data');
-    when(mockBiometricAuthService.decryptWithBiometrics()).thenAnswer((_) async => 'decrypted_data');
+    when(mockBiometricAuthService.isBiometricAvailable())
+        .thenAnswer((_) async => true);
+    when(mockBiometricAuthService.encryptWithBiometrics(any))
+        .thenAnswer((_) async => 'encrypted_data');
+    when(mockBiometricAuthService.decryptWithBiometrics())
+        .thenAnswer((_) async => 'decrypted_data');
   }
 
   static void setupBiometricUnavailable() {
-    when(mockBiometricAuthService.isBiometricAvailable()).thenAnswer((_) async => false);
+    when(mockBiometricAuthService.isBiometricAvailable())
+        .thenAnswer((_) async => false);
   }
 }
