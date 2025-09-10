@@ -1,15 +1,33 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:minecraft_server_automation/models/log_entry.dart';
+import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart';
+import 'package:minecraft_server_automation/services/path_provider_service.dart';
 
 /// Service for managing application logs
 class LoggingService {
   static final LoggingService _instance = LoggingService._internal();
   factory LoggingService() => _instance;
   LoggingService._internal();
+
+  PathProviderServiceInterface _pathProvider = PathProviderService();
+
+  /// Set the path provider service (for testing)
+  void setPathProvider(PathProviderServiceInterface pathProvider) {
+    _pathProvider = pathProvider;
+  }
+
+  /// Reset the service state (for testing)
+  void reset() {
+    _logs.clear();
+    _listeners.clear();
+    _currentSessionId = null;
+    _currentUserId = null;
+    _logFile = null;
+    _isInitialized = false;
+  }
 
   static const String _logFileName = 'app_logs.json';
   static const int _maxLogEntries =
@@ -31,7 +49,7 @@ class LoggingService {
     }
 
     try {
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await _pathProvider.getApplicationDocumentsDirectory();
       _logFile = File('${directory.path}/$_logFileName');
 
       // Load existing logs
@@ -394,6 +412,9 @@ class LoggingService {
     if (_logFile == null) return;
 
     try {
+      // Ensure the directory exists
+      await _logFile!.parent.create(recursive: true);
+
       final jsonData = _logs.map((log) => log.toJson()).toList();
       final content = const JsonEncoder.withIndent('  ').convert(jsonData);
 
