@@ -4,17 +4,12 @@ This guide covers the testing approach for the Minecraft Server Automation app. 
 
 ## Quick Start
 
-### 1. Choose Your Mocking Strategy
+### 1. Mocking Strategy
 
-**Use Mockito** for complex services:
-- Services with external dependencies (APIs, databases, device features)
-- When you need verification capabilities
-- Examples: `AuthServiceInterface`, `DigitalOceanApiServiceInterface`
-
-**Use Custom Mocks** for simple services:
-- Pure utility functions or stateless services
-- When you need fine-grained control
-- Examples: `EncryptionServiceInterface`, `RegionSelectionServiceInterface`
+**Use Mockito** for all services:
+- All services use Mockito-generated mocks for consistency
+- Provides verification capabilities and flexible behavior setup
+- Examples: `AuthServiceInterface`, `DigitalOceanApiServiceInterface`, `BiometricAuthServiceInterface`
 
 **Use Real Instances** for:
 - Data models and pure business logic
@@ -39,28 +34,55 @@ ServiceLocator().clear();
 
 ### Mockito-Based Mocks
 - `AuthServiceInterface` - Firebase authentication
+- `BiometricAuthServiceInterface` - Face ID/Touch ID simulation
+- `SecureStorageServiceInterface` - Keychain storage simulation
+- `LocationServiceInterface` - GPS location simulation
+- `DropletConfigServiceInterface` - Droplet configuration data
+- `LoggingServiceInterface` - Logging functionality
+- `RegionSelectionServiceInterface` - Region selection logic
 - `ApiKeyCacheServiceInterface` - API key caching with biometric encryption
 - `DigitalOceanApiServiceInterface` - DigitalOcean API calls
+- `MinecraftVersionsServiceInterface` - Minecraft version management
+- `EncryptionServiceInterface` - Data encryption
+- `MinecraftServerServiceInterface` - Minecraft server detection
 - `http.Client` - HTTP client for network requests (used by various services)
 
-### Custom Mock Classes
-- `MockSecureStorageService` - Keychain storage simulation
-- `MockBiometricAuthService` - Face ID/Touch ID simulation
-- `MockLocationService` - GPS location simulation
-- `MockDropletConfigService` - Droplet configuration data
-
 ### Real Instances (No Mocking)
-- `EncryptionServiceInterface` - Pure encryption functions
-- `RegionSelectionServiceInterface` - Mathematical calculations
-- `MinecraftServerService` - Static service for Minecraft server detection
 - Data models (`Region`, `DropletSize`, `LogEntry`, `MinecraftServerInfo`)
 
 ## Interface Naming Convention
 
 All interfaces use the `*Interface` suffix to avoid naming conflicts:
 - `AuthServiceInterface` → `AuthService` (implementation)
-- `MockAuthService` (mock)
+- `MockAuthServiceInterface` (Mockito-generated mock)
 - `AuthProviderAdapter` (adapter)
+
+## TestUtils Helper
+
+The `TestUtils` class provides convenient methods for setting up mocks in tests:
+
+```dart
+import 'package:minecraft_server_automation/test/test_utils.dart';
+
+// Setup all mocks
+TestUtils.setupMockServices();
+
+// Access individual mocks
+TestUtils.mockAuthService
+TestUtils.mockBiometricAuthService
+TestUtils.mockSecureStorageService
+// ... etc
+
+// Reset all mocks
+TestUtils.resetAllMocks();
+
+// Setup common scenarios
+TestUtils.setupSuccessfulAuth();
+TestUtils.setupFailedAuth();
+TestUtils.setupSuccessfulLocation();
+TestUtils.setupBiometricAvailable();
+TestUtils.setupBiometricUnavailable();
+```
 
 ## Essential Commands
 
@@ -83,54 +105,55 @@ dart run build_runner build --delete-conflicting-outputs
 
 ## Basic Test Structure
 
-### Mockito Example
+### Using TestUtils (Recommended)
 ```dart
-@GenerateMocks([FirebaseAuth, User])
+import 'package:minecraft_server_automation/test/test_utils.dart';
+
 void main() {
   group('AuthService Tests', () {
-    late AuthServiceInterface authService;
-    late MockFirebaseAuth mockFirebaseAuth;
-
     setUp(() {
-      mockFirebaseAuth = MockFirebaseAuth();
-      authService = AuthService(firebaseAuth: mockFirebaseAuth);
+      TestUtils.setupMockServices();
+    });
+
+    tearDown(() {
+      TestUtils.resetAllMocks();
     });
 
     test('should sign in successfully', () async {
-      when(mockFirebaseAuth.signInWithEmailAndPassword(
-        email: anyNamed('email'),
-        password: anyNamed('password'),
-      )).thenAnswer((_) async => mockUserCredential);
+      // Setup mock behavior
+      when(TestUtils.mockAuthService.signIn(any, any)).thenAnswer((_) async {});
       
+      // Test your service
       final result = await authService.signIn('test@example.com', 'password');
       
+      // Verify behavior
       expect(result, isTrue);
-      verify(mockFirebaseAuth.signInWithEmailAndPassword(
-        email: 'test@example.com',
-        password: 'password',
-      )).called(1);
+      verify(TestUtils.mockAuthService.signIn('test@example.com', 'password')).called(1);
     });
   });
 }
 ```
 
-### Custom Mock Example
+### Direct Mockito Example
 ```dart
+import 'package:minecraft_server_automation/test/mocks/mock_generation.mocks.dart';
+
 void main() {
   group('SomeService Tests', () {
     late SomeService service;
-    late MockSecureStorageService mockStorage;
+    late MockSecureStorageServiceInterface mockStorage;
 
     setUp(() {
-      mockStorage = MockSecureStorageService();
+      mockStorage = MockSecureStorageServiceInterface();
       service = SomeService(storage: mockStorage);
     });
 
     test('should store data successfully', () async {
+      when(mockStorage.write(any, any)).thenAnswer((_) async {});
+      
       await service.storeData('key', 'value');
       
-      expect(mockStorage.operations.length, equals(1));
-      expect(mockStorage.operations.first.type, equals(StorageOperationType.write));
+      verify(mockStorage.write('key', 'value')).called(1);
     });
   });
 }
