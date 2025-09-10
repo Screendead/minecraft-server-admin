@@ -27,7 +27,9 @@ void main() {
     });
 
     group('isBiometricAvailable', () {
-      test('should return true when biometrics are available and device is supported', () async {
+      test(
+          'should return true when biometrics are available and device is supported',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -67,7 +69,8 @@ void main() {
 
       test('should return false when exception occurs', () async {
         // Arrange
-        when(mockLocalAuth.canCheckBiometrics).thenThrow(Exception('Test error'));
+        when(mockLocalAuth.canCheckBiometrics)
+            .thenThrow(Exception('Test error'));
 
         // Act
         final result = await service.isBiometricAvailable();
@@ -80,8 +83,12 @@ void main() {
     group('getAvailableBiometrics', () {
       test('should return available biometric types', () async {
         // Arrange
-        final expectedBiometrics = [BiometricType.fingerprint, BiometricType.face];
-        when(mockLocalAuth.getAvailableBiometrics()).thenAnswer((_) async => expectedBiometrics);
+        final expectedBiometrics = [
+          BiometricType.fingerprint,
+          BiometricType.face
+        ];
+        when(mockLocalAuth.getAvailableBiometrics())
+            .thenAnswer((_) async => expectedBiometrics);
 
         // Act
         final result = await service.getAvailableBiometrics();
@@ -93,7 +100,8 @@ void main() {
 
       test('should return empty list when exception occurs', () async {
         // Arrange
-        when(mockLocalAuth.getAvailableBiometrics()).thenThrow(Exception('Test error'));
+        when(mockLocalAuth.getAvailableBiometrics())
+            .thenThrow(Exception('Test error'));
 
         // Act
         final result = await service.getAvailableBiometrics();
@@ -112,7 +120,9 @@ void main() {
         );
       });
 
-      test('should throw BiometricNotAvailableException when biometrics are not available', () async {
+      test(
+          'should throw BiometricNotAvailableException when biometrics are not available',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => false);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -124,7 +134,9 @@ void main() {
         );
       });
 
-      test('should throw BiometricAuthenticationException when authentication fails', () async {
+      test(
+          'should throw BiometricAuthenticationException when authentication fails',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -140,7 +152,9 @@ void main() {
         );
       });
 
-      test('should successfully encrypt data when biometric authentication succeeds', () async {
+      test(
+          'should successfully encrypt data when biometric authentication succeeds',
+          () async {
         // Arrange
         const testData = 'test data';
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
@@ -149,10 +163,12 @@ void main() {
           localizedReason: anyNamed('localizedReason'),
           options: anyNamed('options'),
         )).thenAnswer((_) async => true);
-        
+
         // Mock secure storage to return null for existing key (new key generation)
-        when(mockSecureStorage.read(key: 'ios_encryption_key')).thenAnswer((_) async => null);
-        when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+        when(mockSecureStorage.read(key: 'ios_encryption_key'))
+            .thenAnswer((_) async => null);
+        when(mockSecureStorage.write(
+                key: anyNamed('key'), value: anyNamed('value')))
             .thenAnswer((_) async {});
 
         // Act
@@ -161,18 +177,24 @@ void main() {
         // Assert
         expect(result, isNotEmpty);
         expect(result, isA<String>());
-        
+
         // Verify authentication was called
         verify(mockLocalAuth.authenticate(
           localizedReason: 'Authenticate to encrypt your API key securely',
           options: anyNamed('options'),
         )).called(1);
-        
+
         // Verify secure storage operations
         verify(mockSecureStorage.read(key: 'ios_encryption_key')).called(1);
-        verify(mockSecureStorage.write(key: 'ios_encryption_key', value: anyNamed('value'))).called(1);
-        verify(mockSecureStorage.write(key: 'ios_encrypted_api_key', value: anyNamed('value'))).called(1);
-        verify(mockSecureStorage.write(key: 'ios_key_metadata', value: anyNamed('value'))).called(1);
+        verify(mockSecureStorage.write(
+                key: 'ios_encryption_key', value: anyNamed('value')))
+            .called(1);
+        verify(mockSecureStorage.write(
+                key: 'ios_encrypted_api_key', value: anyNamed('value')))
+            .called(1);
+        verify(mockSecureStorage.write(
+                key: 'ios_key_metadata', value: anyNamed('value')))
+            .called(1);
       });
 
       test('should use existing encryption key when available', () async {
@@ -184,17 +206,19 @@ void main() {
           keyBytes[i] = i;
         }
         final existingKey = base64.encode(keyBytes);
-        
+
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
         when(mockLocalAuth.authenticate(
           localizedReason: anyNamed('localizedReason'),
           options: anyNamed('options'),
         )).thenAnswer((_) async => true);
-        
+
         // Mock secure storage to return existing key
-        when(mockSecureStorage.read(key: 'ios_encryption_key')).thenAnswer((_) async => existingKey);
-        when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value')))
+        when(mockSecureStorage.read(key: 'ios_encryption_key'))
+            .thenAnswer((_) async => existingKey);
+        when(mockSecureStorage.write(
+                key: anyNamed('key'), value: anyNamed('value')))
             .thenAnswer((_) async {});
 
         // Act
@@ -202,16 +226,19 @@ void main() {
 
         // Assert
         expect(result, isNotEmpty);
-        
+
         // Verify existing key was read
         verify(mockSecureStorage.read(key: 'ios_encryption_key')).called(1);
         // Should not write a new key
-        verifyNever(mockSecureStorage.write(key: 'ios_encryption_key', value: anyNamed('value')));
+        verifyNever(mockSecureStorage.write(
+            key: 'ios_encryption_key', value: anyNamed('value')));
       });
     });
 
     group('decryptWithBiometrics', () {
-      test('should throw BiometricNotAvailableException when biometrics are not available', () async {
+      test(
+          'should throw BiometricNotAvailableException when biometrics are not available',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => false);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
@@ -223,11 +250,14 @@ void main() {
         );
       });
 
-      test('should throw NoEncryptedDataException when no encrypted data exists', () async {
+      test(
+          'should throw NoEncryptedDataException when no encrypted data exists',
+          () async {
         // Arrange
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
-        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer((_) async => null);
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key'))
+            .thenAnswer((_) async => null);
 
         // Act & Assert
         expect(
@@ -236,12 +266,15 @@ void main() {
         );
       });
 
-      test('should throw BiometricAuthenticationException when authentication fails', () async {
+      test(
+          'should throw BiometricAuthenticationException when authentication fails',
+          () async {
         // Arrange
         const encryptedData = 'base64EncodedData';
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
-        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer((_) async => encryptedData);
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key'))
+            .thenAnswer((_) async => encryptedData);
         when(mockLocalAuth.authenticate(
           localizedReason: anyNamed('localizedReason'),
           options: anyNamed('options'),
@@ -254,7 +287,8 @@ void main() {
         );
       });
 
-      test('should successfully decrypt data when authentication succeeds', () async {
+      test('should successfully decrypt data when authentication succeeds',
+          () async {
         // Arrange
         const testData = 'test data';
         // Create a valid 32-byte key and encode it as base64
@@ -263,18 +297,20 @@ void main() {
           keyBytes[i] = i;
         }
         final existingKey = base64.encode(keyBytes);
-        
+
         // Create a valid encrypted data structure (IV + encrypted data)
         final key = Key(keyBytes);
         final encrypter = Encrypter(AES(key));
         final iv = IV.fromSecureRandom(16);
         final encrypted = encrypter.encrypt(testData, iv: iv);
         final combined = base64.encode(iv.bytes + encrypted.bytes);
-        
+
         when(mockLocalAuth.canCheckBiometrics).thenAnswer((_) async => true);
         when(mockLocalAuth.isDeviceSupported()).thenAnswer((_) async => true);
-        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer((_) async => combined);
-        when(mockSecureStorage.read(key: 'ios_encryption_key')).thenAnswer((_) async => existingKey);
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key'))
+            .thenAnswer((_) async => combined);
+        when(mockSecureStorage.read(key: 'ios_encryption_key'))
+            .thenAnswer((_) async => existingKey);
         when(mockLocalAuth.authenticate(
           localizedReason: anyNamed('localizedReason'),
           options: anyNamed('options'),
@@ -285,7 +321,7 @@ void main() {
 
         // Assert
         expect(result, equals(testData));
-        
+
         // Verify authentication was called
         verify(mockLocalAuth.authenticate(
           localizedReason: 'Authenticate to decrypt your API key',
@@ -297,7 +333,8 @@ void main() {
     group('hasEncryptedData', () {
       test('should return true when encrypted data exists', () async {
         // Arrange
-        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer((_) async => 'some data');
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key'))
+            .thenAnswer((_) async => 'some data');
 
         // Act
         final result = await service.hasEncryptedData();
@@ -309,7 +346,8 @@ void main() {
 
       test('should return false when no encrypted data exists', () async {
         // Arrange
-        when(mockSecureStorage.read(key: 'ios_encrypted_api_key')).thenAnswer((_) async => null);
+        when(mockSecureStorage.read(key: 'ios_encrypted_api_key'))
+            .thenAnswer((_) async => null);
 
         // Act
         final result = await service.hasEncryptedData();
@@ -322,8 +360,10 @@ void main() {
     group('getKeyMetadata', () {
       test('should return metadata when it exists', () async {
         // Arrange
-        const metadataJson = '{"algorithm": "AES-256-GCM", "createdAt": "2023-01-01T00:00:00.000Z"}';
-        when(mockSecureStorage.read(key: 'ios_key_metadata')).thenAnswer((_) async => metadataJson);
+        const metadataJson =
+            '{"algorithm": "AES-256-GCM", "createdAt": "2023-01-01T00:00:00.000Z"}';
+        when(mockSecureStorage.read(key: 'ios_key_metadata'))
+            .thenAnswer((_) async => metadataJson);
 
         // Act
         final result = await service.getKeyMetadata();
@@ -336,7 +376,8 @@ void main() {
 
       test('should return null when no metadata exists', () async {
         // Arrange
-        when(mockSecureStorage.read(key: 'ios_key_metadata')).thenAnswer((_) async => null);
+        when(mockSecureStorage.read(key: 'ios_key_metadata'))
+            .thenAnswer((_) async => null);
 
         // Act
         final result = await service.getKeyMetadata();
@@ -347,7 +388,8 @@ void main() {
 
       test('should return null when metadata is invalid JSON', () async {
         // Arrange
-        when(mockSecureStorage.read(key: 'ios_key_metadata')).thenAnswer((_) async => 'invalid json');
+        when(mockSecureStorage.read(key: 'ios_key_metadata'))
+            .thenAnswer((_) async => 'invalid json');
 
         // Act
         final result = await service.getKeyMetadata();
@@ -360,17 +402,18 @@ void main() {
     group('clearEncryptedData', () {
       test('should clear all encrypted data and metadata', () async {
         // Arrange
-        when(mockSecureStorage.delete(key: anyNamed('key'))).thenAnswer((_) async {});
+        when(mockSecureStorage.delete(key: anyNamed('key')))
+            .thenAnswer((_) async {});
 
         // Act
         await service.clearEncryptedData();
 
         // Assert
-        verify(mockSecureStorage.delete(key: 'ios_encrypted_api_key')).called(1);
+        verify(mockSecureStorage.delete(key: 'ios_encrypted_api_key'))
+            .called(1);
         verify(mockSecureStorage.delete(key: 'ios_key_metadata')).called(1);
         verify(mockSecureStorage.delete(key: 'ios_encryption_key')).called(1);
       });
     });
-
   });
 }
