@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
-import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
-import 'package:minecraft_server_automation/services/ios_secure_api_key_service.dart';
 import 'api_key_input_dialog.dart';
 
 class ApiKeyManagementBanner extends StatefulWidget {
@@ -38,13 +36,10 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
       // Check for biometric key (iOS only)
       if (Platform.isIOS) {
-        final biometricService = IOSBiometricEncryptionService();
-        final apiKeyService = IOSSecureApiKeyService(
-          firestore: authProvider.firestore,
-          auth: authProvider.firebaseAuth,
-          biometricService: biometricService,
-        );
-        _hasBiometricKey = await apiKeyService.hasApiKey();
+        final apiKeyService = authProvider.iosApiKeyService;
+        if (apiKeyService != null) {
+          _hasBiometricKey = await apiKeyService.hasApiKey();
+        }
       }
 
       if (mounted) {
@@ -72,12 +67,10 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final biometricService = IOSBiometricEncryptionService();
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: authProvider.firestore,
-        auth: authProvider.firebaseAuth,
-        biometricService: biometricService,
-      );
+      final apiKeyService = authProvider.iosApiKeyService;
+      if (apiKeyService == null) {
+        throw Exception('User not authenticated');
+      }
 
       await apiKeyService.storeApiKey(apiKey);
       await _checkApiKeyStatus();
@@ -116,12 +109,10 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final biometricService = IOSBiometricEncryptionService();
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: authProvider.firestore,
-        auth: authProvider.firebaseAuth,
-        biometricService: biometricService,
-      );
+      final apiKeyService = authProvider.iosApiKeyService;
+      if (apiKeyService == null) {
+        throw Exception('User not authenticated');
+      }
 
       await apiKeyService.updateApiKey(newApiKey);
       await _checkApiKeyStatus();
@@ -160,12 +151,10 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-      final biometricService = IOSBiometricEncryptionService();
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: authProvider.firestore,
-        auth: authProvider.firebaseAuth,
-        biometricService: biometricService,
-      );
+      final apiKeyService = authProvider.iosApiKeyService;
+      if (apiKeyService == null) {
+        throw Exception('User not authenticated');
+      }
 
       await apiKeyService.clearApiKey();
       await _checkApiKeyStatus();
