@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 
-class EncryptionService {
+class EncryptionService implements EncryptionServiceInterface {
   static const String _salt = 'minecraft-server-admin-salt';
 
   /// Encrypts the given text using AES-256-CBC with a password-derived key

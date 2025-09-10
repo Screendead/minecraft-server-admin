@@ -5,9 +5,10 @@ import 'package:uuid/uuid.dart';
 import 'package:minecraft_server_automation/models/log_entry.dart';
 import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart';
 import 'package:minecraft_server_automation/services/path_provider_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/logging_service.dart';
 
 /// Service for managing application logs
-class LoggingService {
+class LoggingService implements LoggingServiceInterface {
   static final LoggingService _instance = LoggingService._internal();
   factory LoggingService() => _instance;
   LoggingService._internal();
