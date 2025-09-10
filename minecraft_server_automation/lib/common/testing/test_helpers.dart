@@ -20,9 +20,12 @@ class TestHelpers {
 
     // Register mock services
     _serviceLocator.register<AuthServiceInterface>(MockAuthService());
-    _serviceLocator.register<DropletConfigServiceInterface>(MockDropletConfigService());
-    _serviceLocator.register<BiometricAuthServiceInterface>(MockBiometricAuthService());
-    _serviceLocator.register<SecureStorageServiceInterface>(MockSecureStorageService());
+    _serviceLocator
+        .register<DropletConfigServiceInterface>(MockDropletConfigService());
+    _serviceLocator
+        .register<BiometricAuthServiceInterface>(MockBiometricAuthService());
+    _serviceLocator
+        .register<SecureStorageServiceInterface>(MockSecureStorageService());
     _serviceLocator.register<LocationServiceInterface>(MockLocationService());
   }
 
@@ -32,15 +35,18 @@ class TestHelpers {
 
   /// Get mock droplet config service for test control
   static MockDropletConfigService get mockDropletConfigService =>
-      _serviceLocator.get<DropletConfigServiceInterface>() as MockDropletConfigService;
+      _serviceLocator.get<DropletConfigServiceInterface>()
+          as MockDropletConfigService;
 
   /// Get mock biometric auth service for test control
   static MockBiometricAuthService get mockBiometricAuthService =>
-      _serviceLocator.get<BiometricAuthServiceInterface>() as MockBiometricAuthService;
+      _serviceLocator.get<BiometricAuthServiceInterface>()
+          as MockBiometricAuthService;
 
   /// Get mock secure storage service for test control
   static MockSecureStorageService get mockSecureStorageService =>
-      _serviceLocator.get<SecureStorageServiceInterface>() as MockSecureStorageService;
+      _serviceLocator.get<SecureStorageServiceInterface>()
+          as MockSecureStorageService;
 
   /// Get mock location service for test control
   static MockLocationService get mockLocationService =>
