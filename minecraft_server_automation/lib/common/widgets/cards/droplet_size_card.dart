@@ -120,5 +120,4 @@ class DropletSizeCard extends StatelessWidget {
       ),
     );
   }
-
 }

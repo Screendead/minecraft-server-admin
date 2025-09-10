@@ -7,15 +7,18 @@ void main() {
     test('should have correct values, display names, and descriptions', () {
       expect(CpuOption.regular.value, equals('regular'));
       expect(CpuOption.regular.displayName, equals('Regular'));
-      expect(CpuOption.regular.description, equals('Disk type: SSD / Network: Up to 2 Gbps'));
-      
+      expect(CpuOption.regular.description,
+          equals('Disk type: SSD / Network: Up to 2 Gbps'));
+
       expect(CpuOption.premiumIntel.value, equals('premium_intel'));
       expect(CpuOption.premiumIntel.displayName, equals('Premium Intel'));
-      expect(CpuOption.premiumIntel.description, equals('Disk: NVMe SSD / Network: Up to 10 Gbps'));
-      
+      expect(CpuOption.premiumIntel.description,
+          equals('Disk: NVMe SSD / Network: Up to 10 Gbps'));
+
       expect(CpuOption.premiumAmd.value, equals('premium_amd'));
       expect(CpuOption.premiumAmd.displayName, equals('Premium AMD'));
-      expect(CpuOption.premiumAmd.description, equals('Disk: NVMe SSD / Network: Up to 10 Gbps'));
+      expect(CpuOption.premiumAmd.description,
+          equals('Disk: NVMe SSD / Network: Up to 10 Gbps'));
     });
 
     test('should have all expected enum values', () {
@@ -35,7 +38,8 @@ void main() {
 
     test('should support string conversion', () {
       expect(CpuOption.regular.toString(), contains('CpuOption.regular'));
-      expect(CpuOption.premiumIntel.toString(), contains('CpuOption.premiumIntel'));
+      expect(CpuOption.premiumIntel.toString(),
+          contains('CpuOption.premiumIntel'));
       expect(CpuOption.premiumAmd.toString(), contains('CpuOption.premiumAmd'));
     });
 
@@ -64,35 +68,61 @@ void main() {
     group('isAvailableFor', () {
       test('should return true for all options with basic category', () {
         expect(CpuOption.regular.isAvailableFor(CpuCategory.basic), isTrue);
-        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.basic), isTrue);
+        expect(
+            CpuOption.premiumIntel.isAvailableFor(CpuCategory.basic), isTrue);
         expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.basic), isTrue);
       });
 
-      test('should return true for regular and premium intel with general purpose category', () {
-        expect(CpuOption.regular.isAvailableFor(CpuCategory.generalPurpose), isTrue);
-        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.generalPurpose), isTrue);
-        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.generalPurpose), isFalse);
+      test(
+          'should return true for regular and premium intel with general purpose category',
+          () {
+        expect(CpuOption.regular.isAvailableFor(CpuCategory.generalPurpose),
+            isTrue);
+        expect(
+            CpuOption.premiumIntel.isAvailableFor(CpuCategory.generalPurpose),
+            isTrue);
+        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.generalPurpose),
+            isFalse);
       });
 
-      test('should return true for regular and premium intel with cpu optimized category', () {
-        expect(CpuOption.regular.isAvailableFor(CpuCategory.cpuOptimized), isTrue);
-        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.cpuOptimized), isTrue);
-        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.cpuOptimized), isFalse);
+      test(
+          'should return true for regular and premium intel with cpu optimized category',
+          () {
+        expect(
+            CpuOption.regular.isAvailableFor(CpuCategory.cpuOptimized), isTrue);
+        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.cpuOptimized),
+            isTrue);
+        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.cpuOptimized),
+            isFalse);
       });
 
-      test('should return true for regular and premium intel with memory optimized category', () {
-        expect(CpuOption.regular.isAvailableFor(CpuCategory.memoryOptimized), isTrue);
-        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.memoryOptimized), isTrue);
-        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.memoryOptimized), isFalse);
+      test(
+          'should return true for regular and premium intel with memory optimized category',
+          () {
+        expect(CpuOption.regular.isAvailableFor(CpuCategory.memoryOptimized),
+            isTrue);
+        expect(
+            CpuOption.premiumIntel.isAvailableFor(CpuCategory.memoryOptimized),
+            isTrue);
+        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.memoryOptimized),
+            isFalse);
       });
 
-      test('should return true for regular and premium intel with storage optimized category', () {
-        expect(CpuOption.regular.isAvailableFor(CpuCategory.storageOptimized), isTrue);
-        expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.storageOptimized), isTrue);
-        expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.storageOptimized), isFalse);
+      test(
+          'should return true for regular and premium intel with storage optimized category',
+          () {
+        expect(CpuOption.regular.isAvailableFor(CpuCategory.storageOptimized),
+            isTrue);
+        expect(
+            CpuOption.premiumIntel.isAvailableFor(CpuCategory.storageOptimized),
+            isTrue);
+        expect(
+            CpuOption.premiumAmd.isAvailableFor(CpuCategory.storageOptimized),
+            isFalse);
       });
 
-      test('should return true for regular and premium intel with gpu category', () {
+      test('should return true for regular and premium intel with gpu category',
+          () {
         expect(CpuOption.regular.isAvailableFor(CpuCategory.gpu), isTrue);
         expect(CpuOption.premiumIntel.isAvailableFor(CpuCategory.gpu), isTrue);
         expect(CpuOption.premiumAmd.isAvailableFor(CpuCategory.gpu), isFalse);
@@ -103,8 +133,9 @@ void main() {
       const regular = CpuOption.regular;
       expect(regular.value, equals('regular'));
       expect(regular.displayName, equals('Regular'));
-      expect(regular.description, equals('Disk type: SSD / Network: Up to 2 Gbps'));
-      
+      expect(regular.description,
+          equals('Disk type: SSD / Network: Up to 2 Gbps'));
+
       // Verify that the enum values are constants
       expect(regular.value, isA<String>());
       expect(regular.displayName, isA<String>());

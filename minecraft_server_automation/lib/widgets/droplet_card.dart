@@ -146,7 +146,6 @@ class DropletCard extends StatelessWidget {
     );
   }
 
-
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'active':

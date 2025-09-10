@@ -7,13 +7,22 @@ void main() {
       const region = Region(
         name: 'New York 1',
         slug: 'nyc1',
-        features: ['virtio', 'private_networking', 'backups', 'ipv6', 'metadata'],
+        features: [
+          'virtio',
+          'private_networking',
+          'backups',
+          'ipv6',
+          'metadata'
+        ],
         available: true,
       );
 
       expect(region.name, equals('New York 1'));
       expect(region.slug, equals('nyc1'));
-      expect(region.features, equals(['virtio', 'private_networking', 'backups', 'ipv6', 'metadata']));
+      expect(
+          region.features,
+          equals(
+              ['virtio', 'private_networking', 'backups', 'ipv6', 'metadata']));
       expect(region.available, isTrue);
     });
 
@@ -22,7 +31,13 @@ void main() {
         final json = {
           'name': 'New York 1',
           'slug': 'nyc1',
-          'features': ['virtio', 'private_networking', 'backups', 'ipv6', 'metadata'],
+          'features': [
+            'virtio',
+            'private_networking',
+            'backups',
+            'ipv6',
+            'metadata'
+          ],
           'available': true,
         };
 
@@ -30,7 +45,15 @@ void main() {
 
         expect(region.name, equals('New York 1'));
         expect(region.slug, equals('nyc1'));
-        expect(region.features, equals(['virtio', 'private_networking', 'backups', 'ipv6', 'metadata']));
+        expect(
+            region.features,
+            equals([
+              'virtio',
+              'private_networking',
+              'backups',
+              'ipv6',
+              'metadata'
+            ]));
         expect(region.available, isTrue);
       });
 
@@ -106,7 +129,7 @@ void main() {
       expect(region.slug, equals('nyc1'));
       expect(region.features, equals(['virtio', 'private_networking']));
       expect(region.available, isTrue);
-      
+
       // Verify that the values are constants
       expect(region.name, isA<String>());
       expect(region.slug, isA<String>());

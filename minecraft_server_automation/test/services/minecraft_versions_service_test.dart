@@ -18,7 +18,7 @@ void main() {
     setUp(() {
       mockClient = MockClient();
       mockResponse = MockResponse();
-      
+
       // Reset the static client for each test
       MinecraftVersionsService.setClient(mockClient);
     });
@@ -36,21 +36,24 @@ void main() {
             {
               'id': '1.20.1',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-06-12T10:00:00+00:00',
               'releaseTime': '2023-06-12T10:00:00+00:00',
             },
             {
               'id': '23w16a',
               'type': 'snapshot',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-04-19T10:00:00+00:00',
               'releaseTime': '2023-04-19T10:00:00+00:00',
             },
             {
               'id': '1.19.4',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-03-14T10:00:00+00:00',
               'releaseTime': '2023-03-14T10:00:00+00:00',
             },
@@ -68,17 +71,19 @@ void main() {
 
         expect(result, isA<List<MinecraftVersion>>());
         expect(result.length, equals(3));
-        
+
         // Check that versions are sorted by release time (newest first)
         expect(result[0].id, equals('1.20.1'));
         expect(result[1].id, equals('23w16a'));
         expect(result[2].id, equals('1.19.4'));
-        
+
         // Check that only release and snapshot types are included
-        expect(result.every((v) => v.type == 'release' || v.type == 'snapshot'), isTrue);
+        expect(result.every((v) => v.type == 'release' || v.type == 'snapshot'),
+            isTrue);
 
         verify(mockClient.get(
-          Uri.parse('https://launchermeta.mojang.com/mc/game/version_manifest_v2.json'),
+          Uri.parse(
+              'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json'),
           headers: {'Content-Type': 'application/json'},
         )).called(1);
       });
@@ -101,7 +106,8 @@ void main() {
         );
 
         verify(mockClient.get(
-          Uri.parse('https://launchermeta.mojang.com/mc/game/version_manifest_v2.json'),
+          Uri.parse(
+              'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json'),
           headers: {'Content-Type': 'application/json'},
         )).called(1);
       });
@@ -146,28 +152,32 @@ void main() {
             {
               'id': '1.20.1',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-06-12T10:00:00+00:00',
               'releaseTime': '2023-06-12T10:00:00+00:00',
             },
             {
               'id': '23w16a',
               'type': 'snapshot',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-04-19T10:00:00+00:00',
               'releaseTime': '2023-04-19T10:00:00+00:00',
             },
             {
               'id': 'old_beta',
               'type': 'old_beta',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2010-12-20T10:00:00+00:00',
               'releaseTime': '2010-12-20T10:00:00+00:00',
             },
             {
               'id': 'old_alpha',
               'type': 'old_alpha',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2010-06-30T10:00:00+00:00',
               'releaseTime': '2010-06-30T10:00:00+00:00',
             },
@@ -198,21 +208,24 @@ void main() {
             {
               'id': '1.20.1',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-06-12T10:00:00+00:00',
               'releaseTime': '2023-06-12T10:00:00+00:00',
             },
             {
               'id': '23w16a',
               'type': 'snapshot',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-04-19T10:00:00+00:00',
               'releaseTime': '2023-04-19T10:00:00+00:00',
             },
             {
               'id': '1.19.4',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-03-14T10:00:00+00:00',
               'releaseTime': '2023-03-14T10:00:00+00:00',
             },
@@ -260,21 +273,24 @@ void main() {
             {
               'id': '1.20.1',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-06-12T10:00:00+00:00',
               'releaseTime': '2023-06-12T10:00:00+00:00',
             },
             {
               'id': '23w16a',
               'type': 'snapshot',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-04-19T10:00:00+00:00',
               'releaseTime': '2023-04-19T10:00:00+00:00',
             },
             {
               'id': '23w15a',
               'type': 'snapshot',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-04-12T10:00:00+00:00',
               'releaseTime': '2023-04-12T10:00:00+00:00',
             },
@@ -323,7 +339,8 @@ void main() {
             {
               'id': '1.20.1',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-06-12T10:00:00+00:00',
               'releaseTime': '2023-06-12T10:00:00+00:00',
             },
@@ -333,7 +350,8 @@ void main() {
         final versionDetailsResponse = {
           'downloads': {
             'server': {
-              'url': 'https://launcher.mojang.com/v1/objects/103874b7986691c6c6d582c0ba42be4df21e38d2/server.jar',
+              'url':
+                  'https://launcher.mojang.com/v1/objects/103874b7986691c6c6d582c0ba42be4df21e38d2/server.jar',
               'sha1': '103874b7986691c6c6d582c0ba42be4df21e38d2',
               'size': 12345678,
             }
@@ -348,23 +366,28 @@ void main() {
         )).thenAnswer((invocation) async {
           final response = MockResponse();
           callCount++;
-          
+
           if (callCount == 1) {
             // First call - version manifest
             when(response.statusCode).thenReturn(200);
-            when(response.body).thenReturn(json.encode(versionManifestResponse));
+            when(response.body)
+                .thenReturn(json.encode(versionManifestResponse));
           } else {
             // Second call - version details
             when(response.statusCode).thenReturn(200);
             when(response.body).thenReturn(json.encode(versionDetailsResponse));
           }
-          
+
           return response;
         });
 
-        final result = await MinecraftVersionsService.getServerJarUrlForVersion('1.20.1');
+        final result =
+            await MinecraftVersionsService.getServerJarUrlForVersion('1.20.1');
 
-        expect(result, equals('https://launcher.mojang.com/v1/objects/103874b7986691c6c6d582c0ba42be4df21e38d2/server.jar'));
+        expect(
+            result,
+            equals(
+                'https://launcher.mojang.com/v1/objects/103874b7986691c6c6d582c0ba42be4df21e38d2/server.jar'));
 
         verify(mockClient.get(
           any,
@@ -378,7 +401,8 @@ void main() {
             {
               'id': '1.20.1',
               'type': 'release',
-              'url': 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
+              'url':
+                  'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json',
               'time': '2023-06-12T10:00:00+00:00',
               'releaseTime': '2023-06-12T10:00:00+00:00',
             },
@@ -386,14 +410,16 @@ void main() {
         };
 
         when(mockResponse.statusCode).thenReturn(200);
-        when(mockResponse.body).thenReturn(json.encode(versionManifestResponse));
+        when(mockResponse.body)
+            .thenReturn(json.encode(versionManifestResponse));
         when(mockClient.get(
           any,
           headers: anyNamed('headers'),
         )).thenAnswer((_) async => mockResponse);
 
         expect(
-          () => MinecraftVersionsService.getServerJarUrlForVersion('nonexistent'),
+          () =>
+              MinecraftVersionsService.getServerJarUrlForVersion('nonexistent'),
           throwsA(isA<Exception>().having(
             (e) => e.toString(),
             'message',
@@ -423,7 +449,7 @@ void main() {
       test('should allow setting custom HTTP client', () {
         final customClient = MockClient();
         MinecraftVersionsService.setClient(customClient);
-        
+
         // This test verifies that setClient doesn't throw
         expect(customClient, isNotNull);
       });

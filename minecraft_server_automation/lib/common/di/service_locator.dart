@@ -72,7 +72,7 @@ class ServiceLocator {
     register<BiometricAuthServiceInterface>(IOSBiometricAuthAdapter());
     register<SecureStorageServiceInterface>(IOSSecureStorageAdapter());
     register<LocationServiceInterface>(LocationServiceAdapter());
-    
+
     // Register logging service
     register<LoggingServiceInterface>(LoggingServiceAdapter(LoggingService()));
   }
@@ -84,20 +84,24 @@ extension ServiceLocatorExtension on ServiceLocator {
   AuthServiceInterface get authService => get<AuthServiceInterface>();
 
   /// Get droplet config service
-  DropletConfigServiceInterface get dropletConfigService => get<DropletConfigServiceInterface>();
+  DropletConfigServiceInterface get dropletConfigService =>
+      get<DropletConfigServiceInterface>();
 
   /// Get region selection service
   RegionSelectionServiceInterface get regionSelectionService =>
       get<RegionSelectionServiceInterface>();
 
   /// Get biometric auth service
-  BiometricAuthServiceInterface get biometricAuthService => get<BiometricAuthServiceInterface>();
+  BiometricAuthServiceInterface get biometricAuthService =>
+      get<BiometricAuthServiceInterface>();
 
   /// Get secure storage service
-  SecureStorageServiceInterface get secureStorageService => get<SecureStorageServiceInterface>();
+  SecureStorageServiceInterface get secureStorageService =>
+      get<SecureStorageServiceInterface>();
 
   /// Get location service
-  LocationServiceInterface get locationService => get<LocationServiceInterface>();
+  LocationServiceInterface get locationService =>
+      get<LocationServiceInterface>();
 
   /// Get logging service
   LoggingServiceInterface get loggingService => get<LoggingServiceInterface>();

@@ -31,12 +31,14 @@ class DropletsProvider with ChangeNotifier {
     try {
       // Load droplets using the provided API key
       final dropletsData = await DigitalOceanApiService.getDroplets(apiKey);
-      _droplets = dropletsData.map((data) => DropletInfo.fromJson(data)).toList();
+      _droplets =
+          dropletsData.map((data) => DropletInfo.fromJson(data)).toList();
 
       // Check Minecraft server status for each droplet
       for (final droplet in _droplets) {
         if (droplet.publicIp != null) {
-          final minecraftInfo = await MinecraftServerService.checkMinecraftServer(
+          final minecraftInfo =
+              await MinecraftServerService.checkMinecraftServer(
             droplet.publicIp!,
           );
           if (minecraftInfo != null) {

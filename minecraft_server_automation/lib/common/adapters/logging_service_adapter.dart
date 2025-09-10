@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:minecraft_server_automation/common/interfaces/logging_service.dart';
-import 'package:minecraft_server_automation/services/logging_service.dart' as impl;
+import 'package:minecraft_server_automation/services/logging_service.dart'
+    as impl;
 import 'package:minecraft_server_automation/models/log_entry.dart';
 
 /// Adapter to make LoggingService conform to LoggingServiceInterface

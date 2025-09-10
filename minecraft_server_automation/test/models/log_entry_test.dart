@@ -62,11 +62,14 @@ void main() {
     });
 
     test('should have correct display names', () {
-      expect(LogCategory.userInteraction.displayName, equals('User Interaction'));
+      expect(
+          LogCategory.userInteraction.displayName, equals('User Interaction'));
       expect(LogCategory.apiCall.displayName, equals('API Call'));
       expect(LogCategory.authentication.displayName, equals('Authentication'));
-      expect(LogCategory.dropletManagement.displayName, equals('Droplet Management'));
-      expect(LogCategory.serverManagement.displayName, equals('Server Management'));
+      expect(LogCategory.dropletManagement.displayName,
+          equals('Droplet Management'));
+      expect(LogCategory.serverManagement.displayName,
+          equals('Server Management'));
       expect(LogCategory.error.displayName, equals('Error'));
       expect(LogCategory.system.displayName, equals('System'));
       expect(LogCategory.security.displayName, equals('Security'));
@@ -98,7 +101,7 @@ void main() {
     test('should create instance with all parameters', () {
       final timestamp = DateTime.now();
       const metadata = {'key': 'value'};
-      
+
       final entry = LogEntry(
         id: 'test-id',
         timestamp: timestamp,
@@ -207,7 +210,7 @@ void main() {
       test('should convert to JSON with all fields', () {
         final timestamp = DateTime.now();
         const metadata = {'key': 'value'};
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -235,7 +238,7 @@ void main() {
 
       test('should convert to JSON with null optional fields', () {
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -262,7 +265,7 @@ void main() {
       test('should create copy with updated fields', () {
         final timestamp = DateTime.now();
         final newTimestamp = DateTime.now().add(Duration(hours: 1));
-        
+
         final original = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -293,9 +296,10 @@ void main() {
         expect(updated.sessionId, equals('session-456'));
       });
 
-      test('should create copy with null fields (preserves original values)', () {
+      test('should create copy with null fields (preserves original values)',
+          () {
         final timestamp = DateTime.now();
-        
+
         final original = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -326,7 +330,7 @@ void main() {
     group('equality', () {
       test('should be equal to identical instance', () {
         final timestamp = DateTime.now();
-        
+
         final entry1 = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -349,7 +353,7 @@ void main() {
 
       test('should not be equal to different instance', () {
         final timestamp = DateTime.now();
-        
+
         final entry1 = LogEntry(
           id: 'test-id-1',
           timestamp: timestamp,
@@ -372,7 +376,7 @@ void main() {
 
       test('should be equal to itself', () {
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -388,7 +392,7 @@ void main() {
     group('toString', () {
       test('should return string representation', () {
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -412,7 +416,7 @@ void main() {
     test('should create instance with all parameters', () {
       final startDate = DateTime.now().subtract(Duration(days: 1));
       final endDate = DateTime.now();
-      
+
       final logFilter = LogFilter(
         levels: [LogLevel.error, LogLevel.fatal],
         categories: [LogCategory.authentication, LogCategory.security],
@@ -424,7 +428,8 @@ void main() {
       );
 
       expect(logFilter.levels, equals([LogLevel.error, LogLevel.fatal]));
-      expect(logFilter.categories, equals([LogCategory.authentication, LogCategory.security]));
+      expect(logFilter.categories,
+          equals([LogCategory.authentication, LogCategory.security]));
       expect(logFilter.startDate, equals(startDate));
       expect(logFilter.endDate, equals(endDate));
       expect(logFilter.searchQuery, equals('test query'));
@@ -448,7 +453,7 @@ void main() {
       test('should match entry when no filters are set', () {
         const filter = LogFilter();
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -463,7 +468,7 @@ void main() {
       test('should match entry when level filter matches', () {
         const filter = LogFilter(levels: [LogLevel.info, LogLevel.warning]);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -478,7 +483,7 @@ void main() {
       test('should not match entry when level filter does not match', () {
         const filter = LogFilter(levels: [LogLevel.error, LogLevel.fatal]);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -491,9 +496,10 @@ void main() {
       });
 
       test('should match entry when category filter matches', () {
-        const filter = LogFilter(categories: [LogCategory.system, LogCategory.error]);
+        const filter =
+            LogFilter(categories: [LogCategory.system, LogCategory.error]);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -506,9 +512,10 @@ void main() {
       });
 
       test('should not match entry when category filter does not match', () {
-        const filter = LogFilter(categories: [LogCategory.authentication, LogCategory.security]);
+        const filter = LogFilter(
+            categories: [LogCategory.authentication, LogCategory.security]);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -525,7 +532,7 @@ void main() {
         final endDate = DateTime.now().add(Duration(hours: 1));
         final filter = LogFilter(startDate: startDate, endDate: endDate);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -542,7 +549,7 @@ void main() {
         final endDate = DateTime.now().add(Duration(hours: 2));
         final filter = LogFilter(startDate: startDate, endDate: endDate);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -559,7 +566,7 @@ void main() {
         final endDate = DateTime.now().subtract(Duration(hours: 1));
         final filter = LogFilter(startDate: startDate, endDate: endDate);
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -574,7 +581,7 @@ void main() {
       test('should match entry when search query matches message', () {
         const filter = LogFilter(searchQuery: 'test');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -589,7 +596,7 @@ void main() {
       test('should match entry when search query matches details', () {
         const filter = LogFilter(searchQuery: 'details');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -605,7 +612,7 @@ void main() {
       test('should not match entry when search query does not match', () {
         const filter = LogFilter(searchQuery: 'notfound');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -620,7 +627,7 @@ void main() {
       test('should match entry when search query is empty', () {
         const filter = LogFilter(searchQuery: '');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -635,7 +642,7 @@ void main() {
       test('should match entry when userId matches', () {
         const filter = LogFilter(userId: 'user-123');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -651,7 +658,7 @@ void main() {
       test('should not match entry when userId does not match', () {
         const filter = LogFilter(userId: 'user-456');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -667,7 +674,7 @@ void main() {
       test('should match entry when sessionId matches', () {
         const filter = LogFilter(sessionId: 'session-123');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -683,7 +690,7 @@ void main() {
       test('should not match entry when sessionId does not match', () {
         const filter = LogFilter(sessionId: 'session-456');
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -709,7 +716,7 @@ void main() {
           sessionId: 'session-123',
         );
         final timestamp = DateTime.now();
-        
+
         final entry = LogEntry(
           id: 'test-id',
           timestamp: timestamp,
@@ -729,7 +736,7 @@ void main() {
         final startDate = DateTime.now().subtract(Duration(days: 1));
         final endDate = DateTime.now();
         final newStartDate = DateTime.now().subtract(Duration(days: 2));
-        
+
         final original = LogFilter(
           levels: [LogLevel.error],
           categories: [LogCategory.authentication],
@@ -755,10 +762,11 @@ void main() {
         expect(updated.sessionId, equals('session-456'));
       });
 
-      test('should create copy with null fields (preserves original values)', () {
+      test('should create copy with null fields (preserves original values)',
+          () {
         final startDate = DateTime.now().subtract(Duration(days: 1));
         final endDate = DateTime.now();
-        
+
         final original = LogFilter(
           levels: [LogLevel.error],
           categories: [LogCategory.authentication],

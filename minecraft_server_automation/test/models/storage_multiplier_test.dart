@@ -9,18 +9,21 @@ void main() {
       expect(StorageMultiplier.x1.value, equals('1x'));
       expect(StorageMultiplier.x1.displayName, equals('1x SSD'));
       expect(StorageMultiplier.x1.description, equals('Standard storage'));
-      
+
       expect(StorageMultiplier.x2.value, equals('2x'));
       expect(StorageMultiplier.x2.displayName, equals('2x SSD'));
-      expect(StorageMultiplier.x2.description, equals('Double storage capacity'));
-      
+      expect(
+          StorageMultiplier.x2.description, equals('Double storage capacity'));
+
       expect(StorageMultiplier.x3.value, equals('3x'));
       expect(StorageMultiplier.x3.displayName, equals('3x SSD'));
-      expect(StorageMultiplier.x3.description, equals('Triple storage capacity'));
-      
+      expect(
+          StorageMultiplier.x3.description, equals('Triple storage capacity'));
+
       expect(StorageMultiplier.x6.value, equals('6x'));
       expect(StorageMultiplier.x6.displayName, equals('6x SSD'));
-      expect(StorageMultiplier.x6.description, equals('Six times storage capacity'));
+      expect(StorageMultiplier.x6.description,
+          equals('Six times storage capacity'));
     });
 
     test('should have all expected enum values', () {
@@ -44,56 +47,150 @@ void main() {
 
     group('isAvailableFor', () {
       test('should return true for all multipliers with basic category', () {
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.basic, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.basic, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x3.isAvailableFor(CpuCategory.basic, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x6.isAvailableFor(CpuCategory.basic, CpuOption.regular), isTrue);
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.basic, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2
+                .isAvailableFor(CpuCategory.basic, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x3
+                .isAvailableFor(CpuCategory.basic, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x6
+                .isAvailableFor(CpuCategory.basic, CpuOption.regular),
+            isTrue);
       });
 
-      test('should return true for x1 and x2 with general purpose category', () {
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x3.isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular), isFalse);
-        expect(StorageMultiplier.x6.isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular), isFalse);
+      test('should return true for x1 and x2 with general purpose category',
+          () {
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2
+                .isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x3
+                .isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular),
+            isFalse);
+        expect(
+            StorageMultiplier.x6
+                .isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular),
+            isFalse);
       });
 
       test('should return true for x1 and x2 with cpu optimized category', () {
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x3.isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular), isFalse);
-        expect(StorageMultiplier.x6.isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular), isFalse);
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2
+                .isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x3
+                .isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular),
+            isFalse);
+        expect(
+            StorageMultiplier.x6
+                .isAvailableFor(CpuCategory.cpuOptimized, CpuOption.regular),
+            isFalse);
       });
 
-      test('should return true for x1, x3, and x6 with memory optimized category', () {
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular), isFalse);
-        expect(StorageMultiplier.x3.isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x6.isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular), isTrue);
+      test(
+          'should return true for x1, x3, and x6 with memory optimized category',
+          () {
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2
+                .isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular),
+            isFalse);
+        expect(
+            StorageMultiplier.x3
+                .isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x6
+                .isAvailableFor(CpuCategory.memoryOptimized, CpuOption.regular),
+            isTrue);
       });
 
-      test('should return true for x1 and x2 with storage optimized category', () {
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.storageOptimized, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.storageOptimized, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x3.isAvailableFor(CpuCategory.storageOptimized, CpuOption.regular), isFalse);
-        expect(StorageMultiplier.x6.isAvailableFor(CpuCategory.storageOptimized, CpuOption.regular), isFalse);
+      test('should return true for x1 and x2 with storage optimized category',
+          () {
+        expect(
+            StorageMultiplier.x1.isAvailableFor(
+                CpuCategory.storageOptimized, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2.isAvailableFor(
+                CpuCategory.storageOptimized, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x3.isAvailableFor(
+                CpuCategory.storageOptimized, CpuOption.regular),
+            isFalse);
+        expect(
+            StorageMultiplier.x6.isAvailableFor(
+                CpuCategory.storageOptimized, CpuOption.regular),
+            isFalse);
       });
 
       test('should return true only for x1 with gpu category', () {
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.gpu, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.gpu, CpuOption.regular), isFalse);
-        expect(StorageMultiplier.x3.isAvailableFor(CpuCategory.gpu, CpuOption.regular), isFalse);
-        expect(StorageMultiplier.x6.isAvailableFor(CpuCategory.gpu, CpuOption.regular), isFalse);
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.gpu, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2
+                .isAvailableFor(CpuCategory.gpu, CpuOption.regular),
+            isFalse);
+        expect(
+            StorageMultiplier.x3
+                .isAvailableFor(CpuCategory.gpu, CpuOption.regular),
+            isFalse);
+        expect(
+            StorageMultiplier.x6
+                .isAvailableFor(CpuCategory.gpu, CpuOption.regular),
+            isFalse);
       });
 
       test('should work with different CPU options for same category', () {
         // Test that CPU option doesn't affect availability (only category matters)
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.basic, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.basic, CpuOption.premiumIntel), isTrue);
-        expect(StorageMultiplier.x1.isAvailableFor(CpuCategory.basic, CpuOption.premiumAmd), isTrue);
-        
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.generalPurpose, CpuOption.premiumIntel), isTrue);
-        expect(StorageMultiplier.x2.isAvailableFor(CpuCategory.generalPurpose, CpuOption.premiumAmd), isTrue);
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.basic, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.basic, CpuOption.premiumIntel),
+            isTrue);
+        expect(
+            StorageMultiplier.x1
+                .isAvailableFor(CpuCategory.basic, CpuOption.premiumAmd),
+            isTrue);
+
+        expect(
+            StorageMultiplier.x2
+                .isAvailableFor(CpuCategory.generalPurpose, CpuOption.regular),
+            isTrue);
+        expect(
+            StorageMultiplier.x2.isAvailableFor(
+                CpuCategory.generalPurpose, CpuOption.premiumIntel),
+            isTrue);
+        expect(
+            StorageMultiplier.x2.isAvailableFor(
+                CpuCategory.generalPurpose, CpuOption.premiumAmd),
+            isTrue);
       });
     });
 
@@ -102,7 +199,7 @@ void main() {
       expect(x1.value, equals('1x'));
       expect(x1.displayName, equals('1x SSD'));
       expect(x1.description, equals('Standard storage'));
-      
+
       // Verify that the enum values are constants
       expect(x1.value, isA<String>());
       expect(x1.displayName, isA<String>());

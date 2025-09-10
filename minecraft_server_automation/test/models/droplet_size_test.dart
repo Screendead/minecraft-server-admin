@@ -525,7 +525,8 @@ void main() {
         expect(dropletSize.cpuOption, equals(CpuOption.premiumAmd));
       });
 
-      test('should return regular for dedicated CPU droplets without intel', () {
+      test('should return regular for dedicated CPU droplets without intel',
+          () {
         const dropletSize = DropletSize(
           slug: 'c-1vcpu-1gb',
           memory: 1024,
@@ -542,7 +543,8 @@ void main() {
         expect(dropletSize.cpuOption, equals(CpuOption.regular));
       });
 
-      test('should return premiumIntel for dedicated CPU droplets with intel', () {
+      test('should return premiumIntel for dedicated CPU droplets with intel',
+          () {
         const dropletSize = DropletSize(
           slug: 'c-1vcpu-1gb-intel',
           memory: 1024,

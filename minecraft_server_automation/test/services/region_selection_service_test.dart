@@ -35,17 +35,28 @@ void main() {
 
       test('should return coordinates for all known regions', () {
         final knownRegions = [
-          'nyc1', 'nyc2', 'nyc3',
-          'sfo1', 'sfo2', 'sfo3',
-          'tor1', 'lon1',
-          'ams2', 'ams3', 'fra1',
-          'sgp1', 'blr1',
-          'syd1', 'syd2', 'syd3',
+          'nyc1',
+          'nyc2',
+          'nyc3',
+          'sfo1',
+          'sfo2',
+          'sfo3',
+          'tor1',
+          'lon1',
+          'ams2',
+          'ams3',
+          'fra1',
+          'sgp1',
+          'blr1',
+          'syd1',
+          'syd2',
+          'syd3',
         ];
 
         for (final region in knownRegions) {
           final coords = service.getRegionCoordinates(region);
-          expect(coords, isNotNull, reason: 'Region $region should have coordinates');
+          expect(coords, isNotNull,
+              reason: 'Region $region should have coordinates');
           expect(coords!['lat'], isA<double>());
           expect(coords['lng'], isA<double>());
         }
@@ -55,33 +66,38 @@ void main() {
     group('calculateDistance', () {
       test('should calculate distance between two points', () {
         // Distance between New York and London (approximately 5570 km)
-        final distance = service.calculateDistance(40.7128, -74.0060, 51.5074, -0.1278);
+        final distance =
+            service.calculateDistance(40.7128, -74.0060, 51.5074, -0.1278);
         expect(distance, greaterThan(5500));
         expect(distance, lessThan(5600));
       });
 
       test('should return 0 for same coordinates', () {
-        final distance = service.calculateDistance(40.7128, -74.0060, 40.7128, -74.0060);
+        final distance =
+            service.calculateDistance(40.7128, -74.0060, 40.7128, -74.0060);
         expect(distance, equals(0.0));
       });
 
       test('should calculate distance between New York and San Francisco', () {
         // Distance between NYC and SFO (approximately 4130 km)
-        final distance = service.calculateDistance(40.7128, -74.0060, 37.7749, -122.4194);
+        final distance =
+            service.calculateDistance(40.7128, -74.0060, 37.7749, -122.4194);
         expect(distance, greaterThan(4100));
         expect(distance, lessThan(4200));
       });
 
       test('should calculate distance between London and Singapore', () {
         // Distance between London and Singapore (approximately 10850 km)
-        final distance = service.calculateDistance(51.5074, -0.1278, 1.3521, 103.8198);
+        final distance =
+            service.calculateDistance(51.5074, -0.1278, 1.3521, 103.8198);
         expect(distance, greaterThan(10800));
         expect(distance, lessThan(10900));
       });
 
       test('should handle negative coordinates', () {
         // Distance between Sydney and New York (approximately 15900 km)
-        final distance = service.calculateDistance(-33.8688, 151.2093, 40.7128, -74.0060);
+        final distance =
+            service.calculateDistance(-33.8688, 151.2093, 40.7128, -74.0060);
         expect(distance, greaterThan(15800));
         expect(distance, lessThan(16000));
       });
@@ -242,7 +258,7 @@ void main() {
         // Since we can't access private methods directly, we'll test the behavior
         // through the public findClosestRegion method with null location
         final result = await service.findClosestRegion(regions);
-        
+
         // The service should return a region (likely London as default)
         expect(result, isNotNull);
         expect(result!.slug, isIn(['nyc1', 'lon1']));
@@ -265,7 +281,7 @@ void main() {
         ];
 
         final result = await service.findClosestRegion(regions);
-        
+
         expect(result, isNotNull);
         expect(result!.slug, isIn(['nyc1', 'sfo1']));
       });

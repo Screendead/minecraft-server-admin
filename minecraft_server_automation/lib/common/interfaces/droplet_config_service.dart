@@ -18,9 +18,11 @@ abstract class DropletConfigServiceInterface {
 
   Future<void> loadConfigurationData();
 
-  List<CpuCategory> getAvailableCategoriesForArchitecture(CpuArchitecture architecture);
+  List<CpuCategory> getAvailableCategoriesForArchitecture(
+      CpuArchitecture architecture);
   List<CpuOption> getAvailableOptionsForCategory(CpuCategory category);
-  List<StorageMultiplier> getAvailableStorageMultipliersFor(CpuCategory category, CpuOption option);
+  List<StorageMultiplier> getAvailableStorageMultipliersFor(
+      CpuCategory category, CpuOption option);
   List<DropletSize> getSizesForStorage(
     String regionSlug,
     CpuArchitecture architecture,

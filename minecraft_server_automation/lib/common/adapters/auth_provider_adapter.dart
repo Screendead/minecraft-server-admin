@@ -3,7 +3,8 @@ import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 
 /// Adapter to make AuthProvider conform to AuthServiceInterface interface
-class AuthProviderAdapter extends ChangeNotifier implements AuthServiceInterface {
+class AuthProviderAdapter extends ChangeNotifier
+    implements AuthServiceInterface {
   final AuthProvider _provider;
 
   AuthProviderAdapter(this._provider) {

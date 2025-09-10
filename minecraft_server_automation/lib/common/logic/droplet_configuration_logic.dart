@@ -61,8 +61,11 @@ class DropletConfigurationLogic {
     required CpuOption? option,
     required StorageMultiplier? multiplier,
   }) {
-    if (region == null || architecture == null || category == null || 
-        option == null || multiplier == null) {
+    if (region == null ||
+        architecture == null ||
+        category == null ||
+        option == null ||
+        multiplier == null) {
       return false;
     }
 

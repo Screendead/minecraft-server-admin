@@ -70,7 +70,7 @@ class UnitFormatter {
     final toIndex = units.indexOf(toUnit.toUpperCase());
 
     if (fromIndex == -1 || toIndex == -1) return 1.0;
-    
+
     // If same unit, no conversion needed
     if (fromIndex == toIndex) return 1.0;
 

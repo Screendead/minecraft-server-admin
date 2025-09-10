@@ -311,5 +311,4 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
     widget.onApplyFilter(filter);
     Navigator.of(context).pop();
   }
-
 }

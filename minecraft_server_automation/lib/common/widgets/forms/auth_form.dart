@@ -118,7 +118,8 @@ class _AuthFormState extends State<AuthForm> {
               if (value == null || value.isEmpty) {
                 return 'Please enter your email';
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value)) {
                 return 'Please enter a valid email';
               }
               return null;
@@ -219,7 +220,8 @@ class _AuthFormState extends State<AuthForm> {
             ),
             const SizedBox(height: 8),
             OutlinedButton(
-              onPressed: widget.authService.isLoading ? null : _debugCreateAccount,
+              onPressed:
+                  widget.authService.isLoading ? null : _debugCreateAccount,
               child: const Text('Debug Create Account'),
             ),
           ],
