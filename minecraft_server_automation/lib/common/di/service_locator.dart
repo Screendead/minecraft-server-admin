@@ -1,7 +1,6 @@
 import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/droplet_config_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/region_selection_service.dart';
-import 'package:minecraft_server_automation/common/interfaces/http_client.dart';
 import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart';
@@ -10,14 +9,12 @@ import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/providers/droplet_config_provider.dart';
 import 'package:minecraft_server_automation/common/adapters/droplet_config_provider_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/auth_provider_adapter.dart';
-import 'package:minecraft_server_automation/common/adapters/http_client_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/ios_biometric_auth_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/ios_secure_storage_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/location_service_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/logging_service_adapter.dart';
 import 'package:minecraft_server_automation/services/region_selection_service.dart';
 import 'package:minecraft_server_automation/services/logging_service.dart';
-import 'package:http/http.dart' as http;
 
 /// Simple service locator for dependency injection
 /// This makes it easy to swap implementations for testing
@@ -56,12 +53,7 @@ class ServiceLocator {
   void registerDefaults({
     AuthProvider? authProvider,
     DropletConfigProvider? dropletConfigProvider,
-    http.Client? httpClient,
   }) {
-    // Register HTTP client
-    register<HttpClientInterface>(
-        HttpClientAdapter(httpClient ?? http.Client()));
-
     // Register auth service - use adapter to make AuthProvider conform to AuthServiceInterface
     if (authProvider != null) {
       register<AuthServiceInterface>(AuthProviderAdapter(authProvider));
@@ -97,9 +89,6 @@ extension ServiceLocatorExtension on ServiceLocator {
   /// Get region selection service
   RegionSelectionServiceInterface get regionSelectionService =>
       get<RegionSelectionServiceInterface>();
-
-  /// Get HTTP client
-  HttpClientInterface get httpClient => get<HttpClientInterface>();
 
   /// Get biometric auth service
   BiometricAuthServiceInterface get biometricAuthService => get<BiometricAuthServiceInterface>();

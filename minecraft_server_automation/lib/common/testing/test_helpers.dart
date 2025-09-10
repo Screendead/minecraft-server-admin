@@ -1,10 +1,8 @@
 import 'package:minecraft_server_automation/common/mocks/mock_auth_service.dart';
 import 'package:minecraft_server_automation/common/mocks/mock_droplet_config_service.dart';
-import 'package:minecraft_server_automation/common/mocks/mock_http_client.dart';
 import 'package:minecraft_server_automation/common/mocks/mock_biometric_auth_service.dart';
 import 'package:minecraft_server_automation/common/mocks/mock_secure_storage_service.dart';
 import 'package:minecraft_server_automation/common/mocks/mock_location_service.dart';
-import 'package:minecraft_server_automation/common/interfaces/http_client.dart';
 import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/droplet_config_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart';
@@ -21,17 +19,12 @@ class TestHelpers {
     _serviceLocator.clear();
 
     // Register mock services
-    _serviceLocator.register<HttpClientInterface>(MockHttpClient());
     _serviceLocator.register<AuthServiceInterface>(MockAuthService());
     _serviceLocator.register<DropletConfigServiceInterface>(MockDropletConfigService());
     _serviceLocator.register<BiometricAuthServiceInterface>(MockBiometricAuthService());
     _serviceLocator.register<SecureStorageServiceInterface>(MockSecureStorageService());
     _serviceLocator.register<LocationServiceInterface>(MockLocationService());
   }
-
-  /// Get mock HTTP client for test control
-  static MockHttpClient get mockHttpClient =>
-      _serviceLocator.get<HttpClientInterface>() as MockHttpClient;
 
   /// Get mock auth service for test control
   static MockAuthService get mockAuthService =>
@@ -55,7 +48,6 @@ class TestHelpers {
 
   /// Reset all mock services to default state
   static void resetAllMocks() {
-    mockHttpClient.reset();
     mockAuthService.reset();
     mockDropletConfigService.reset();
     mockBiometricAuthService.reset();

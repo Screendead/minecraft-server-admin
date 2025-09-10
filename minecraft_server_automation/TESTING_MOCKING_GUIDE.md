@@ -281,7 +281,6 @@ void main() {
 - `LocationServiceInterface` - Location Services
 - `DropletConfigServiceInterface` - Droplet Configuration
 - `LoggingServiceInterface` - Logging
-- `HttpClientInterface` - HTTP Client
 - `RegionSelectionServiceInterface` - Region Selection
 
 This mocking system allows you to test components in isolation without external dependencies while maintaining clean, maintainable code.
