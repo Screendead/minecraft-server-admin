@@ -6,12 +6,9 @@
 import 'dart:async' as _i3;
 
 import 'package:local_auth/local_auth.dart' as _i4;
-import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart'
-    as _i2;
 import 'package:minecraft_server_automation/services/ios_secure_api_key_service.dart'
-    as _i6;
+    as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -28,99 +25,11 @@ import 'package:mockito/src/dummies.dart' as _i5;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-/// A class which mocks [IOSBiometricEncryptionService].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockIOSBiometricEncryptionService extends _i1.Mock
-    implements _i2.IOSBiometricEncryptionService {
-  MockIOSBiometricEncryptionService() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i3.Future<bool> isBiometricAvailable() => (super.noSuchMethod(
-        Invocation.method(
-          #isBiometricAvailable,
-          [],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
-
-  @override
-  _i3.Future<List<_i4.BiometricType>> getAvailableBiometrics() =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getAvailableBiometrics,
-          [],
-        ),
-        returnValue:
-            _i3.Future<List<_i4.BiometricType>>.value(<_i4.BiometricType>[]),
-      ) as _i3.Future<List<_i4.BiometricType>>);
-
-  @override
-  _i3.Future<String> encryptWithBiometrics(String? data) => (super.noSuchMethod(
-        Invocation.method(
-          #encryptWithBiometrics,
-          [data],
-        ),
-        returnValue: _i3.Future<String>.value(_i5.dummyValue<String>(
-          this,
-          Invocation.method(
-            #encryptWithBiometrics,
-            [data],
-          ),
-        )),
-      ) as _i3.Future<String>);
-
-  @override
-  _i3.Future<String> decryptWithBiometrics() => (super.noSuchMethod(
-        Invocation.method(
-          #decryptWithBiometrics,
-          [],
-        ),
-        returnValue: _i3.Future<String>.value(_i5.dummyValue<String>(
-          this,
-          Invocation.method(
-            #decryptWithBiometrics,
-            [],
-          ),
-        )),
-      ) as _i3.Future<String>);
-
-  @override
-  _i3.Future<bool> hasEncryptedData() => (super.noSuchMethod(
-        Invocation.method(
-          #hasEncryptedData,
-          [],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
-
-  @override
-  _i3.Future<Map<String, dynamic>?> getKeyMetadata() => (super.noSuchMethod(
-        Invocation.method(
-          #getKeyMetadata,
-          [],
-        ),
-        returnValue: _i3.Future<Map<String, dynamic>?>.value(),
-      ) as _i3.Future<Map<String, dynamic>?>);
-
-  @override
-  _i3.Future<void> clearEncryptedData() => (super.noSuchMethod(
-        Invocation.method(
-          #clearEncryptedData,
-          [],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-}
-
 /// A class which mocks [IOSSecureApiKeyService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockIOSSecureApiKeyService extends _i1.Mock
-    implements _i6.IOSSecureApiKeyService {
+    implements _i2.IOSSecureApiKeyService {
   MockIOSSecureApiKeyService() {
     _i1.throwOnMissingStub(this);
   }

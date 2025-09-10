@@ -5,7 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 import 'dart:io' as _i2;
-import 'dart:ui' as _i17;
+import 'dart:ui' as _i18;
 
 import 'package:minecraft_server_automation/common/interfaces/api_key_cache_service.dart'
     as _i21;
@@ -16,38 +16,40 @@ import 'package:minecraft_server_automation/common/interfaces/biometric_auth_ser
 import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_service.dart'
     as _i22;
 import 'package:minecraft_server_automation/common/interfaces/droplet_config_service.dart'
-    as _i7;
+    as _i8;
 import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart'
     as _i25;
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart'
-    as _i15;
-import 'package:minecraft_server_automation/common/interfaces/logging_service.dart'
     as _i16;
+import 'package:minecraft_server_automation/common/interfaces/logging_service.dart'
+    as _i17;
 import 'package:minecraft_server_automation/common/interfaces/minecraft_server_service.dart'
     as _i26;
 import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart'
     as _i24;
 import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart'
-    as _i27;
+    as _i28;
 import 'package:minecraft_server_automation/common/interfaces/region_selection_service.dart'
     as _i20;
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart'
-    as _i6;
+    as _i7;
 import 'package:minecraft_server_automation/models/cpu_architecture.dart'
-    as _i12;
-import 'package:minecraft_server_automation/models/cpu_category.dart' as _i11;
-import 'package:minecraft_server_automation/models/cpu_option.dart' as _i13;
+    as _i13;
+import 'package:minecraft_server_automation/models/cpu_category.dart' as _i12;
+import 'package:minecraft_server_automation/models/cpu_option.dart' as _i14;
 import 'package:minecraft_server_automation/models/droplet_creation_request.dart'
     as _i23;
-import 'package:minecraft_server_automation/models/droplet_size.dart' as _i8;
-import 'package:minecraft_server_automation/models/log_entry.dart' as _i18;
+import 'package:minecraft_server_automation/models/droplet_size.dart' as _i9;
+import 'package:minecraft_server_automation/models/log_entry.dart' as _i19;
+import 'package:minecraft_server_automation/models/minecraft_server_info.dart'
+    as _i27;
 import 'package:minecraft_server_automation/models/minecraft_version.dart'
-    as _i10;
-import 'package:minecraft_server_automation/models/region.dart' as _i9;
+    as _i11;
+import 'package:minecraft_server_automation/models/region.dart' as _i10;
 import 'package:minecraft_server_automation/models/storage_multiplier.dart'
-    as _i14;
+    as _i15;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i19;
+import 'package:mockito/src/dummies.dart' as _i6;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -159,20 +161,10 @@ class MockBiometricAuthServiceInterface extends _i1.Mock
   }
 
   @override
-  _i4.Future<bool> isAvailable() => (super.noSuchMethod(
+  _i4.Future<bool> isBiometricAvailable() => (super.noSuchMethod(
         Invocation.method(
-          #isAvailable,
+          #isBiometricAvailable,
           [],
-        ),
-        returnValue: _i4.Future<bool>.value(false),
-      ) as _i4.Future<bool>);
-
-  @override
-  _i4.Future<bool> authenticate({String? reason}) => (super.noSuchMethod(
-        Invocation.method(
-          #authenticate,
-          [],
-          {#reason: reason},
         ),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
@@ -187,13 +179,81 @@ class MockBiometricAuthServiceInterface extends _i1.Mock
         returnValue:
             _i4.Future<List<_i5.BiometricType>>.value(<_i5.BiometricType>[]),
       ) as _i4.Future<List<_i5.BiometricType>>);
+
+  @override
+  _i4.Future<String> encryptWithBiometrics(String? data) => (super.noSuchMethod(
+        Invocation.method(
+          #encryptWithBiometrics,
+          [data],
+        ),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #encryptWithBiometrics,
+            [data],
+          ),
+        )),
+      ) as _i4.Future<String>);
+
+  @override
+  _i4.Future<String> decryptWithBiometrics() => (super.noSuchMethod(
+        Invocation.method(
+          #decryptWithBiometrics,
+          [],
+        ),
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
+          this,
+          Invocation.method(
+            #decryptWithBiometrics,
+            [],
+          ),
+        )),
+      ) as _i4.Future<String>);
+
+  @override
+  _i4.Future<bool> hasEncryptedData() => (super.noSuchMethod(
+        Invocation.method(
+          #hasEncryptedData,
+          [],
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
+  _i4.Future<Map<String, dynamic>?> getKeyMetadata() => (super.noSuchMethod(
+        Invocation.method(
+          #getKeyMetadata,
+          [],
+        ),
+        returnValue: _i4.Future<Map<String, dynamic>?>.value(),
+      ) as _i4.Future<Map<String, dynamic>?>);
+
+  @override
+  _i4.Future<void> clearEncryptedData() => (super.noSuchMethod(
+        Invocation.method(
+          #clearEncryptedData,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> rotateEncryptionKey() => (super.noSuchMethod(
+        Invocation.method(
+          #rotateEncryptionKey,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 }
 
 /// A class which mocks [SecureStorageServiceInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSecureStorageServiceInterface extends _i1.Mock
-    implements _i6.SecureStorageServiceInterface {
+    implements _i7.SecureStorageServiceInterface {
   MockSecureStorageServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
@@ -267,34 +327,34 @@ class MockSecureStorageServiceInterface extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDropletConfigServiceInterface extends _i1.Mock
-    implements _i7.DropletConfigServiceInterface {
+    implements _i8.DropletConfigServiceInterface {
   MockDropletConfigServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i8.DropletSize> get dropletSizes => (super.noSuchMethod(
+  List<_i9.DropletSize> get dropletSizes => (super.noSuchMethod(
         Invocation.getter(#dropletSizes),
-        returnValue: <_i8.DropletSize>[],
-      ) as List<_i8.DropletSize>);
+        returnValue: <_i9.DropletSize>[],
+      ) as List<_i9.DropletSize>);
 
   @override
-  List<_i9.Region> get regions => (super.noSuchMethod(
+  List<_i10.Region> get regions => (super.noSuchMethod(
         Invocation.getter(#regions),
-        returnValue: <_i9.Region>[],
-      ) as List<_i9.Region>);
+        returnValue: <_i10.Region>[],
+      ) as List<_i10.Region>);
 
   @override
-  List<_i10.MinecraftVersion> get minecraftVersions => (super.noSuchMethod(
+  List<_i11.MinecraftVersion> get minecraftVersions => (super.noSuchMethod(
         Invocation.getter(#minecraftVersions),
-        returnValue: <_i10.MinecraftVersion>[],
-      ) as List<_i10.MinecraftVersion>);
+        returnValue: <_i11.MinecraftVersion>[],
+      ) as List<_i11.MinecraftVersion>);
 
   @override
-  List<_i10.MinecraftVersion> get releaseVersions => (super.noSuchMethod(
+  List<_i11.MinecraftVersion> get releaseVersions => (super.noSuchMethod(
         Invocation.getter(#releaseVersions),
-        returnValue: <_i10.MinecraftVersion>[],
-      ) as List<_i10.MinecraftVersion>);
+        returnValue: <_i11.MinecraftVersion>[],
+      ) as List<_i11.MinecraftVersion>);
 
   @override
   bool get isLoading => (super.noSuchMethod(
@@ -313,31 +373,31 @@ class MockDropletConfigServiceInterface extends _i1.Mock
       ) as _i4.Future<void>);
 
   @override
-  List<_i11.CpuCategory> getAvailableCategoriesForArchitecture(
-          _i12.CpuArchitecture? architecture) =>
+  List<_i12.CpuCategory> getAvailableCategoriesForArchitecture(
+          _i13.CpuArchitecture? architecture) =>
       (super.noSuchMethod(
         Invocation.method(
           #getAvailableCategoriesForArchitecture,
           [architecture],
         ),
-        returnValue: <_i11.CpuCategory>[],
-      ) as List<_i11.CpuCategory>);
+        returnValue: <_i12.CpuCategory>[],
+      ) as List<_i12.CpuCategory>);
 
   @override
-  List<_i13.CpuOption> getAvailableOptionsForCategory(
-          _i11.CpuCategory? category) =>
+  List<_i14.CpuOption> getAvailableOptionsForCategory(
+          _i12.CpuCategory? category) =>
       (super.noSuchMethod(
         Invocation.method(
           #getAvailableOptionsForCategory,
           [category],
         ),
-        returnValue: <_i13.CpuOption>[],
-      ) as List<_i13.CpuOption>);
+        returnValue: <_i14.CpuOption>[],
+      ) as List<_i14.CpuOption>);
 
   @override
-  List<_i14.StorageMultiplier> getAvailableStorageMultipliersFor(
-    _i11.CpuCategory? category,
-    _i13.CpuOption? option,
+  List<_i15.StorageMultiplier> getAvailableStorageMultipliersFor(
+    _i12.CpuCategory? category,
+    _i14.CpuOption? option,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -347,16 +407,16 @@ class MockDropletConfigServiceInterface extends _i1.Mock
             option,
           ],
         ),
-        returnValue: <_i14.StorageMultiplier>[],
-      ) as List<_i14.StorageMultiplier>);
+        returnValue: <_i15.StorageMultiplier>[],
+      ) as List<_i15.StorageMultiplier>);
 
   @override
-  List<_i8.DropletSize> getSizesForStorage(
+  List<_i9.DropletSize> getSizesForStorage(
     String? regionSlug,
-    _i12.CpuArchitecture? architecture,
-    _i11.CpuCategory? category,
-    _i13.CpuOption? option,
-    _i14.StorageMultiplier? multiplier,
+    _i13.CpuArchitecture? architecture,
+    _i12.CpuCategory? category,
+    _i14.CpuOption? option,
+    _i15.StorageMultiplier? multiplier,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -369,58 +429,58 @@ class MockDropletConfigServiceInterface extends _i1.Mock
             multiplier,
           ],
         ),
-        returnValue: <_i8.DropletSize>[],
-      ) as List<_i8.DropletSize>);
+        returnValue: <_i9.DropletSize>[],
+      ) as List<_i9.DropletSize>);
 
   @override
-  List<_i8.DropletSize> getRecommendedSizesForRegion(String? regionSlug) =>
+  List<_i9.DropletSize> getRecommendedSizesForRegion(String? regionSlug) =>
       (super.noSuchMethod(
         Invocation.method(
           #getRecommendedSizesForRegion,
           [regionSlug],
         ),
-        returnValue: <_i8.DropletSize>[],
-      ) as List<_i8.DropletSize>);
+        returnValue: <_i9.DropletSize>[],
+      ) as List<_i9.DropletSize>);
 }
 
 /// A class which mocks [LocationServiceInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockLocationServiceInterface extends _i1.Mock
-    implements _i15.LocationServiceInterface {
+    implements _i16.LocationServiceInterface {
   MockLocationServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i15.LocationPermission> checkPermission() => (super.noSuchMethod(
+  _i4.Future<_i16.LocationPermission> checkPermission() => (super.noSuchMethod(
         Invocation.method(
           #checkPermission,
           [],
         ),
-        returnValue: _i4.Future<_i15.LocationPermission>.value(
-            _i15.LocationPermission.denied),
-      ) as _i4.Future<_i15.LocationPermission>);
+        returnValue: _i4.Future<_i16.LocationPermission>.value(
+            _i16.LocationPermission.denied),
+      ) as _i4.Future<_i16.LocationPermission>);
 
   @override
-  _i4.Future<_i15.LocationPermission> requestPermission() =>
+  _i4.Future<_i16.LocationPermission> requestPermission() =>
       (super.noSuchMethod(
         Invocation.method(
           #requestPermission,
           [],
         ),
-        returnValue: _i4.Future<_i15.LocationPermission>.value(
-            _i15.LocationPermission.denied),
-      ) as _i4.Future<_i15.LocationPermission>);
+        returnValue: _i4.Future<_i16.LocationPermission>.value(
+            _i16.LocationPermission.denied),
+      ) as _i4.Future<_i16.LocationPermission>);
 
   @override
-  _i4.Future<_i15.LocationData?> getCurrentLocation() => (super.noSuchMethod(
+  _i4.Future<_i16.LocationData?> getCurrentLocation() => (super.noSuchMethod(
         Invocation.method(
           #getCurrentLocation,
           [],
         ),
-        returnValue: _i4.Future<_i15.LocationData?>.value(),
-      ) as _i4.Future<_i15.LocationData?>);
+        returnValue: _i4.Future<_i16.LocationData?>.value(),
+      ) as _i4.Future<_i16.LocationData?>);
 
   @override
   _i4.Future<bool> isLocationServiceEnabled() => (super.noSuchMethod(
@@ -436,7 +496,7 @@ class MockLocationServiceInterface extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockLoggingServiceInterface extends _i1.Mock
-    implements _i16.LoggingServiceInterface {
+    implements _i17.LoggingServiceInterface {
   MockLoggingServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
@@ -467,7 +527,7 @@ class MockLoggingServiceInterface extends _i1.Mock
       );
 
   @override
-  void addListener(_i17.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i18.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #addListener,
           [listener],
@@ -476,7 +536,7 @@ class MockLoggingServiceInterface extends _i1.Mock
       );
 
   @override
-  void removeListener(_i17.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i18.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #removeListener,
           [listener],
@@ -487,7 +547,7 @@ class MockLoggingServiceInterface extends _i1.Mock
   @override
   _i4.Future<void> logDebug(
     String? message, {
-    _i18.LogCategory? category = _i18.LogCategory.system,
+    _i19.LogCategory? category = _i19.LogCategory.system,
     String? details,
     Map<String, dynamic>? metadata,
   }) =>
@@ -508,7 +568,7 @@ class MockLoggingServiceInterface extends _i1.Mock
   @override
   _i4.Future<void> logInfo(
     String? message, {
-    _i18.LogCategory? category = _i18.LogCategory.system,
+    _i19.LogCategory? category = _i19.LogCategory.system,
     String? details,
     Map<String, dynamic>? metadata,
   }) =>
@@ -529,7 +589,7 @@ class MockLoggingServiceInterface extends _i1.Mock
   @override
   _i4.Future<void> logWarning(
     String? message, {
-    _i18.LogCategory? category = _i18.LogCategory.system,
+    _i19.LogCategory? category = _i19.LogCategory.system,
     String? details,
     Map<String, dynamic>? metadata,
   }) =>
@@ -550,7 +610,7 @@ class MockLoggingServiceInterface extends _i1.Mock
   @override
   _i4.Future<void> logError(
     String? message, {
-    _i18.LogCategory? category = _i18.LogCategory.error,
+    _i19.LogCategory? category = _i19.LogCategory.error,
     String? details,
     Map<String, dynamic>? metadata,
     Object? error,
@@ -575,7 +635,7 @@ class MockLoggingServiceInterface extends _i1.Mock
   @override
   _i4.Future<void> logFatal(
     String? message, {
-    _i18.LogCategory? category = _i18.LogCategory.error,
+    _i19.LogCategory? category = _i19.LogCategory.error,
     String? details,
     Map<String, dynamic>? metadata,
     Object? error,
@@ -625,33 +685,33 @@ class MockLoggingServiceInterface extends _i1.Mock
       ) as _i4.Future<void>);
 
   @override
-  List<_i18.LogEntry> getLogs() => (super.noSuchMethod(
+  List<_i19.LogEntry> getLogs() => (super.noSuchMethod(
         Invocation.method(
           #getLogs,
           [],
         ),
-        returnValue: <_i18.LogEntry>[],
-      ) as List<_i18.LogEntry>);
+        returnValue: <_i19.LogEntry>[],
+      ) as List<_i19.LogEntry>);
 
   @override
-  List<_i18.LogEntry> getLogsByCategory(_i18.LogCategory? category) =>
+  List<_i19.LogEntry> getLogsByCategory(_i19.LogCategory? category) =>
       (super.noSuchMethod(
         Invocation.method(
           #getLogsByCategory,
           [category],
         ),
-        returnValue: <_i18.LogEntry>[],
-      ) as List<_i18.LogEntry>);
+        returnValue: <_i19.LogEntry>[],
+      ) as List<_i19.LogEntry>);
 
   @override
-  List<_i18.LogEntry> getLogsByLevel(_i18.LogLevel? level) =>
+  List<_i19.LogEntry> getLogsByLevel(_i19.LogLevel? level) =>
       (super.noSuchMethod(
         Invocation.method(
           #getLogsByLevel,
           [level],
         ),
-        returnValue: <_i18.LogEntry>[],
-      ) as List<_i18.LogEntry>);
+        returnValue: <_i19.LogEntry>[],
+      ) as List<_i19.LogEntry>);
 
   @override
   _i4.Future<void> clearLogs() => (super.noSuchMethod(
@@ -674,14 +734,14 @@ class MockLoggingServiceInterface extends _i1.Mock
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<String> exportLogsToJson({_i18.LogFilter? filter}) =>
+  _i4.Future<String> exportLogsToJson({_i19.LogFilter? filter}) =>
       (super.noSuchMethod(
         Invocation.method(
           #exportLogsToJson,
           [],
           {#filter: filter},
         ),
-        returnValue: _i4.Future<String>.value(_i19.dummyValue<String>(
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
           this,
           Invocation.method(
             #exportLogsToJson,
@@ -692,14 +752,14 @@ class MockLoggingServiceInterface extends _i1.Mock
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> exportLogsToCsv({_i18.LogFilter? filter}) =>
+  _i4.Future<String> exportLogsToCsv({_i19.LogFilter? filter}) =>
       (super.noSuchMethod(
         Invocation.method(
           #exportLogsToCsv,
           [],
           {#filter: filter},
         ),
-        returnValue: _i4.Future<String>.value(_i19.dummyValue<String>(
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
           this,
           Invocation.method(
             #exportLogsToCsv,
@@ -710,14 +770,14 @@ class MockLoggingServiceInterface extends _i1.Mock
       ) as _i4.Future<String>);
 
   @override
-  _i4.Future<String> exportLogsToText({_i18.LogFilter? filter}) =>
+  _i4.Future<String> exportLogsToText({_i19.LogFilter? filter}) =>
       (super.noSuchMethod(
         Invocation.method(
           #exportLogsToText,
           [],
           {#filter: filter},
         ),
-        returnValue: _i4.Future<String>.value(_i19.dummyValue<String>(
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
           this,
           Invocation.method(
             #exportLogsToText,
@@ -728,23 +788,23 @@ class MockLoggingServiceInterface extends _i1.Mock
       ) as _i4.Future<String>);
 
   @override
-  List<_i18.LogEntry> getFilteredLogs(_i18.LogFilter? filter) =>
+  List<_i19.LogEntry> getFilteredLogs(_i19.LogFilter? filter) =>
       (super.noSuchMethod(
         Invocation.method(
           #getFilteredLogs,
           [filter],
         ),
-        returnValue: <_i18.LogEntry>[],
-      ) as List<_i18.LogEntry>);
+        returnValue: <_i19.LogEntry>[],
+      ) as List<_i19.LogEntry>);
 
   @override
-  List<_i18.LogEntry> getRecentLogs(int? count) => (super.noSuchMethod(
+  List<_i19.LogEntry> getRecentLogs(int? count) => (super.noSuchMethod(
         Invocation.method(
           #getRecentLogs,
           [count],
         ),
-        returnValue: <_i18.LogEntry>[],
-      ) as List<_i18.LogEntry>);
+        returnValue: <_i19.LogEntry>[],
+      ) as List<_i19.LogEntry>);
 }
 
 /// A class which mocks [RegionSelectionServiceInterface].
@@ -757,15 +817,15 @@ class MockRegionSelectionServiceInterface extends _i1.Mock
   }
 
   @override
-  _i4.Future<_i9.Region?> findClosestRegion(
-          List<_i9.Region>? availableRegions) =>
+  _i4.Future<_i10.Region?> findClosestRegion(
+          List<_i10.Region>? availableRegions) =>
       (super.noSuchMethod(
         Invocation.method(
           #findClosestRegion,
           [availableRegions],
         ),
-        returnValue: _i4.Future<_i9.Region?>.value(),
-      ) as _i4.Future<_i9.Region?>);
+        returnValue: _i4.Future<_i10.Region?>.value(),
+      ) as _i4.Future<_i10.Region?>);
 }
 
 /// A class which mocks [ApiKeyCacheServiceInterface].
@@ -891,25 +951,25 @@ class MockDigitalOceanApiServiceInterface extends _i1.Mock
       ) as _i4.Future<List<Map<String, dynamic>>>);
 
   @override
-  _i4.Future<List<_i8.DropletSize>> getDropletSizes(String? apiKey) =>
+  _i4.Future<List<_i9.DropletSize>> getDropletSizes(String? apiKey) =>
       (super.noSuchMethod(
         Invocation.method(
           #getDropletSizes,
           [apiKey],
         ),
         returnValue:
-            _i4.Future<List<_i8.DropletSize>>.value(<_i8.DropletSize>[]),
-      ) as _i4.Future<List<_i8.DropletSize>>);
+            _i4.Future<List<_i9.DropletSize>>.value(<_i9.DropletSize>[]),
+      ) as _i4.Future<List<_i9.DropletSize>>);
 
   @override
-  _i4.Future<List<_i9.Region>> getRegions(String? apiKey) =>
+  _i4.Future<List<_i10.Region>> getRegions(String? apiKey) =>
       (super.noSuchMethod(
         Invocation.method(
           #getRegions,
           [apiKey],
         ),
-        returnValue: _i4.Future<List<_i9.Region>>.value(<_i9.Region>[]),
-      ) as _i4.Future<List<_i9.Region>>);
+        returnValue: _i4.Future<List<_i10.Region>>.value(<_i10.Region>[]),
+      ) as _i4.Future<List<_i10.Region>>);
 
   @override
   _i4.Future<List<Map<String, dynamic>>> fetchImages(String? apiKey) =>
@@ -959,37 +1019,37 @@ class MockMinecraftVersionsServiceInterface extends _i1.Mock
       );
 
   @override
-  _i4.Future<List<_i10.MinecraftVersion>> getMinecraftVersions() =>
+  _i4.Future<List<_i11.MinecraftVersion>> getMinecraftVersions() =>
       (super.noSuchMethod(
         Invocation.method(
           #getMinecraftVersions,
           [],
         ),
-        returnValue: _i4.Future<List<_i10.MinecraftVersion>>.value(
-            <_i10.MinecraftVersion>[]),
-      ) as _i4.Future<List<_i10.MinecraftVersion>>);
+        returnValue: _i4.Future<List<_i11.MinecraftVersion>>.value(
+            <_i11.MinecraftVersion>[]),
+      ) as _i4.Future<List<_i11.MinecraftVersion>>);
 
   @override
-  _i4.Future<List<_i10.MinecraftVersion>> getReleaseVersions() =>
+  _i4.Future<List<_i11.MinecraftVersion>> getReleaseVersions() =>
       (super.noSuchMethod(
         Invocation.method(
           #getReleaseVersions,
           [],
         ),
-        returnValue: _i4.Future<List<_i10.MinecraftVersion>>.value(
-            <_i10.MinecraftVersion>[]),
-      ) as _i4.Future<List<_i10.MinecraftVersion>>);
+        returnValue: _i4.Future<List<_i11.MinecraftVersion>>.value(
+            <_i11.MinecraftVersion>[]),
+      ) as _i4.Future<List<_i11.MinecraftVersion>>);
 
   @override
-  _i4.Future<List<_i10.MinecraftVersion>> getSnapshotVersions() =>
+  _i4.Future<List<_i11.MinecraftVersion>> getSnapshotVersions() =>
       (super.noSuchMethod(
         Invocation.method(
           #getSnapshotVersions,
           [],
         ),
-        returnValue: _i4.Future<List<_i10.MinecraftVersion>>.value(
-            <_i10.MinecraftVersion>[]),
-      ) as _i4.Future<List<_i10.MinecraftVersion>>);
+        returnValue: _i4.Future<List<_i11.MinecraftVersion>>.value(
+            <_i11.MinecraftVersion>[]),
+      ) as _i4.Future<List<_i11.MinecraftVersion>>);
 
   @override
   _i4.Future<String> getServerJarUrlForVersion(String? versionId) =>
@@ -998,7 +1058,7 @@ class MockMinecraftVersionsServiceInterface extends _i1.Mock
           #getServerJarUrlForVersion,
           [versionId],
         ),
-        returnValue: _i4.Future<String>.value(_i19.dummyValue<String>(
+        returnValue: _i4.Future<String>.value(_i6.dummyValue<String>(
           this,
           Invocation.method(
             #getServerJarUrlForVersion,
@@ -1030,7 +1090,7 @@ class MockEncryptionServiceInterface extends _i1.Mock
             password,
           ],
         ),
-        returnValue: _i19.dummyValue<String>(
+        returnValue: _i6.dummyValue<String>(
           this,
           Invocation.method(
             #encrypt,
@@ -1055,7 +1115,7 @@ class MockEncryptionServiceInterface extends _i1.Mock
             password,
           ],
         ),
-        returnValue: _i19.dummyValue<String>(
+        returnValue: _i6.dummyValue<String>(
           this,
           Invocation.method(
             #decrypt,
@@ -1087,27 +1147,22 @@ class MockMinecraftServerServiceInterface extends _i1.Mock
       );
 
   @override
-  _i4.Future<Map<String, dynamic>?> checkMinecraftServer(
-    String? ip,
-    int? port,
-  ) =>
+  _i4.Future<_i27.MinecraftServerInfo?> checkMinecraftServer(
+          String? ipAddress) =>
       (super.noSuchMethod(
         Invocation.method(
           #checkMinecraftServer,
-          [
-            ip,
-            port,
-          ],
+          [ipAddress],
         ),
-        returnValue: _i4.Future<Map<String, dynamic>?>.value(),
-      ) as _i4.Future<Map<String, dynamic>?>);
+        returnValue: _i4.Future<_i27.MinecraftServerInfo?>.value(),
+      ) as _i4.Future<_i27.MinecraftServerInfo?>);
 }
 
 /// A class which mocks [PathProviderServiceInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPathProviderServiceInterface extends _i1.Mock
-    implements _i27.PathProviderServiceInterface {
+    implements _i28.PathProviderServiceInterface {
   MockPathProviderServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
