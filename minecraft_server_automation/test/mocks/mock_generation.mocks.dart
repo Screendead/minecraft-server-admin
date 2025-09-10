@@ -17,18 +17,16 @@ import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_s
     as _i22;
 import 'package:minecraft_server_automation/common/interfaces/droplet_config_service.dart'
     as _i8;
-import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart'
-    as _i25;
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart'
     as _i16;
 import 'package:minecraft_server_automation/common/interfaces/logging_service.dart'
     as _i17;
 import 'package:minecraft_server_automation/common/interfaces/minecraft_server_service.dart'
-    as _i26;
+    as _i25;
 import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart'
     as _i24;
 import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart'
-    as _i28;
+    as _i27;
 import 'package:minecraft_server_automation/common/interfaces/region_selection_service.dart'
     as _i20;
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart'
@@ -42,7 +40,7 @@ import 'package:minecraft_server_automation/models/droplet_creation_request.dart
 import 'package:minecraft_server_automation/models/droplet_size.dart' as _i9;
 import 'package:minecraft_server_automation/models/log_entry.dart' as _i19;
 import 'package:minecraft_server_automation/models/minecraft_server_info.dart'
-    as _i27;
+    as _i26;
 import 'package:minecraft_server_automation/models/minecraft_version.dart'
     as _i11;
 import 'package:minecraft_server_automation/models/region.dart' as _i10;
@@ -1068,71 +1066,11 @@ class MockMinecraftVersionsServiceInterface extends _i1.Mock
       ) as _i4.Future<String>);
 }
 
-/// A class which mocks [EncryptionServiceInterface].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockEncryptionServiceInterface extends _i1.Mock
-    implements _i25.EncryptionServiceInterface {
-  MockEncryptionServiceInterface() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  String encrypt(
-    String? text,
-    String? password,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #encrypt,
-          [
-            text,
-            password,
-          ],
-        ),
-        returnValue: _i6.dummyValue<String>(
-          this,
-          Invocation.method(
-            #encrypt,
-            [
-              text,
-              password,
-            ],
-          ),
-        ),
-      ) as String);
-
-  @override
-  String decrypt(
-    String? encryptedText,
-    String? password,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #decrypt,
-          [
-            encryptedText,
-            password,
-          ],
-        ),
-        returnValue: _i6.dummyValue<String>(
-          this,
-          Invocation.method(
-            #decrypt,
-            [
-              encryptedText,
-              password,
-            ],
-          ),
-        ),
-      ) as String);
-}
-
 /// A class which mocks [MinecraftServerServiceInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockMinecraftServerServiceInterface extends _i1.Mock
-    implements _i26.MinecraftServerServiceInterface {
+    implements _i25.MinecraftServerServiceInterface {
   MockMinecraftServerServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
@@ -1147,22 +1085,22 @@ class MockMinecraftServerServiceInterface extends _i1.Mock
       );
 
   @override
-  _i4.Future<_i27.MinecraftServerInfo?> checkMinecraftServer(
+  _i4.Future<_i26.MinecraftServerInfo?> checkMinecraftServer(
           String? ipAddress) =>
       (super.noSuchMethod(
         Invocation.method(
           #checkMinecraftServer,
           [ipAddress],
         ),
-        returnValue: _i4.Future<_i27.MinecraftServerInfo?>.value(),
-      ) as _i4.Future<_i27.MinecraftServerInfo?>);
+        returnValue: _i4.Future<_i26.MinecraftServerInfo?>.value(),
+      ) as _i4.Future<_i26.MinecraftServerInfo?>);
 }
 
 /// A class which mocks [PathProviderServiceInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPathProviderServiceInterface extends _i1.Mock
-    implements _i28.PathProviderServiceInterface {
+    implements _i27.PathProviderServiceInterface {
   MockPathProviderServiceInterface() {
     _i1.throwOnMissingStub(this);
   }

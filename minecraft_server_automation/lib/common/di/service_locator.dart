@@ -9,7 +9,6 @@ import 'package:minecraft_server_automation/common/interfaces/api_key_cache_serv
 import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/minecraft_server_service.dart';
-import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/providers/droplet_config_provider.dart';
@@ -23,7 +22,6 @@ import 'package:minecraft_server_automation/services/api_key_cache_service.dart'
 import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
 import 'package:minecraft_server_automation/services/minecraft_versions_service.dart';
 import 'package:minecraft_server_automation/services/minecraft_server_service.dart';
-import 'package:minecraft_server_automation/services/encryption_service.dart';
 import 'package:minecraft_server_automation/services/path_provider_service.dart';
 import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
 
@@ -83,7 +81,6 @@ class ServiceLocator {
     register<DigitalOceanApiServiceInterface>(DigitalOceanApiService());
     register<MinecraftVersionsServiceInterface>(MinecraftVersionsService());
     register<MinecraftServerServiceInterface>(MinecraftServerService());
-    register<EncryptionServiceInterface>(EncryptionService());
     register<PathProviderServiceInterface>(PathProviderService());
 
     // Register platform services (keep adapters for platform-specific implementations)
@@ -136,10 +133,6 @@ extension ServiceLocatorExtension on ServiceLocator {
   /// Get Minecraft server service
   MinecraftServerServiceInterface get minecraftServerService =>
       get<MinecraftServerServiceInterface>();
-
-  /// Get encryption service
-  EncryptionServiceInterface get encryptionService =>
-      get<EncryptionServiceInterface>();
 
   /// Get path provider service
   PathProviderServiceInterface get pathProviderService =>

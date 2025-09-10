@@ -15,7 +15,6 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
   bool _isLoading = false;
   String? _error;
   bool _hasBiometricKey = false;
-  bool _hasPasswordKey = false;
 
   @override
   void initState() {
@@ -28,11 +27,6 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
     try {
       final authProvider = context.read<AuthProvider>();
-
-      // Check for password-based key
-      final passwordKey =
-          authProvider.sharedPreferences.getString('encrypted_api_key');
-      _hasPasswordKey = passwordKey != null && passwordKey.isNotEmpty;
 
       // Check for biometric key (iOS only)
       if (Platform.isIOS) {
@@ -69,7 +63,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
+        throw Exception(
+            'iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       await apiKeyService.storeApiKey(apiKey);
@@ -111,7 +106,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
+        throw Exception(
+            'iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       await apiKeyService.updateApiKey(newApiKey);
@@ -153,7 +149,8 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
+        throw Exception(
+            'iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       await apiKeyService.clearApiKey();
@@ -302,7 +299,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     }
 
     // No API key found
-    if (!_hasBiometricKey && !_hasPasswordKey) {
+    if (!_hasBiometricKey) {
       return const Text(
         'No API key found. Add one to get started.',
         style: TextStyle(fontSize: 12),
@@ -312,12 +309,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     }
 
     // API key exists - show status
-    String statusText = 'API key available';
-    if (_hasBiometricKey) {
-      statusText = 'API key secured with Face ID/Touch ID';
-    } else if (_hasPasswordKey) {
-      statusText = 'API key encrypted with password';
-    }
+    const statusText = 'API key secured with Face ID/Touch ID';
 
     return Text(
       statusText,
@@ -355,7 +347,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
     }
 
     // No API key found
-    if (!_hasBiometricKey && !_hasPasswordKey) {
+    if (!_hasBiometricKey) {
       return TextButton(
         onPressed: () => _showApiKeyInputDialog(),
         style: TextButton.styleFrom(

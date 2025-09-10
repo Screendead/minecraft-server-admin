@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:minecraft_server_automation/services/encryption_service.dart';
 import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
 import 'package:minecraft_server_automation/services/ios_secure_api_key_service.dart';
 import 'package:minecraft_server_automation/services/logging_service.dart';
@@ -12,7 +11,6 @@ class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final SharedPreferences _sharedPreferences;
-  final EncryptionService _encryptionService;
   final LoggingService _loggingService = LoggingService();
 
   User? _user;
@@ -26,11 +24,9 @@ class AuthProvider extends ChangeNotifier {
     required FirebaseAuth firebaseAuth,
     required FirebaseFirestore firestore,
     required SharedPreferences sharedPreferences,
-    EncryptionService? encryptionService,
   })  : _firebaseAuth = firebaseAuth,
         _firestore = firestore,
-        _sharedPreferences = sharedPreferences,
-        _encryptionService = encryptionService ?? EncryptionService() {
+        _sharedPreferences = sharedPreferences {
     _init();
   }
 
@@ -43,7 +39,6 @@ class AuthProvider extends ChangeNotifier {
   FirebaseAuth get firebaseAuth => _firebaseAuth;
   FirebaseFirestore get firestore => _firestore;
   SharedPreferences get sharedPreferences => _sharedPreferences;
-  EncryptionService get encryptionService => _encryptionService;
 
   // Get the iOS API key service (lazy initialization)
   IOSSecureApiKeyService? get iosApiKeyService {
@@ -164,36 +159,11 @@ class AuthProvider extends ChangeNotifier {
       _iosApiKeyService?.onSignOut();
 
       await _firebaseAuth.signOut();
-      // Clear stored API key
-      await _sharedPreferences.remove('encrypted_api_key');
 
       // Clear service references
       _iosApiKeyService = null;
     } catch (e) {
       _setError('Sign out failed: ${e.toString()}');
-    }
-  }
-
-  Future<String?> getDecryptedApiKey(String password) async {
-    try {
-      final encryptedApiKey = _sharedPreferences.getString('encrypted_api_key');
-      if (encryptedApiKey == null) return null;
-
-      return _encryptionService.decrypt(encryptedApiKey, password);
-    } catch (e) {
-      _setError('Failed to decrypt API key: ${e.toString()}');
-      return null;
-    }
-  }
-
-  Future<bool> updateApiKey(String newApiKey, String password) async {
-    try {
-      final encryptedApiKey = _encryptionService.encrypt(newApiKey, password);
-      await _sharedPreferences.setString('encrypted_api_key', encryptedApiKey);
-      return true;
-    } catch (e) {
-      _setError('Failed to update API key: ${e.toString()}');
-      return false;
     }
   }
 
