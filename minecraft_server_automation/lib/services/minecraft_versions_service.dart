@@ -1,24 +1,27 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:minecraft_server_automation/models/minecraft_version.dart';
+import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart';
 
 /// Service for fetching Minecraft versions from the official launcher manifest
-class MinecraftVersionsService {
+class MinecraftVersionsService implements MinecraftVersionsServiceInterface {
   static const String _manifestUrl =
       'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json';
-  static http.Client? _client;
+  http.Client? _client;
 
   /// Set a custom HTTP client for testing
-  static void setClient(http.Client client) {
-    _client = client;
+  @override
+  void setClient(dynamic client) {
+    _client = client as http.Client?;
   }
 
   /// Get the HTTP client (for testing or default)
-  static http.Client get _httpClient => _client ?? http.Client();
+  http.Client get _httpClient => _client ?? http.Client();
 
   /// Fetches all available Minecraft versions from the official manifest
   /// Returns a list of MinecraftVersion objects sorted by release date (newest first)
-  static Future<List<MinecraftVersion>> getMinecraftVersions() async {
+  @override
+  Future<List<MinecraftVersion>> getMinecraftVersions() async {
     try {
       final response = await _httpClient.get(
         Uri.parse(_manifestUrl),
@@ -47,20 +50,23 @@ class MinecraftVersionsService {
   }
 
   /// Fetches only release versions (stable releases)
-  static Future<List<MinecraftVersion>> getReleaseVersions() async {
+  @override
+  Future<List<MinecraftVersion>> getReleaseVersions() async {
     final allVersions = await getMinecraftVersions();
     return allVersions.where((version) => version.type == 'release').toList();
   }
 
   /// Fetches only snapshot versions (preview releases)
-  static Future<List<MinecraftVersion>> getSnapshotVersions() async {
+  @override
+  Future<List<MinecraftVersion>> getSnapshotVersions() async {
     final allVersions = await getMinecraftVersions();
     return allVersions.where((version) => version.type == 'snapshot').toList();
   }
 
   /// Fetches the server JAR URL for a specific Minecraft version
   /// Throws an exception if the version is not found or the URL cannot be fetched
-  static Future<String> getServerJarUrlForVersion(String versionId) async {
+  @override
+  Future<String> getServerJarUrlForVersion(String versionId) async {
     try {
       // First get all versions to find the specific one
       final versions = await getMinecraftVersions();

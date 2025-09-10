@@ -5,24 +5,27 @@ import 'package:minecraft_server_automation/models/region.dart';
 import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/common/di/service_locator.dart';
 import 'package:minecraft_server_automation/models/log_entry.dart';
+import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_service.dart';
 
 /// Service for interacting with DigitalOcean API
-class DigitalOceanApiService {
+class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
   static const String _baseUrl = 'https://api.digitalocean.com/v2';
-  static http.Client? _client;
-  static final ServiceLocator _serviceLocator = ServiceLocator();
+  http.Client? _client;
+  final ServiceLocator _serviceLocator = ServiceLocator();
 
   /// Set a custom HTTP client for testing
-  static void setClient(http.Client client) {
-    _client = client;
+  @override
+  void setClient(dynamic client) {
+    _client = client as http.Client?;
   }
 
   /// Get the HTTP client (for testing or default)
-  static http.Client get _httpClient => _client ?? http.Client();
+  http.Client get _httpClient => _client ?? http.Client();
 
   /// Validates a DigitalOcean API key by making a basic API call
   /// Returns true if the key is valid, false otherwise
-  static Future<bool> validateApiKey(String apiKey) async {
+  @override
+  Future<bool> validateApiKey(String apiKey) async {
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -78,7 +81,8 @@ class DigitalOceanApiService {
 
   /// Gets the account information for a valid API key
   /// Throws an exception if the key is invalid
-  static Future<Map<String, dynamic>> getAccountInfo(String apiKey) async {
+  @override
+  Future<Map<String, dynamic>> getAccountInfo(String apiKey) async {
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -150,7 +154,8 @@ class DigitalOceanApiService {
 
   /// Gets all droplets for the authenticated user
   /// Throws an exception if the API key is invalid or request fails
-  static Future<List<Map<String, dynamic>>> getDroplets(String apiKey) async {
+  @override
+  Future<List<Map<String, dynamic>>> getDroplets(String apiKey) async {
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -223,7 +228,8 @@ class DigitalOceanApiService {
 
   /// Gets all available droplet sizes
   /// Throws an exception if the API key is invalid or request fails
-  static Future<List<DropletSize>> getDropletSizes(String apiKey) async {
+  @override
+  Future<List<DropletSize>> getDropletSizes(String apiKey) async {
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl/sizes?per_page=200'),
       headers: {
@@ -243,7 +249,8 @@ class DigitalOceanApiService {
 
   /// Gets all available regions
   /// Throws an exception if the API key is invalid or request fails
-  static Future<List<Region>> getRegions(String apiKey) async {
+  @override
+  Future<List<Region>> getRegions(String apiKey) async {
     final response = await _httpClient.get(
       Uri.parse('$_baseUrl/regions'),
       headers: {
@@ -263,7 +270,8 @@ class DigitalOceanApiService {
 
   /// Gets all available images
   /// Throws an exception if the API key is invalid or request fails
-  static Future<List<Map<String, dynamic>>> fetchImages(String apiKey) async {
+  @override
+  Future<List<Map<String, dynamic>>> fetchImages(String apiKey) async {
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -352,7 +360,8 @@ class DigitalOceanApiService {
 
   /// Creates a new droplet using the DigitalOcean API
   /// Throws an exception if the API key is invalid or request fails
-  static Future<Map<String, dynamic>> createDroplet(
+  @override
+  Future<Map<String, dynamic>> createDroplet(
     String apiKey,
     DropletCreationRequest request,
   ) async {
