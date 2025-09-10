@@ -52,20 +52,26 @@ jobs:
       with:
         path: |
           ~/.pub-cache
-          app/.dart_tool
-        key: ${{ runner.os }}-flutter-${{ hashFiles('app/pubspec.lock') }}
+          minecraft_server_automation/.dart_tool
+        key: ${{ runner.os }}-flutter-${{ hashFiles('minecraft_server_automation/pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-flutter-
         
     - name: Install Flutter dependencies
       run: |
-        cd app
+        cd minecraft_server_automation
         flutter pub get
         
     - name: Run Flutter tests
       run: |
-        cd app
+        cd minecraft_server_automation
         flutter test --coverage
+        
+    - name: Disable man-db triggers
+      run: |
+        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
+        echo 'DPkg::Post-Invoke {"rm -f /var/cache/apt/archives/*.deb || true";};' | sudo tee /etc/apt/apt.conf.d/02no-clean
+        echo 'DPkg::Post-Invoke {"rm -f /var/lib/dpkg/info/man-db.* || true";};' | sudo tee /etc/apt/apt.conf.d/03no-man-db
         
     - name: Setup LCOV
       uses: hrishikesh-kadam/setup-lcov@v1
@@ -73,14 +79,14 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: app/coverage/lcov.info
+        file: minecraft_server_automation/coverage/lcov.info
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: true
         
     - name: Verify iOS build configuration
       run: |
-        cd app
+        cd minecraft_server_automation
         echo "Verifying iOS build configuration..."
         flutter doctor
         echo "iOS build would require macOS runner - skipping actual build"
@@ -91,4 +97,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: app/coverage/
+        path: minecraft_server_automation/coverage/

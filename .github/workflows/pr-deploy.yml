@@ -61,20 +61,26 @@ jobs:
       with:
         path: |
           ~/.pub-cache
-          app/.dart_tool
-        key: ${{ runner.os }}-flutter-${{ hashFiles('app/pubspec.lock') }}
+          minecraft_server_automation/.dart_tool
+        key: ${{ runner.os }}-flutter-${{ hashFiles('minecraft_server_automation/pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-flutter-
         
     - name: Install Flutter dependencies
       run: |
-        cd app
+        cd minecraft_server_automation
         flutter pub get
         
     - name: Run Flutter tests with coverage
       run: |
-        cd app
+        cd minecraft_server_automation
         flutter test --coverage
+        
+    - name: Disable man-db triggers
+      run: |
+        echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
+        echo 'DPkg::Post-Invoke {"rm -f /var/cache/apt/archives/*.deb || true";};' | sudo tee /etc/apt/apt.conf.d/02no-clean
+        echo 'DPkg::Post-Invoke {"rm -f /var/lib/dpkg/info/man-db.* || true";};' | sudo tee /etc/apt/apt.conf.d/03no-man-db
         
     - name: Setup LCOV
       uses: hrishikesh-kadam/setup-lcov@v1
@@ -82,10 +88,10 @@ jobs:
     - name: Generate coverage report
       uses: zgosalvez/github-actions-report-lcov@v4
       with:
-        coverage-files: app/coverage/lcov.info
+        coverage-files: minecraft_server_automation/coverage/lcov.info
         artifact-name: code-coverage-report
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: app
+        working-directory: minecraft_server_automation
         update-comment: true
         
     - name: Deploy coverage report to Firebase
@@ -96,19 +102,19 @@ jobs:
         
         # Check what coverage files are available and copy them
         echo "Available coverage files:"
-        ls -la app/coverage/
+        ls -la minecraft_server_automation/coverage/
         
         # The zgosalvez/github-actions-report-lcov action generates HTML in a temp directory
-        # We need to copy from there instead of app/coverage
+        # We need to copy from there instead of minecraft_server_automation/coverage
         if [ -d "/tmp/__zgosalvez_github-actions-report-lcov/html" ]; then
           echo "Copying HTML coverage report from LCOV action temp directory..."
           cp -r /tmp/__zgosalvez_github-actions-report-lcov/html/* coverage-deploy/
-        elif [ -d "app/coverage/html" ]; then
+        elif [ -d "minecraft_server_automation/coverage/html" ]; then
           echo "Copying HTML coverage report from html/ subdirectory..."
-          cp -r app/coverage/html/* coverage-deploy/
+          cp -r minecraft_server_automation/coverage/html/* coverage-deploy/
         else
           echo "Copying coverage files directly..."
-          cp -r app/coverage/* coverage-deploy/
+          cp -r minecraft_server_automation/coverage/* coverage-deploy/
         fi
         
         # Create a temporary firebase.json for coverage deployment
@@ -181,7 +187,7 @@ jobs:
         
     - name: Verify iOS build configuration
       run: |
-        cd app
+        cd minecraft_server_automation
         echo "Verifying iOS build configuration..."
         flutter doctor
         echo "iOS build would require macOS runner - skipping actual build"

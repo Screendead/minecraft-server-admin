@@ -5,21 +5,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "app",
-      "cwd": "app",
+      "name": "Debug",
+      "cwd": "minecraft_server_automation",
       "request": "launch",
       "type": "dart"
     },
     {
-      "name": "app (profile mode)",
-      "cwd": "app",
+      "name": "Profile",
+      "cwd": "minecraft_server_automation",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
-      "name": "app (release mode)",
-      "cwd": "app",
+      "name": "Install",
+      "cwd": "minecraft_server_automation",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"
