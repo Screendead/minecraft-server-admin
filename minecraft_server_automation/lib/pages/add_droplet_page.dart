@@ -5,8 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:minecraft_server_automation/providers/droplet_config_provider.dart';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
-import 'package:minecraft_server_automation/services/ios_secure_api_key_service.dart';
-import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
 import 'package:minecraft_server_automation/common/di/service_locator.dart';
 import 'package:minecraft_server_automation/models/cpu_architecture.dart';
 import 'package:minecraft_server_automation/models/cpu_category.dart';
@@ -69,11 +67,18 @@ class _AddDropletPageState extends State<AddDropletPage> {
       final authProvider = context.read<AuthProvider>();
       final configProvider = context.read<DropletConfigProvider>();
 
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: authProvider.firestore,
-        auth: authProvider.firebaseAuth,
-        biometricService: IOSBiometricEncryptionService(),
-      );
+      // Use the existing API key service from AuthProvider instead of creating a new one
+      final apiKeyService = authProvider.iosApiKeyService;
+      if (apiKeyService == null) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'iOS API key service unavailable. Biometric API key storage not supported on this platform.';
+            _isLoadingData = false;
+          });
+        }
+        return;
+      }
+
       final apiKey = await apiKeyService.getApiKey();
 
       if (apiKey == null) {
@@ -331,13 +336,13 @@ class _AddDropletPageState extends State<AddDropletPage> {
     });
 
     try {
-      // Get API key
+      // Get API key using the existing service from AuthProvider
       final authProvider = context.read<AuthProvider>();
-      final apiKeyService = IOSSecureApiKeyService(
-        firestore: authProvider.firestore,
-        auth: authProvider.firebaseAuth,
-        biometricService: IOSBiometricEncryptionService(),
-      );
+      final apiKeyService = authProvider.iosApiKeyService;
+      if (apiKeyService == null) {
+        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
+      }
+
       final apiKey = await apiKeyService.getApiKey();
 
       if (apiKey == null) {
@@ -346,7 +351,8 @@ class _AddDropletPageState extends State<AddDropletPage> {
       }
 
       // Fetch available images and select latest Ubuntu LTS image
-      final images = await ServiceLocator().digitalOceanApiService.fetchImages(apiKey);
+      final images =
+          await ServiceLocator().digitalOceanApiService.fetchImages(apiKey);
       final ubuntuImages = images
           .where((img) =>
               img['distribution'] == 'Ubuntu' &&
@@ -373,8 +379,9 @@ class _AddDropletPageState extends State<AddDropletPage> {
       );
 
       // Create the droplet
-      final droplet =
-          await ServiceLocator().digitalOceanApiService.createDroplet(apiKey, request);
+      final droplet = await ServiceLocator()
+          .digitalOceanApiService
+          .createDroplet(apiKey, request);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -532,7 +539,9 @@ write_files:
   Future<String> _getServerJarUrl(String version) async {
     try {
       // Use the MinecraftVersionsService to fetch the actual download URL from the Minecraft version manifest
-      return await ServiceLocator().minecraftVersionsService.getServerJarUrlForVersion(version);
+      return await ServiceLocator()
+          .minecraftVersionsService
+          .getServerJarUrlForVersion(version);
     } catch (e) {
       // Fallback to a generic URL if version-specific fetching fails
       // This ensures the droplet creation doesn't fail due to version manifest issues

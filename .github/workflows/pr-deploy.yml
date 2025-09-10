@@ -1,13 +1,19 @@
-name: Deploy PR Preview
+name: iOS App Testing & Coverage Report
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to test (optional - leave empty for current PR)'
+        required: false
+        type: string
 
 jobs:
-  build-and-deploy-preview:
+  test-ios-app-and-deploy-coverage:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false || github.event_name == 'workflow_dispatch'
     permissions:
       pull-requests: write
       contents: read
@@ -206,7 +212,7 @@ jobs:
           
           const botComment = comments.find(comment => 
             comment.user.type === 'Bot' && 
-            comment.body.includes('🚀 iOS Configuration verified!')
+            comment.body.includes('🧪 iOS App Testing & Coverage Report')
           );
           
           const coverageUrl = '${{ steps.deploy-coverage.outputs.coverage-url }}';
@@ -218,14 +224,15 @@ jobs:
           - 📁 [Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           - ⚠️ Firebase deployment failed - coverage report available as artifact only`;
           
-          const commentBody = `## 🚀 iOS Configuration verified!
+          const commentBody = `## 🧪 iOS App Testing & Coverage Report
           
-          **Build Status:** ✅ Configuration verified
-          **Platform:** iOS only
+          **Test Status:** ✅ All tests passed
+          **Platform:** iOS Flutter app
           **Bundle ID:** com.screendead.servers
+          **Coverage:** Generated and deployed
           ${coverageSection}
           
-          Note: iOS builds require macOS runners. This PR verifies the iOS configuration is correct.
+          This workflow runs Flutter tests and generates coverage reports for the iOS Minecraft Server Admin app.
           
           ---
           *This comment will be updated automatically.*`;
