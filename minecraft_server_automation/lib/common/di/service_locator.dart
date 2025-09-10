@@ -5,16 +5,27 @@ import 'package:minecraft_server_automation/common/interfaces/biometric_auth_ser
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/logging_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/api_key_cache_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/digitalocean_api_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/minecraft_versions_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/encryption_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/path_provider_service.dart';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/providers/droplet_config_provider.dart';
 import 'package:minecraft_server_automation/common/adapters/droplet_config_provider_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/auth_provider_adapter.dart';
-import 'package:minecraft_server_automation/common/adapters/ios_biometric_auth_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/ios_secure_storage_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/location_service_adapter.dart';
-import 'package:minecraft_server_automation/common/adapters/logging_service_adapter.dart';
 import 'package:minecraft_server_automation/services/region_selection_service.dart';
 import 'package:minecraft_server_automation/services/logging_service.dart';
+import 'package:minecraft_server_automation/services/api_key_cache_service.dart';
+import 'package:minecraft_server_automation/services/digitalocean_api_service.dart';
+import 'package:minecraft_server_automation/services/minecraft_versions_service.dart';
+import 'package:minecraft_server_automation/services/minecraft_server_service.dart';
+import 'package:minecraft_server_automation/services/encryption_service.dart';
+import 'package:minecraft_server_automation/services/path_provider_service.dart';
+import 'package:minecraft_server_automation/services/ios_biometric_encryption_service.dart';
 
 /// Simple service locator for dependency injection
 /// This makes it easy to swap implementations for testing
@@ -65,16 +76,20 @@ class ServiceLocator {
           DropletConfigProviderAdapter(dropletConfigProvider));
     }
 
-    // Register region selection service
+    // Register core services (direct implementations)
     register<RegionSelectionServiceInterface>(RegionSelectionService());
+    register<LoggingServiceInterface>(LoggingService());
+    register<ApiKeyCacheServiceInterface>(ApiKeyCacheService());
+    register<DigitalOceanApiServiceInterface>(DigitalOceanApiService());
+    register<MinecraftVersionsServiceInterface>(MinecraftVersionsService());
+    register<MinecraftServerServiceInterface>(MinecraftServerService());
+    register<EncryptionServiceInterface>(EncryptionService());
+    register<PathProviderServiceInterface>(PathProviderService());
 
-    // Register platform services
-    register<BiometricAuthServiceInterface>(IOSBiometricAuthAdapter());
+    // Register platform services (keep adapters for platform-specific implementations)
+    register<BiometricAuthServiceInterface>(IOSBiometricEncryptionService());
     register<SecureStorageServiceInterface>(IOSSecureStorageAdapter());
     register<LocationServiceInterface>(LocationServiceAdapter());
-
-    // Register logging service
-    register<LoggingServiceInterface>(LoggingServiceAdapter(LoggingService()));
   }
 }
 
@@ -105,4 +120,28 @@ extension ServiceLocatorExtension on ServiceLocator {
 
   /// Get logging service
   LoggingServiceInterface get loggingService => get<LoggingServiceInterface>();
+
+  /// Get API key cache service
+  ApiKeyCacheServiceInterface get apiKeyCacheService =>
+      get<ApiKeyCacheServiceInterface>();
+
+  /// Get DigitalOcean API service
+  DigitalOceanApiServiceInterface get digitalOceanApiService =>
+      get<DigitalOceanApiServiceInterface>();
+
+  /// Get Minecraft versions service
+  MinecraftVersionsServiceInterface get minecraftVersionsService =>
+      get<MinecraftVersionsServiceInterface>();
+
+  /// Get Minecraft server service
+  MinecraftServerServiceInterface get minecraftServerService =>
+      get<MinecraftServerServiceInterface>();
+
+  /// Get encryption service
+  EncryptionServiceInterface get encryptionService =>
+      get<EncryptionServiceInterface>();
+
+  /// Get path provider service
+  PathProviderServiceInterface get pathProviderService =>
+      get<PathProviderServiceInterface>();
 }
