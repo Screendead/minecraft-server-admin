@@ -72,7 +72,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
       if (apiKeyService == null) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'User not authenticated';
+            _errorMessage = 'iOS API key service unavailable. Biometric API key storage not supported on this platform.';
             _isLoadingData = false;
           });
         }
@@ -340,7 +340,7 @@ class _AddDropletPageState extends State<AddDropletPage> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('User not authenticated');
+        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       final apiKey = await apiKeyService.getApiKey();

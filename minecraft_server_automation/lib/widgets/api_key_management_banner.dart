@@ -69,7 +69,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('User not authenticated');
+        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       await apiKeyService.storeApiKey(apiKey);
@@ -111,7 +111,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('User not authenticated');
+        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       await apiKeyService.updateApiKey(newApiKey);
@@ -153,7 +153,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       final authProvider = context.read<AuthProvider>();
       final apiKeyService = authProvider.iosApiKeyService;
       if (apiKeyService == null) {
-        throw Exception('User not authenticated');
+        throw Exception('iOS API key service unavailable. Biometric API key storage not supported on this platform.');
       }
 
       await apiKeyService.clearApiKey();
