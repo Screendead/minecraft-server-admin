@@ -1,25 +1,48 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:minecraft_server_automation/services/logging_service.dart';
 import 'package:minecraft_server_automation/models/log_entry.dart';
+import '../mocks/mock_generation.mocks.dart';
 
 void main() {
   // Initialize Flutter binding for tests
   TestWidgetsFlutterBinding.ensureInitialized();
   group('LoggingService', () {
     late LoggingService loggingService;
+    late Directory mockDirectory;
+    late MockPathProviderServiceInterface mockPathProvider;
 
     setUp(() {
+      // Create a mock directory for testing
+      mockDirectory = Directory.systemTemp.createTempSync('logging_test');
+
+      // Create mock path provider
+      mockPathProvider = MockPathProviderServiceInterface();
+      when(mockPathProvider.getApplicationDocumentsDirectory())
+          .thenAnswer((_) async => mockDirectory);
+
       // Get the singleton instance
       loggingService = LoggingService();
 
-      // Reset any existing state
-      loggingService.clearLogs();
+      // Set the mock path provider
+      loggingService.setPathProvider(mockPathProvider);
+
+      // Reset any existing state - clear logs and reset initialization state
+      loggingService.reset();
     });
 
     tearDown(() {
       // Clean up after each test
       loggingService.clearLogs();
+
+      // Clean up mock directory
+      try {
+        mockDirectory.deleteSync(recursive: true);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
     });
 
     group('Initialization', () {
@@ -33,13 +56,30 @@ void main() {
         expect(loggingService.currentUserId, isNull);
       });
 
+      test('should initialize successfully with mocked path_provider',
+          () async {
+        // Now we can test successful initialization with mocked path_provider
+        await loggingService.initialize();
+
+        expect(loggingService.isInitialized, isTrue);
+        expect(loggingService.currentSessionId, isNotNull);
+
+        // Verify that the initialization log was created
+        final logs = loggingService.getLogs();
+        expect(logs.length, equals(1));
+        expect(logs.first.message, equals('Logging service initialized'));
+        expect(logs.first.category, equals(LogCategory.system));
+      });
+
       test('should handle initialization failure gracefully', () async {
-        // Note: We can't test successful initialization in unit tests due to path_provider dependency
-        // This test verifies that the service handles initialization failures gracefully
+        // Mock path_provider to throw an error
+        when(mockPathProvider.getApplicationDocumentsDirectory())
+            .thenThrow(Exception('Path provider error'));
+
         try {
           await loggingService.initialize();
         } catch (e) {
-          // Expected to fail in test environment
+          // Expected to fail when path_provider throws
           expect(e, isNotNull);
         }
 
@@ -522,18 +562,20 @@ void main() {
         final logs = loggingService.getLogs();
         expect(logs.length, equals(1));
         expect(logs.first.userId, equals(userId));
-        // Note: sessionId will be null until service is initialized
+        // sessionId will be null until service is initialized
         expect(logs.first.sessionId, isNull);
       });
 
       test('should handle session ID when service is initialized', () async {
-        // Note: We can't easily test initialization in unit tests due to path_provider dependency
-        // This test verifies that session ID is null when not initialized
-        await loggingService.logInfo('Test message before init');
+        // Initialize the service first
+        await loggingService.initialize();
+
+        await loggingService.logInfo('Test message after init');
 
         final logs = loggingService.getLogs();
-        expect(logs.length, equals(1));
-        expect(logs.first.sessionId, isNull);
+        expect(logs.length, equals(2)); // Initialization log + our test log
+        expect(logs.first.sessionId,
+            isNotNull); // Should have session ID after init
       });
 
       test('should generate unique IDs for each log entry', () async {
