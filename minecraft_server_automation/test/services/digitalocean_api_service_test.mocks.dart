@@ -9,9 +9,9 @@ import 'dart:typed_data' as _i6;
 import 'dart:ui' as _i8;
 
 import 'package:http/http.dart' as _i2;
-import 'package:minecraft_server_automation/models/log_entry.dart' as _i9;
-import 'package:minecraft_server_automation/services/logging_service.dart'
+import 'package:minecraft_server_automation/common/interfaces/logging_service.dart'
     as _i7;
+import 'package:minecraft_server_automation/models/log_entry.dart' as _i9;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 
@@ -287,11 +287,12 @@ class MockClient extends _i1.Mock implements _i2.Client {
       );
 }
 
-/// A class which mocks [LoggingService].
+/// A class which mocks [LoggingServiceInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLoggingService extends _i1.Mock implements _i7.LoggingService {
-  MockLoggingService() {
+class MockLoggingServiceInterface extends _i1.Mock
+    implements _i7.LoggingServiceInterface {
+  MockLoggingServiceInterface() {
     _i1.throwOnMissingStub(this);
   }
 
@@ -452,25 +453,6 @@ class MockLoggingService extends _i1.Mock implements _i7.LoggingService {
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<void> logUserInteraction(
-    String? action, {
-    String? details,
-    Map<String, dynamic>? metadata,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #logUserInteraction,
-          [action],
-          {
-            #details: details,
-            #metadata: metadata,
-          },
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-
-  @override
   _i3.Future<void> logApiCall(
     String? endpoint,
     String? method, {
@@ -507,25 +489,6 @@ class MockLoggingService extends _i1.Mock implements _i7.LoggingService {
       ) as List<_i9.LogEntry>);
 
   @override
-  List<_i9.LogEntry> getFilteredLogs(_i9.LogFilter? filter) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getFilteredLogs,
-          [filter],
-        ),
-        returnValue: <_i9.LogEntry>[],
-      ) as List<_i9.LogEntry>);
-
-  @override
-  List<_i9.LogEntry> getLogsByLevel(_i9.LogLevel? level) => (super.noSuchMethod(
-        Invocation.method(
-          #getLogsByLevel,
-          [level],
-        ),
-        returnValue: <_i9.LogEntry>[],
-      ) as List<_i9.LogEntry>);
-
-  @override
   List<_i9.LogEntry> getLogsByCategory(_i9.LogCategory? category) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -536,10 +499,10 @@ class MockLoggingService extends _i1.Mock implements _i7.LoggingService {
       ) as List<_i9.LogEntry>);
 
   @override
-  List<_i9.LogEntry> getRecentLogs(int? count) => (super.noSuchMethod(
+  List<_i9.LogEntry> getLogsByLevel(_i9.LogLevel? level) => (super.noSuchMethod(
         Invocation.method(
-          #getRecentLogs,
-          [count],
+          #getLogsByLevel,
+          [level],
         ),
         returnValue: <_i9.LogEntry>[],
       ) as List<_i9.LogEntry>);
@@ -617,4 +580,23 @@ class MockLoggingService extends _i1.Mock implements _i7.LoggingService {
           ),
         )),
       ) as _i3.Future<String>);
+
+  @override
+  List<_i9.LogEntry> getFilteredLogs(_i9.LogFilter? filter) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getFilteredLogs,
+          [filter],
+        ),
+        returnValue: <_i9.LogEntry>[],
+      ) as List<_i9.LogEntry>);
+
+  @override
+  List<_i9.LogEntry> getRecentLogs(int? count) => (super.noSuchMethod(
+        Invocation.method(
+          #getRecentLogs,
+          [count],
+        ),
+        returnValue: <_i9.LogEntry>[],
+      ) as List<_i9.LogEntry>);
 }

@@ -5,6 +5,7 @@ import 'package:minecraft_server_automation/common/interfaces/http_client.dart';
 import 'package:minecraft_server_automation/common/interfaces/biometric_auth_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/secure_storage_service.dart';
 import 'package:minecraft_server_automation/common/interfaces/location_service.dart';
+import 'package:minecraft_server_automation/common/interfaces/logging_service.dart';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'package:minecraft_server_automation/providers/droplet_config_provider.dart';
 import 'package:minecraft_server_automation/common/adapters/droplet_config_provider_adapter.dart';
@@ -13,7 +14,9 @@ import 'package:minecraft_server_automation/common/adapters/http_client_adapter.
 import 'package:minecraft_server_automation/common/adapters/ios_biometric_auth_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/ios_secure_storage_adapter.dart';
 import 'package:minecraft_server_automation/common/adapters/location_service_adapter.dart';
+import 'package:minecraft_server_automation/common/adapters/logging_service_adapter.dart';
 import 'package:minecraft_server_automation/services/region_selection_service.dart';
+import 'package:minecraft_server_automation/services/logging_service.dart';
 import 'package:http/http.dart' as http;
 
 /// Simple service locator for dependency injection
@@ -77,6 +80,9 @@ class ServiceLocator {
     register<BiometricAuthService>(IOSBiometricAuthAdapter());
     register<SecureStorageService>(IOSSecureStorageAdapter());
     register<LocationService>(LocationServiceAdapter());
+    
+    // Register logging service
+    register<LoggingServiceInterface>(LoggingServiceAdapter(LoggingService()));
   }
 }
 
@@ -103,4 +109,7 @@ extension ServiceLocatorExtension on ServiceLocator {
 
   /// Get location service
   LocationService get locationService => get<LocationService>();
+
+  /// Get logging service
+  LoggingServiceInterface get loggingService => get<LoggingServiceInterface>();
 }

@@ -7,32 +7,36 @@ import 'package:minecraft_server_automation/services/digitalocean_api_service.da
 import 'package:minecraft_server_automation/models/droplet_creation_request.dart';
 import 'package:minecraft_server_automation/models/droplet_size.dart';
 import 'package:minecraft_server_automation/models/region.dart';
+import 'package:minecraft_server_automation/common/di/service_locator.dart';
+import 'package:minecraft_server_automation/common/interfaces/logging_service.dart';
+import 'package:minecraft_server_automation/models/log_entry.dart';
 import 'digitalocean_api_service_test.mocks.dart';
 
 // Generate mocks for external dependencies
-@GenerateMocks([http.Client])
+@GenerateMocks([http.Client, LoggingServiceInterface])
 void main() {
   group('DigitalOceanApiService Tests', () {
     late MockClient mockHttpClient;
+    late MockLoggingServiceInterface mockLoggingService;
     const String testApiKey = 'test-api-key-123';
 
     setUp(() {
       mockHttpClient = MockClient();
+      mockLoggingService = MockLoggingServiceInterface();
       
       // Set the mock client for testing
       DigitalOceanApiService.setClient(mockHttpClient);
       
-      // Note: LoggingService is used as a static singleton in DigitalOceanApiService
-      // (static final LoggingService _loggingService = LoggingService();)
-      // This makes it difficult to mock directly. The service will use the real
-      // LoggingService instance, but we can still test the core API functionality.
-      // To properly test logging behavior, the service would need to be refactored
-      // to accept LoggingService as a dependency rather than using a static instance.
+      // Register mock logging service in ServiceLocator
+      ServiceLocator().clear();
+      ServiceLocator().register<LoggingServiceInterface>(mockLoggingService);
     });
 
     tearDown(() {
       // Reset the client after each test
       DigitalOceanApiService.setClient(http.Client());
+      // Clear ServiceLocator
+      ServiceLocator().clear();
     });
 
     group('validateApiKey', () {
@@ -48,7 +52,7 @@ void main() {
           }),
           200,
         );
-
+        
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -66,6 +70,24 @@ void main() {
             'Content-Type': 'application/json',
           },
         )).called(1);
+        
+        // Verify logging calls
+        verify(mockLoggingService.logApiCall(
+          '/account',
+          'GET',
+          metadata: {'operation': 'validate_api_key'},
+        )).called(1);
+        
+        verify(mockLoggingService.logApiCall(
+          '/account',
+          'GET',
+          statusCode: 200,
+          duration: anyNamed('duration'),
+          metadata: {
+            'operation': 'validate_api_key',
+            'isValid': true,
+          },
+        )).called(1);
       });
 
       test('should return false for invalid API key', () async {
@@ -74,7 +96,7 @@ void main() {
           json.encode({'error': 'Unauthorized'}),
           401,
         );
-
+        
         when(mockHttpClient.get(
           any,
           headers: anyNamed('headers'),
@@ -92,6 +114,24 @@ void main() {
             'Content-Type': 'application/json',
           },
         )).called(1);
+        
+        // Verify logging calls
+        verify(mockLoggingService.logApiCall(
+          '/account',
+          'GET',
+          metadata: {'operation': 'validate_api_key'},
+        )).called(1);
+        
+        verify(mockLoggingService.logApiCall(
+          '/account',
+          'GET',
+          statusCode: 401,
+          duration: anyNamed('duration'),
+          metadata: {
+            'operation': 'validate_api_key',
+            'isValid': false,
+          },
+        )).called(1);
       });
 
       test('should return false when request times out', () async {
@@ -106,6 +146,25 @@ void main() {
 
         // Assert
         expect(result, isFalse);
+        
+        // Verify logging calls
+        verify(mockLoggingService.logApiCall(
+          '/account',
+          'GET',
+          metadata: {'operation': 'validate_api_key'},
+        )).called(1);
+        
+        verify(mockLoggingService.logError(
+          'API key validation failed',
+          category: LogCategory.apiCall,
+          details: 'Endpoint: /account, Error: Exception: Timeout',
+          metadata: {
+            'endpoint': '/account',
+            'method': 'GET',
+            'operation': 'validate_api_key',
+          },
+          error: anyNamed('error'),
+        )).called(1);
       });
 
       test('should return false when network error occurs', () async {
