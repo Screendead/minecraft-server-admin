@@ -30,7 +30,6 @@ void main() {
     late MockEncryptionService mockEncryptionService;
     late MockUser mockUser;
     late MockUserCredential mockUserCredential;
-    late MockDocumentSnapshot mockDocumentSnapshot;
 
     setUp(() {
       mockFirebaseAuth = MockFirebaseAuth();
@@ -39,7 +38,6 @@ void main() {
       mockEncryptionService = MockEncryptionService();
       mockUser = MockUser();
       mockUserCredential = MockUserCredential();
-      mockDocumentSnapshot = MockDocumentSnapshot();
 
       authService = AuthService(
         firebaseAuth: mockFirebaseAuth,
