@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'loading_indicator.dart';
 
 /// Loading overlay component that can be easily tested
 /// This component is pure UI with no business logic dependencies
@@ -28,19 +29,8 @@ class LoadingOverlay extends StatelessWidget {
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(),
-                      if (loadingMessage != null) ...[
-                        const SizedBox(height: 16),
-                        Text(
-                          loadingMessage!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ],
+                  child: LoadingIndicator.large(
+                    message: loadingMessage,
                   ),
                 ),
               ),
