@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'permission_chips_widget.dart';
+import 'package:minecraft_server_automation/common/widgets/feedback/loading_indicator.dart';
 
 class ApiKeyInputDialog extends StatefulWidget {
   final bool isUpdate;
@@ -279,11 +280,7 @@ class _ApiKeyInputDialogState extends State<ApiKeyInputDialog> {
           onPressed:
               (_isButtonEnabled && !_isValidating) ? _handleConfirm : null,
           child: _isValidating
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+              ? const LoadingIndicator.small()
               : Text(widget.isUpdate ? 'Update' : 'Add'),
         ),
       ],
