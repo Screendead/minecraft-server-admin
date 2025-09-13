@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minecraft_server_automation/common/interfaces/auth_service.dart';
+import 'package:minecraft_server_automation/common/widgets/feedback/loading_indicator.dart';
 
 /// Auth form component that accepts an AuthService interface
 /// This makes it easy to inject mock services for testing
@@ -175,17 +176,9 @@ class _AuthFormState extends State<AuthForm> {
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
             child: widget.authService.isLoading
-                ? const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      SizedBox(width: 12),
-                      Text('Please wait...'),
-                    ],
+                ? const LoadingIndicator.medium(
+                    message: 'Please wait...',
+                    showInRow: true,
                   )
                 : Text(_isSignUp ? 'Sign Up' : 'Sign In'),
           ),
