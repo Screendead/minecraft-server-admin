@@ -322,11 +322,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
 
   Widget _buildButtons() {
     if (_isLoading) {
-      return const SizedBox(
-        width: 16,
-        height: 16,
-        child: LoadingIndicator.small(),
-      );
+      return const LoadingIndicator.small();
     }
 
     if (_error != null) {
