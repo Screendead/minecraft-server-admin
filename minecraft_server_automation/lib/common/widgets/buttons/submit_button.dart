@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minecraft_server_automation/common/widgets/feedback/loading_indicator.dart';
 
 class SubmitButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -20,17 +21,9 @@ class SubmitButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
       child: isLoading
-          ? const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: 12),
-                Text('Creating Droplet...'),
-              ],
+          ? const LoadingIndicator.medium(
+              message: 'Creating Droplet...',
+              showInRow: true,
             )
           : Text(
               text,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'loading_indicator.dart';
 
 class LoadingStateWidget extends StatelessWidget {
   final String? message;
@@ -13,26 +14,14 @@ class LoadingStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: size ?? 40,
-            height: size ?? 40,
-            child: const CircularProgressIndicator(),
-          ),
-          if (message != null) ...[
-            const SizedBox(height: 16),
-            Text(
-              message!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-              textAlign: TextAlign.center,
+      child: size != null
+          ? LoadingIndicator(
+              message: message,
+              size: size,
+            )
+          : LoadingIndicator.large(
+              message: message,
             ),
-          ],
-        ],
-      ),
     );
   }
 }
