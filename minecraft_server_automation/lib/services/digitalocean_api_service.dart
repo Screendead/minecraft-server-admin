@@ -35,13 +35,15 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         metadata: {'operation': 'validate_api_key'},
       );
 
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/account'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await _httpClient
+          .get(
+            Uri.parse('$_baseUrl/account'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       stopwatch.stop();
 
@@ -53,10 +55,7 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         'GET',
         statusCode: response.statusCode,
         duration: stopwatch.elapsed,
-        metadata: {
-          'operation': 'validate_api_key',
-          'isValid': isValid,
-        },
+        metadata: {'operation': 'validate_api_key', 'isValid': isValid},
       );
 
       return isValid;
@@ -92,13 +91,15 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         metadata: {'operation': 'get_account_info'},
       );
 
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/account'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await _httpClient
+          .get(
+            Uri.parse('$_baseUrl/account'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       stopwatch.stop();
 
@@ -165,13 +166,15 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         metadata: {'operation': 'get_droplets'},
       );
 
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/droplets'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await _httpClient
+          .get(
+            Uri.parse('$_baseUrl/droplets'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       stopwatch.stop();
 
@@ -230,13 +233,15 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
   /// Throws an exception if the API key is invalid or request fails
   @override
   Future<List<DropletSize>> getDropletSizes(String apiKey) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/sizes?per_page=200'),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-    ).timeout(const Duration(seconds: 10));
+    final response = await _httpClient
+        .get(
+          Uri.parse('$_baseUrl/sizes?per_page=200'),
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+        )
+        .timeout(const Duration(seconds: 10));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch droplet sizes: ${response.statusCode}');
@@ -251,13 +256,15 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
   /// Throws an exception if the API key is invalid or request fails
   @override
   Future<List<Region>> getRegions(String apiKey) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/regions'),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-    ).timeout(const Duration(seconds: 10));
+    final response = await _httpClient
+        .get(
+          Uri.parse('$_baseUrl/regions'),
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+        )
+        .timeout(const Duration(seconds: 10));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch regions: ${response.statusCode}');
@@ -281,13 +288,15 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         metadata: {'operation': 'fetch_images'},
       );
 
-      final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/images?per_page=200'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await _httpClient
+          .get(
+            Uri.parse('$_baseUrl/images?per_page=200'),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       stopwatch.stop();
 
@@ -332,10 +341,7 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         'GET',
         statusCode: response.statusCode,
         duration: stopwatch.elapsed,
-        metadata: {
-          'operation': 'fetch_images',
-          'imageCount': imageList.length,
-        },
+        metadata: {'operation': 'fetch_images', 'imageCount': imageList.length},
       );
 
       return imageList;
@@ -409,7 +415,8 @@ class DigitalOceanApiService implements DigitalOceanApiServiceInterface {
         );
 
         throw Exception(
-            'Failed to create droplet: ${response.statusCode} - ${response.body}');
+          'Failed to create droplet: ${response.statusCode} - ${response.body}',
+        );
       }
 
       final data = json.decode(response.body);
