@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:minecraft_server_automation/providers/auth_provider.dart';
 import 'api_key_input_dialog.dart';
+import 'package:minecraft_server_automation/common/widgets/feedback/loading_indicator.dart';
 
 class ApiKeyManagementBanner extends StatefulWidget {
   const ApiKeyManagementBanner({super.key});
@@ -324,7 +325,7 @@ class _ApiKeyManagementBannerState extends State<ApiKeyManagementBanner> {
       return const SizedBox(
         width: 16,
         height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2),
+        child: LoadingIndicator.small(),
       );
     }
 
